@@ -1,0 +1,28 @@
+name: magnetohydrodynamics
+channels:
+  - conda-forge
+
+dependencies:
+  # Python
+  - python>=3.10,<3.13
+
+  # Core numerical stack
+  - numpy
+  - scipy
+  - pandas
+
+  # Optional extras (remove if irrelevant)
+  - matplotlib
+  - seaborn
+
+  # For dev & formatting
+  - pip
+  - pip:
+      - magnetohydrodynamics  # editable install if developing the package
+      - black
+      - ruff
+      - mypy
+      - pytest
+      - pytest-cov
+      - build
+      - twine

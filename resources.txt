@@ -1,0 +1,467 @@
+
+You're talking about sample libraries / sound packs - the raw material of electronic music: kicks, snares, hats, toms, FX, textures, synth stabs, risers, glitches, etc. There is a whole ecosystem for legally free-to-use collections, and it's a bit fragmented, so here's the clean map.
+
+I'll separate 100% free & safe, free-with-conditions, and curated professional freebies.
+
+⸻
+
+1️⃣ 100% Free, No Strings (royalty-free, attribution usually not required)
+
+🔹 99Sounds
+- Curated packs (often genre-specific)
+- High quality, modern electronic sounds
+- License: royalty-free (check pack page, but generally safe)
+
+👉 https://99sounds.org/
+
+⸻
+
+🔹 Sample Focus
+- Individual samples (not packs)
+- You can filter by drum / FX / synth / genre
+- Free tier gives limited daily downloads
+
+👉 https://samplefocus.com/
+
+⸻
+
+🔹 Bedroom Producers Blog
+- Probably the best hub for free, legal sample packs
+- They review and aggregate other people's free packs
+- Very trustworthy
+
+👉 https://bedroomproducersblog.com/
+
+(Search for "free sample packs")
+
+⸻
+
+2️⃣ Massive Archives (older but huge)
+
+🔹 Freesound
+- Tens of thousands of sounds
+- VERY IMPORTANT: filter by license
+- Use CC0 or Attribution-Free
+- Some sounds are raw field recordings, others are clean synth/drums
+
+👉 https://freesound.org/
+(Filter -> License -> CC0)
+
+💡 Pro tip: search terms like
+kick, snare, hat, fx, impact, whoosh, drone
+
+⸻
+
+🔹 SampleSwap
+- Old-school, but lots of drum hits & loops
+- Mostly free-use, but read their license page once
+
+👉 https://sampleswap.org/
+
+⸻
+
+3️⃣ Professional-Grade Freebies (used by real producers)
+
+🔹 Splice (Free Packs Section)
+- You don't need a paid subscription for some packs
+- Excellent quality
+- Clean metadata
+
+👉 https://splice.com/sounds/free
+
+⸻
+
+🔹 Ableton (Free Packs)
+- Even if you don't use Ableton
+- Extremely polished electronic sounds
+
+👉 https://www.ableton.com/en/packs/
+
+(Filter -> Free)
+
+⸻
+
+4️⃣ Synth & FX-focused (very "AI-music vibe")
+
+🔹 Wave Alchemy (Free section)
+- Clean, studio-quality drums
+- Classic analog flavor
+
+👉 https://www.wavealchemy.co.uk/free-samples/
+
+⸻
+
+🔹 MusicRadar
+- Regularly releases huge free packs (1000+ samples)
+- Covers drums, synths, cinematic FX
+
+👉 https://www.musicradar.com/news/tech/sampleradar-collections-634253
+
+⸻
+
+5️⃣ Licensing rule of thumb (important)
+
+For your music + AI project, stick to one of these licenses:
+- CC0 -> safest (public domain)
+- Royalty-Free / Free for Commercial Use
+- Avoid anything requiring attribution in audio output
+
+If the license says:
+
+"Free to use in music productions"
+you're good.
+
+If it says:
+
+"Not for redistribution as samples"
+that's also fine - you're using, not redistributing raw samples.
+
+---
+
+Got it. Thank you for the reset — this helps a lot.
+We stay with literary creations / figures / characters / titles, not authors, not mythology, not real people, and short, evocative, safe names that carry imagery, not biography.
+
+Think: characters, narrative objects, archetypes that feel invented, like Faust, Frankenstein, Moby Dick, Robin Hood.
+
+Below is a carefully curated list, grouped by vibe, with short explanations so you can feel each one.
+
+⸻
+
+🧩 Clever / Automatable / “Why wasn’t this always done?”
+
+(Perfect for tiny tools that quietly solve things)
+	•	Bartleby — minimalism, refusal to overdo things
+	•	Little John — helper, sidekick, strength without spotlight
+	•	Friday — utility, assistance, reliability
+	•	Milo — shortcuts, systems, clever mechanics
+	•	Pip — small beginnings, growth, leverage
+
+⸻
+
+⚙️ Precision / Focus / Single-purpose Power
+
+(Tools that do one thing, sharply)
+	•	Ishmael — observer, glue logic, narrator of systems
+	•	Ahab — ⚠️ strong focus (borderline obsessive, but powerful)
+	•	Gregor — transformation, state change
+	•	K. — procedural logic, bureaucracy-as-code
+	•	Prospero — orchestration, control, command
+
+⸻
+
+🌱 Gentle / Friendly / Safe-for-Use Names
+
+(These feel trustworthy — ideal for utilities)
+	•	Paddington — polite, helpful, dependable
+	•	Winnie — simple, warm, quietly wise
+	•	Hobbit — small scale, big effectiveness (safe despite Tolkien)
+	•	Snoopy — playful, iconic, harmless overlap
+	•	Piglet — gentle, supportive, background helper
+
+⸻
+
+🧠 Intellectual / Elegant / “Literary Tool”
+
+(Names that feel smart without being ominous)
+	•	Ulysses — journey, structure, complexity (name itself is myth-adjacent but modern-literary)
+	•	Candide — naive logic encountering reality
+	•	Gulliver — scale shifts, perspective changes
+	•	Fahrenheit — threshold, limit, measurement
+	•	Clockwork — mechanisms, automation imagery
+
+⸻
+
+🕯 Serious but Not Unsafe
+
+(Weighty, but still professional and usable)
+	•	Lear — judgment, error, insight
+	•	Crusoe — survival logic, self-sufficiency
+	•	Jekyll — dual modes / toggles (borderline, but useful metaphor)
+	•	Hyde — hidden behavior (use carefully)
+	•	Dorian — state drift, hidden decay (probably too dark for tools)
+
+⸻
+
+🏆 Best Fits for Your Exact Idea
+
+If I had to strongly shortlist names that feel:
+
+“small code, automatable, literary, safe, memorable”
+
+These stand out:
+	•	Bartleby → minimalist automation
+	•	Milo → shortcuts & systems
+	•	Friday → helper utilities
+	•	Little John → sidekick tools
+	•	Pip → small → powerful
+	•	Ishmael → observer / glue logic
+	•	Paddington → friendly utility
+
+⸻
+
+One guiding rule (worth keeping)
+
+Good tool names feel like characters you’d trust to help you, not stories that warn you.
+
+If you want next, I can:
+	•	restrict to single-word only
+	•	restrict to ≤5 letters
+	•	restrict to no Shakespeare
+	•	or help you build a coherent naming family (core name + sub-tools)
+
+Just point the constraint 💛
+
+---
+
+To fit a CLI (Command Line Interface) software, names should ideally be short (2-3 syllables), easy to type, and evoke a sense of utility, power, or mystery.
+
+The following 30 names are derived strictly from fictional literary artifacts, creatures, or entities (avoiding real mythology or religion) that are catchy enough for a command line:
+
+1. The Artifacts & Machines (Short & Punchy)
+
+Aleph (From Borges’ The Aleph) – A point in space that contains all other points.
+Palantir (From Tolkien’s LOTR) – A seeing-stone used for communication and observation.
+Vril (From Bulwer-Lytton’s The Coming Race) – A mysterious, all-permeating energy source.
+Ansible (From Le Guin’s Hainish Cycle) – A device for instantaneous communication across light-years.
+Axiom (From the ship in WALL-E / Asimov themes) – A self-evident truth or a central hub.
+Tralfamadore (From Vonnegut’s Slaughterhouse-Five) – Shortened to Tralfa, a distant, Fourth-dimensional logic.
+Seldon (From Asimov’s Foundation) – Referring to the mathematical "Seldon Plan."
+Grok (From Heinlein’s Stranger in a Strange Land) – To understand something intuitively and fully.
+Multivac (From Asimov’s short stories) – The ultimate supercomputer.
+Babel (From The Library of Babel / The Hitchhiker's Guide) – A universal translator or infinite library.
+
+2. The Entities & Constructs (Catchy & Characterful)
+
+HAL (From Clarke’s 2001: A Space Odyssey) – The most famous, albeit eerie, CLI-style interface.
+Gollum (From Tolkien) – Small, efficient, and obsessed with a single task.
+Shai (From Herbert’s Dune) – From "Shai-Hulud," the great worm; implies power under the surface.
+Boxer (From Orwell’s Animal Farm) – The horse that represents hard work and "doing more."
+Queequeg (From Melville’s Moby Dick) – A loyal, skilled, and mysterious companion.
+Mowgli (From Kipling’s The Jungle Book) – A navigator between two different worlds (user and kernel).
+Zaphod (From Adams’ Hitchhiker's Guide) – Fast, multi-headed, and eccentric.
+Friday (From Defoe’s Robinson Crusoe) – The ultimate assistant/helper.
+Caliban (From Shakespeare’s The Tempest) – A raw, powerful force of nature governed by commands.
+Fiver (From Adams’ Watership Down) – A small rabbit with prophetic vision.
+
+3. Abstract & "New-Weird" Literary References
+
+Uqbar (From Borges’ Tlön, Uqbar, Orbis Tertius) – A fictional place that becomes real through documentation. *****
+Odradek (From Kafka’s The Cares of a Family Man) – A strange, star-shaped, indestructible living object.
+Gantua (From Rabelais’ Gargantua) – For software that handles "huge" amounts of data.
+Lilliput (From Swift’s Gulliver’s Travels) – For a "micro" service or tiny utility.
+Nadsat (From Burgess’ A Clockwork Orange) – The fictional language; perfect for a CLI parser.
+Fahrenheit (From Bradbury’s Fahrenheit 451) – Evokes heat, speed, and data processing.
+Erewhon (From Butler’s Erewhon) – An anagram of "Nowhere"; a satirical utopia.
+R.U.R. (From Čapek’s Rossum's Universal Robots) – The origin of the word "Robot."
+Arrakis (From Herbert’s Dune) – Harsh, dry, and full of "spice" (valuable data).
+Yossarian (From Heller’s Catch-22) – For a tool that solves paradoxical logic problems.
+
+Recommendation: For a simple, professional CLI, Aleph, Ansible, or Vril are the most type-friendly. If you want something with more personality, Grok or Fiver are excellent choices.
+
+----------
+
+Pumpkin, this is a clean packaging / execution question, and the answer is fortunately crisp once the mental model clicks.
+
+I’ll go step by step, from filesystem → import semantics → python -m → versioning, with no fluff.
+
+⸻
+
+0. The mental model (one paragraph)
+	•	src/ is never part of the import path. It is a packaging convention, not a namespace.
+	•	Whatever directory contains __init__.py is the package.
+	•	python -m X means: “import package/module X and execute its __main__.py”.
+
+So the only name that matters is uqbar, not src, not the repo name.
+
+⸻
+
+1. Correct and minimal project layout (recommended)
+
+Given your repo is called Uqbar, the canonical modern layout is:
+
+Uqbar/
+├── pyproject.toml
+├── README.md
+├── src/
+│   └── uqbar/
+│       ├── __init__.py
+│       ├── __main__.py
+│       ├── _version.py
+│       ├── cli.py          # optional, but recommended
+│       └── core.py         # your real logic
+└── tests/
+
+Key rule
+
+👉 Everything importable lives under src/uqbar/
+
+⸻
+
+2. Where does __init__.py go?
+
+Here:
+
+src/uqbar/__init__.py
+
+Minimal content (usually enough)
+
+from ._version import __version__
+
+__all__ = ["__version__"]
+
+Why?
+	•	Makes import uqbar work
+	•	Exposes the version
+	•	Keeps side effects minimal (important!)
+
+⸻
+
+3. Where does __main__.py go?
+
+Here:
+
+src/uqbar/__main__.py
+
+This file is exactly what runs when you do:
+
+python -m uqbar
+
+Minimal, clean __main__.py
+
+from __future__ import annotations
+
+from .cli import main
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+That’s it.
+No argument parsing here. No logic. Just delegation.
+
+⸻
+
+4. Where should the CLI logic live?
+
+Not in __main__.py.
+
+Put it here:
+
+src/uqbar/cli.py
+
+Example:
+
+from __future__ import annotations
+
+import sys
+from typing import Sequence
+
+from ._version import __version__
+from .args import argument_parser  # if you want to split it further
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = argument_parser(argv)
+
+    # your real program logic here
+    print("Uqbar version:", __version__)
+    print("Arguments:", args)
+
+    return 0
+
+Why this split matters:
+	•	python -m uqbar works
+	•	uqbar.cli.main() is importable and testable
+	•	entry points (later) reuse the same function
+
+⸻
+
+5. Where does _version.py go?
+
+Here:
+
+src/uqbar/_version.py
+
+Minimal and common pattern
+
+__version__ = "0.1.0"
+
+That’s enough for:
+	•	import uqbar; uqbar.__version__
+	•	CLI --version
+	•	logging / metadata
+
+Later, you can replace this with dynamic versioning if you want — but don’t start there.
+
+⸻
+
+6. How does python -m actually work here?
+
+When you run:
+
+python -m uqbar
+
+Python does:
+	1.	Find package uqbar on sys.path
+	2.	Load uqbar/__main__.py
+	3.	Execute it as __name__ == "__main__"
+
+That’s why:
+	•	You never write python -m src.uqbar
+	•	You never include src in imports
+	•	You never run python src/uqbar/__main__.py (that breaks relative imports)
+
+⸻
+
+7. How do you make python -m uqbar.acta.foo work?
+
+If you want subcommands/modules runnable with -m, the rule is simple:
+
+src/uqbar/acta/foo/__main__.py
+
+Example layout:
+
+src/uqbar/
+├── acta/
+│   ├── __init__.py
+│   └── foo/
+│       ├── __init__.py
+│       └── __main__.py
+
+Then:
+
+python -m uqbar.acta.foo
+
+works automatically.
+
+No config. No setup. Just structure.
+
+⸻
+
+8. Minimal pyproject.toml snippet (important)
+
+To make the src/ layout work, you must tell the build system:
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+Without this, Python won’t find uqbar.
+
+⸻
+
+9. Summary (rules you can reuse forever)
+	•	✅ Package name = directory containing __init__.py
+	•	❌ src is never part of the import path
+	•	✅ __main__.py enables python -m package
+	•	✅ Put logic in cli.py, not in __main__.py
+	•	✅ _version.py is the cleanest early solution
+	•	✅ python -m uqbar.acta.foo requires acta/foo/__main__.py
+
+If you want, next I can:
+	•	add console_scripts entry points (so uqbar runs without python -m)
+	•	give you a PEP 621–clean pyproject.toml
+	•	or show how to support both python -m uqbar and uqbar command cleanly
+
+Just tell me where you want to land.

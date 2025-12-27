@@ -1,0 +1,23 @@
+# Repository Information
+name: Magnetohydrodynamics
+package: magnetohydrodynamics
+description: Core library implementing algorithms, utilities, and experiments associated with the Magnetohydrodynamics Python package.
+
+# Maintainers
+primary_maintainer: Eduardo G. Gusmao
+contact_email: contact@gusmaolab.org
+
+# Repository Structure Notes
+src_dir: src/magnetohydrodynamics/
+tests_dir: tests/
+docs_dir: docs/
+examples_dir: examples/
+benchmarks_dir: benchmarks/
+
+# Development
+python_min_version: 3.10
+package_manager: uv / pip
+
+# Notes
+This file exists only for internal repository metadata.
+Do not treat it as a configuration or manifest file.

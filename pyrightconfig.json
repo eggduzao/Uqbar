@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/pyright/main/packages/pyright/schema/pyrightconfig.schema.json",
+
+  "include": ["src/magnetohydrodynamics", "tests"],
+  "exclude": ["build", "dist", ".nox", ".venv", "docs/_build"],
+
+  "typeCheckingMode": "strict",
+
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "reportUnusedImport": "warning",
+  "reportUnusedVariable": "warning",
+
+  "pythonVersion": "3.10",
+  "pythonPlatform": "Darwin",
+
+  "executionEnvironments": [
+    {
+      "root": "src/magnetohydrodynamics",
+      "extraPaths": ["src"]
+    }
+  ]
+}
