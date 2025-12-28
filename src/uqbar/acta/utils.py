@@ -20,13 +20,14 @@ Metadata
 from __future__ import annotations
 
 from collections.abc import MutableSequence, Iterable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from datetime import timezone, timedelta, datetime
 from email.utils import parsedate_to_datetime
 from enum import Enum
 import functools
+import json
 from pathlib import Path
-from typing import overload, Any
+from typing import overload, Any, get_type_hints, TextIO
 from urllib.parse import urlparse
 import warnings
 
@@ -237,6 +238,9 @@ NEWS_CATEGORIES = {
 }
 
 
+_SCHEMA_VERSION = 1
+
+
 # --------------------------------------------------------------------------------------
 # Helpers
 # --------------------------------------------------------------------------------------
@@ -257,6 +261,45 @@ def _empty_parts() -> dict[str, str | None]:
         "minute": None,
         "second": None,
     }
+
+
+def _trend_to_dict(t: Trend) -> dict[str, Any]:
+    data: dict[str, Any] = {}
+    for f in fields(Trend):
+        v = getattr(t, f.name)
+
+        # Reconstruct Path on load, serialize as str on save
+        if isinstance(v, Path):
+            data[f.name] = str(v)
+        else:
+            data[f.name] = v
+
+    return data
+
+
+def _dict_to_trend(data: dict[str, Any]) -> Trend:
+    # Start from defaults, then overwrite fields present in snapshot
+    t = Trend()
+
+    trend_field_names = {f.name for f in fields(Trend)}
+    path_field_names = {
+        f.name for f in fields(Trend)
+        if f.type is Path or str(f.type) == "pathlib.Path"
+    }
+
+    for k, v in data.items():
+        if k not in trend_field_names:
+            continue  # ignore unknown fields (forward compatibility)
+
+        if k in path_field_names:
+            if v is None:
+                setattr(t, k, None)  # allow None if you decide to use Optional later
+            else:
+                setattr(t, k, Path(v))
+        else:
+            setattr(t, k, v)
+
+    return t
 
 
 @deprecated
@@ -299,6 +342,63 @@ def dtnow(*, fmt: bool = True):
     if fmt:
         return f"[{str(datetime.now()).split(".")[0]}]"
     return str(datetime.now())
+
+
+def chunked_list_to_str(chunked_list: list[list[str]]) -> str:
+    """Converts a chunked list in a text."""
+    texty = " ".join([" ".join(el) for el in chunked_list])
+    return texty.strip()
+
+
+def save_trendlist(trend_list: TrendList, path: Path) -> None:
+    payload: dict[str, Any] = {
+        "schema_version": _SCHEMA_VERSION,
+        "trendlist": {
+            "datetime_utc": trend_list.datetime_utc,
+            "datetime_br": trend_list.datetime_br,
+            "datetime_us": trend_list.datetime_us,
+            "datetime_utc_parts": trend_list.datetime_utc_parts,
+            "datetime_br_parts": trend_list.datetime_br_parts,
+            "datetime_us_parts": trend_list.datetime_us_parts,
+        },
+        "items": [_trend_to_dict(t) for t in trend_list],
+    }
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+def load_trendlist(path: Path) -> TrendList:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+
+    tl_meta = payload.get("trendlist", {}) if isinstance(payload, dict) else {}
+    tl = TrendList(
+        datetime_utc=tl_meta.get("datetime_utc"),
+        datetime_br=tl_meta.get("datetime_br"),
+        datetime_us=tl_meta.get("datetime_us"),
+    )
+
+    # If present in file, overwrite the default empty parts
+    if isinstance(tl_meta.get("datetime_utc_parts"), dict):
+        tl.datetime_utc_parts = tl_meta["datetime_utc_parts"]
+    if isinstance(tl_meta.get("datetime_br_parts"), dict):
+        tl.datetime_br_parts = tl_meta["datetime_br_parts"]
+    if isinstance(tl_meta.get("datetime_us_parts"), dict):
+        tl.datetime_us_parts = tl_meta["datetime_us_parts"]
+
+    items = payload.get("items", [])
+    if not isinstance(items, list):
+        raise TypeError(f"Invalid snapshot: 'items' must be a list, got {type(items)!r}.")
+
+    for item in items:
+        if not isinstance(item, dict):
+            raise TypeError(f"Invalid snapshot: each item must be a dict, got {type(item)!r}.")
+        tl.append(_dict_to_trend(item))
+
+    return tl
 
 
 # --------------------------------------------------------------------------------------
@@ -381,7 +481,7 @@ class MoodItem:
             setattr(self, name, value)
 
 
-class DateTimeUCT:
+class DateTimeUTC:
     """
     Placeholder
     """
@@ -391,10 +491,10 @@ class DateTimeUCT:
         """
         self.xml_time = xml_time
         self.months_dict: dict[str, str] = _MONTHS_DICT
-        self.uct_datetime: str = None
+        self.utc_datetime: str = None
         self.usa_datetime: str = None
         self.bra_datetime: str = None
-        self.uct_parts: dict[str, Any] = _empty_parts()
+        self.utc_parts: dict[str, Any] = _empty_parts()
         self.usa_parts: dict[str, Any] = _empty_parts()
         self.bra_parts: dict[str, Any] = _empty_parts()
         self._parse_dates_times()
@@ -432,12 +532,12 @@ class DateTimeUCT:
         bra_hour = min(datetime_hou + bra_offset, 23)
 
         # 4. Populate parts
-        self.uct_parts["year"] = str(f"{datetime_yea:02d}")
-        self.uct_parts["month"] = str(f"{int(datetime_mon):02d}")
-        self.uct_parts["day"] = str(f"{datetime_day:04d}")
-        self.uct_parts["hour"] = str(f"{utc_hour:02d}")
-        self.uct_parts["minute"] = str(f"{datetime_min:02d}")
-        self.uct_parts["second"] = str(f"{datetime_sec:02d}")
+        self.utc_parts["year"] = str(f"{datetime_yea:02d}")
+        self.utc_parts["month"] = str(f"{int(datetime_mon):02d}")
+        self.utc_parts["day"] = str(f"{datetime_day:04d}")
+        self.utc_parts["hour"] = str(f"{utc_hour:02d}")
+        self.utc_parts["minute"] = str(f"{datetime_min:02d}")
+        self.utc_parts["second"] = str(f"{datetime_sec:02d}")
         self.usa_parts["year"] = str(f"{datetime_yea:02d}")
         self.usa_parts["month"] = str(f"{int(datetime_mon):02d}")
         self.usa_parts["day"] = str(f"{datetime_day:04d}")
@@ -450,6 +550,17 @@ class DateTimeUCT:
         self.bra_parts["hour"] = str(f"{bra_hour:02d}")
         self.bra_parts["minute"] = str(f"{datetime_min:02d}")
         self.bra_parts["second"] = str(f"{datetime_sec:02d}")
+
+        # 5. Creating iso strings
+        iso_utc_dlist = [self.utc_parts["year"], self.utc_parts["month"], self.utc_parts["day"]]
+        iso_utc_hlist = [self.utc_parts["hour"], self.utc_parts["minute"], self.utc_parts["second"]]
+        self.utc_datetime = f"{"-".join(iso_utc_dlist)}_{":".join(iso_utc_hlist)}"
+        usa_utc_dlist = [self.usa_parts["year"], self.usa_parts["month"], self.usa_parts["day"]]
+        usa_utc_hlist = [self.usa_parts["hour"], self.usa_parts["minute"], self.usa_parts["second"]]
+        self.usa_datetime = f"{"-".join(usa_utc_dlist)}_{":".join(usa_utc_hlist)}"
+        bra_utc_dlist = [self.bra_parts["year"], self.bra_parts["month"], self.bra_parts["day"]]
+        bra_utc_hlist = [self.bra_parts["hour"], self.bra_parts["minute"], self.bra_parts["second"]]
+        self.bra_datetime = f"{"-".join(bra_utc_dlist)}_{":".join(bra_utc_hlist)}"
 
     def _translate_month(self, month_name: str):
         """
@@ -539,6 +650,55 @@ class Trend:
                 print(f"URL field not assigned. Skipping paywall updatefor {url_field}.")
             setattr(self, flag_field, _is_paywalled(url))
 
+    # ----- Loaders & Printers -----
+
+    @deprecated
+    def print(self, file: TextIO) -> None:
+        """
+        Iterates over a dataclass's fields in order and prints their values based on type.
+        """
+
+        # Get type hints reliably, including for inherited classes and string forward references
+        type_hints = get_type_hints(self.__class__)
+
+        for field in fields(self):
+
+            attr_name = field.name
+            attr_value = getattr(self, attr_name)
+            attr_type = type_hints.get(attr_name, field.type)
+            if "__args__" in dir(attr_type):
+                attr_type = attr_type.__args__[0]
+            attr_type = attr_type.__name__
+
+            # Example of conditional printing based on type
+            if isinstance(attr_value, list):
+                for idx1, aval in enumerate(attr_value):
+                    if isinstance(aval, list):
+                        for idx2, av in enumerate(aval):
+                            file.write(f"{attr_name}|list|list\t{idx1}\t{idx2}\t{str(av)}\n")
+                        continue
+                    file.write(f"{attr_name}|list\t{idx1}\t{str(av)}\n")
+
+            elif isinstance(attr_value, dict):
+                for akey, aval in attr_value.items():
+                    if isinstance(aval, list):
+                        for idx1, av in enumerate(aval):
+                            file.write(f"{attr_name}|dict|list\t{akey}\t{idx1}\t{str(av)}\n")
+                        continue
+                    elif isinstance(aval, set):
+                        for av in aval:
+                            file.write(f"{attr_name}|dict|set\t{akey}\t0\t{str(av)}\n")
+                        continue
+                    file.write(f"{attr_name}|dict\t{akey}\t{str(aval)}\n")
+
+            file.write(f"{attr_name}|{attr_type}\t{str(attr_value)}\n")
+        return
+
+    @deprecated
+    def load(self, file: TextIO) -> Trend:
+        """Populates this list given a `.trends` file"""
+        return
+
 
 class TrendList(MutableSequence[Trend]):
     """
@@ -627,6 +787,7 @@ class TrendList(MutableSequence[Trend]):
             raise TypeError(f"Expected Trend, got {type(value)!r}.")
         self._items.insert(index, value)
 
+
     # ----- Functions -----
     def update_datetime(self) -> None:
 
@@ -635,13 +796,13 @@ class TrendList(MutableSequence[Trend]):
             print("`datetime_utc` must exist. Not updating fields.")
             return None
 
-        datetimeuct = DateTimeUCT(self.datetime_utc)
-        iso_utc = datetimeuct.uct_datetime
-        parts_utc = datetimeuct.uct_parts
-        iso_br = datetimeuct.bra_datetime
-        parts_br = datetimeuct.bra_parts
-        iso_us = datetimeuct.usa_datetime
-        parts_us = datetimeuct.usa_parts
+        datetimeutc = DateTimeUTC(self.datetime_utc)
+        self.datetime_utc = datetimeutc.utc_datetime
+        self.datetime_utc_parts = datetimeutc.utc_parts
+        self.datetime_br = datetimeutc.bra_datetime
+        self.datetime_br_parts = datetimeutc.bra_parts
+        self.datetime_us = datetimeutc.usa_datetime
+        self.datetime_us_parts = datetimeutc.usa_parts
 
     # ----- Utility functions -----
     def __repr__(self) -> str:
@@ -650,6 +811,63 @@ class TrendList(MutableSequence[Trend]):
     def to_list(self) -> list[Trend]:
         """Return a shallow copy of the underlying list."""
         return list(self._items)
+
+
+    # ----- Loading and Printing -----
+    @deprecated
+    def print(self, output_path: Path) -> None:
+        """Prints this list of trends in a loadable manner"""
+
+        if not isinstance(output_path, Path):
+            print("Not a Path object")
+            return
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        parts_list: list[str] = ["year", "month", "day", "hour", "minute", "second"]
+
+        with open(output_path, "w", encoding="utf-8") as file:
+            file.write(f"[START]")
+
+            if self.datetime_utc:
+                file.write(f"datetime_utc|str\t{self.datetime_utc}")
+
+            if self.datetime_br:
+                file.write(f"datetime_br|str\t{self.datetime_br}")
+
+            if self.datetime_us:
+                file.write(f"datetime_us|str\t{self.datetime_us}")
+
+            for par in self.datetime_utc_parts:
+
+                if self.datetime_utc_parts[par]:
+                    file.write(f"datetime_utc_parts|dict|str\t{par}\t{self.datetime_utc_parts[par]}")
+
+                if self.datetime_br_parts[par]:
+                    file.write(f"datetime_br_parts|dict|str\t{par}\t{self.datetime_br_parts[par]}")
+
+                if self.datetime_us_parts[par]:
+                    file.write(f"datetime_us_parts|dict|str\t{par}\t{self.datetime_us_parts[par]}")
+
+            if self._items:
+
+                file.write(f"[TREND START]")
+
+                for trend in self._items:
+
+                    trend.print(file)
+
+                file.write(f"[TREND END]")
+
+            file.write(f"[END]")
+
+    @deprecated
+    def load(self, input_path: Path) -> TrendList:
+        """Populates this list given a `.trends` file"""
+
+        with open(output_path, "r", encoding="utf-8") as file:
+            pass
+        return
 
 
 # --------------------------------------------------------------------------------------
@@ -661,10 +879,12 @@ __all__: list[str] = [
     "NEWS_CATEGORIES",
     "deprecated",
     "dtnow",
+    "save_trendlist",
+    "load_trendlist",
     "MoodLevel",
     "QueryConfig",
     "MoodItem",
-    "DateTimeUCT",
+    "DateTimeUTC",
     "Trend",
     "TrendList",
 ]

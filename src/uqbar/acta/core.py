@@ -98,10 +98,12 @@ from uqbar.acta.utils import (
     NEWS_CATEGORIES,
     deprecated,
     dtnow,
+    save_trendlist,
+    load_trendlist,
     MoodLevel,
     QueryConfig,
     MoodItem,
-    DateTimeUCT,
+    DateTimeUTC,
     Trend,
     TrendList,
 )
@@ -163,8 +165,9 @@ def acta_core(
     # output_video_path: Path,
 
     # Initialization - Date string
-    datetime_br = dtnow(fmt=False).split(" ")[0]
-    working_path: Path = ROOT_PATH / datetime_br
+    # datetime_utc = dtnow(fmt=False).split(" ")[0]
+    datetime_utc = "2025-12-27"
+    working_path: Path = ROOT_PATH / datetime_utc
 
     # Initialization - Path
     image_path: Path = working_path / "pics"
@@ -188,21 +191,41 @@ def acta_core(
         print("[Error] Trend list is None.")
         return 1
 
+    output_path_1 = working_path / "trends_1.json"
+    save_trendlist(trend_list, output_path_1)
+    # trend_list = load_trendlist(output_path_1)
+
     # 2. Create prompt input
-    create_trend_prompt(
-        trend_list=trend_list,
-        overwrite_file=False,
-        write_file=False,
-    )
+    # create_trend_prompt(
+    #     trend_list=trend_list,
+    #     overwrite_file=False,
+    #     write_file=False,
+    # )
 
-    # 3. Create news text prompt result
-    query_models(trend_list=trend_list)
+    # output_path_2 = working_path / "trends_2.json"
+    # save_trendlist(trend_list, output_path_2)
+    # # trend_list = load_trendlist(output_path_2)
 
-    # 4. Create mood and image prompt results
-    query_image_and_mood(trend_list=trend_list)
+    # # 3. Create news text prompt result
+    # query_models(trend_list=trend_list)
 
-    # 5. Create mood results
-    predict_mood(trend_list=trend_list)
+    # output_path_3 = working_path / "trends_3.json"
+    # save_trendlist(trend_list, output_path_3)
+    # # trend_list = load_trendlist(output_path_3)
+
+    # # 4. Create mood and image prompt results
+    # query_image_and_mood(trend_list=trend_list)
+
+    # output_path_4 = working_path / "trends_4.json"
+    # save_trendlist(trend_list, output_path_4)
+    # # trend_list = load_trendlist(output_path_4)
+
+    # # 5. Create mood results
+    # predict_mood(trend_list=trend_list)
+
+    # output_path_5 = working_path / "trends_5.json"
+    # save_trendlist(trend_list, output_path_5)
+    # trend_list = load_trendlist(output_path_5)
 
     # 6. Download images
     # download_images(trend_list)

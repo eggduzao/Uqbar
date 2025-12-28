@@ -32,7 +32,7 @@ import subprocess
 import os
 
 
-from uqbar.acta.utils import dtnow, Trend, TrendList
+from uqbar.acta.utils import dtnow, Trend, TrendList, chunked_list_to_str
 from uqbar.acta.trend_prompt_parser import (
     _get_prompt_string_image_query, 
     _get_prompt_string_mood_query,
@@ -305,7 +305,7 @@ def query_models(
 
 
 def query_image_and_mood(
-    trend_list: list[str],
+    trend_list: TrendList,
     *,
     model: str = DEFAULT_MODEL,
     role: str = DEFAULT_ROLE,
@@ -334,10 +334,10 @@ def query_image_and_mood(
         return
 
     # Create result list
-    for trend in enumerate(trend_list, start=1):
+    for counter, trend in enumerate(trend_list, start=1):
 
         # News piece
-        news_piece = trend.tts_prompt_response
+        news_piece = chunked_list_to_str(trend.tts_prompt_response)
 
         # Create image prompt
         prompt_image_keywords, file_image_keywords = _get_prompt_string_image_query(

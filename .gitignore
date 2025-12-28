@@ -213,3 +213,9 @@ _logo/
 # Docs
 docs/source/
 docs/build/
+
+# Global Testing
+out.txt
+*/out.txt
+*/*/out.txt
+*/*/*/out.txt
