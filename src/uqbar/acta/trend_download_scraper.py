@@ -187,8 +187,6 @@ def _delete_trends_local_url(rss_download_path: Path) -> tuple[str, str]:
 
 
 # ------------------------------------ DEPRECATED -------------------------------------
-
-
 @deprecated("Version 0.1.0 - Manual Download")
 def _get_trends_from_local_url_legacy(url_path: Path) -> list[str]:
 
@@ -232,7 +230,10 @@ def _delete_trends_local_url_legacy(url_path: Path) -> tuple[str, str]:
 # -------------------------------------------------------------------------------------
 # Functions
 # -------------------------------------------------------------------------------------
-def parse_trend_rss_feed(rss_feed_path: Path) -> TrendList:
+def parse_trend_rss_feed(
+    rss_feed_path: Path,
+    working_path: Path,
+) -> TrendList:
     """
     Parse a Google Trends RSS feed file as saved from a browser.
 
@@ -251,7 +252,7 @@ def parse_trend_rss_feed(rss_feed_path: Path) -> TrendList:
     all_items = channel.findall("item")
     trend_list: TrendList = TrendList()
 
-    for item in all_items:
+    for counter, item in enumerate(all_items, start=1):
         trend: Trend = Trend()
 
         trend.title = _child_text_by_localname(item, "title")
@@ -263,9 +264,12 @@ def parse_trend_rss_feed(rss_feed_path: Path) -> TrendList:
         # print(f"pub = {pub} | type(pub) = {type(pub)}")
         # sys.exit(0)
 
-        if not trend_list.datetime_utc:
-            setattr(trend_list, "datetime_utc", pub)
-        trend_list.update_datetime()
+        if counter == 1:
+            if not trend_list.datetime_utc:
+                trend_list.datetime_utc = pub
+            # print(f"trend_list.datetime_utc = {trend_list.datetime_utc} | type(trend_list.datetime_utc) = {type(trend_list.datetime_utc)}")
+            # sys.exit(0)
+            trend_list.update_datetime()
         
         trend.picture_source = _child_text_by_localname(item, "picture_source")
 
@@ -279,9 +283,24 @@ def parse_trend_rss_feed(rss_feed_path: Path) -> TrendList:
             setattr(trend, f"news_item_url_{idx}", url)
             setattr(trend, f"news_item_source_{idx}", source)
 
+        if news_items:
+            trend.update_paywall()
+
         if trend.volume is None:
             trend.volume = DEFAULT_VOLUME
         trend_list.append(trend)
+
+        # Initialization - Path
+        trend.content_path: Path = working_path / f"trend_{counter:02d}"
+        trend.image_path: Path = trend.content_path / "pics"
+        trend.video_path: Path = trend.content_path / "vids"
+        trend.audio_path: Path = trend.content_path / "audi"
+        path_list = [trend.image_path, trend.video_path, trend.audio_path]
+        for path_name in path_list:
+            try:
+                path_name.mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                print(f"An error occurred during path creation: {e}")
 
     return trend_list
 
@@ -289,6 +308,7 @@ def parse_trend_rss_feed(rss_feed_path: Path) -> TrendList:
 def get_trends(
     *,
     rss_download_path: str = RSS_DOWNLOAD_PATH,
+    working_path: Path,
     delete_rss_xml_path: bool = False,
 ) -> TrendList | None:
     """
@@ -311,7 +331,11 @@ def get_trends(
             print("[ERROR] Trend xml file does not exist!")
             return None
 
-    trend_list: TrendList = parse_trend_rss_feed(rss_download_path)
+    # Create Trends and TrendList
+    trend_list: TrendList = parse_trend_rss_feed(
+        rss_feed_path=rss_download_path,
+        working_path=working_path,
+    )
 
     if not trend_list:
         print("[ERROR] Trend List is Empty!")

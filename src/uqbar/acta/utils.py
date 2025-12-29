@@ -19,17 +19,20 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from collections.abc import MutableSequence, Iterable
+from collections.abc import MutableSequence, Iterable, Generator
 from dataclasses import dataclass, field, fields
 from datetime import timezone, timedelta, datetime
 from email.utils import parsedate_to_datetime
 from enum import Enum
 import functools
 import json
+from math import ceil
 from pathlib import Path
 from typing import overload, Any, get_type_hints, TextIO
 from urllib.parse import urlparse
 import warnings
+
+import numpy as np
 
 
 # --------------------------------------------------------------------------------------
@@ -74,6 +77,7 @@ _URL_TO_FLAG: dict[str, str] = {
     "news_item_url_3": "news_item_paywall_flag_3",
 }
 
+
 # @deprecated
 # UTC = timezone.utc
 
@@ -88,6 +92,7 @@ UTC_USAEAST_OFFSET = -5
 # BRAZIL_TZ = timezone(timedelta(hours=-3))  # UTC-3 (Brasilia standard)
 
 UTC_BRAZIL_OFFSET = -3
+
 
 _MONTHS_DICT: dict[str, str] = {
     "jan": "01",
@@ -113,6 +118,15 @@ _MONTHS_DICT: dict[str, str] = {
     "dez": "12",
     "des": "12",
 }
+
+
+NORMAL_GENERATOR: Generator = np.random.default_rng()
+
+NORMAL_MEAN: float = 0.5
+
+NORMAL_STD: float = 0.3
+
+NORMAL_SIZE: float = 1
 
 
 GO_EMOTIONS_LABELS: list[str] = [
@@ -350,6 +364,19 @@ def chunked_list_to_str(chunked_list: list[list[str]]) -> str:
     return texty.strip()
 
 
+def get_random(
+    *,
+    mean: float = NORMAL_MEAN,
+    std: float = NORMAL_STD,
+    size: float = NORMAL_SIZE,
+) -> float:
+    """
+    Placeholder
+    """
+    value = NORMAL_GENERATOR.normal(loc = mean, scale = std, size = size)
+    return max(float(value[0]), 0.0011)
+
+
 def save_trendlist(trend_list: TrendList, path: Path) -> None:
     payload: dict[str, Any] = {
         "schema_version": _SCHEMA_VERSION,
@@ -532,21 +559,21 @@ class DateTimeUTC:
         bra_hour = min(datetime_hou + bra_offset, 23)
 
         # 4. Populate parts
-        self.utc_parts["year"] = str(f"{datetime_yea:02d}")
+        self.utc_parts["year"] = str(f"{datetime_yea:04d}")
         self.utc_parts["month"] = str(f"{int(datetime_mon):02d}")
-        self.utc_parts["day"] = str(f"{datetime_day:04d}")
+        self.utc_parts["day"] = str(f"{datetime_day:02d}")
         self.utc_parts["hour"] = str(f"{utc_hour:02d}")
         self.utc_parts["minute"] = str(f"{datetime_min:02d}")
         self.utc_parts["second"] = str(f"{datetime_sec:02d}")
-        self.usa_parts["year"] = str(f"{datetime_yea:02d}")
+        self.usa_parts["year"] = str(f"{datetime_yea:04d}")
         self.usa_parts["month"] = str(f"{int(datetime_mon):02d}")
-        self.usa_parts["day"] = str(f"{datetime_day:04d}")
+        self.usa_parts["day"] = str(f"{datetime_day:02d}")
         self.usa_parts["hour"] = str(f"{usa_hour:02d}")
         self.usa_parts["minute"] = str(f"{datetime_min:02d}")
         self.usa_parts["second"] = str(f"{datetime_sec:02d}")
-        self.bra_parts["year"] = str(f"{datetime_yea:02d}")
+        self.bra_parts["year"] = str(f"{datetime_yea:04d}")
         self.bra_parts["month"] = str(f"{int(datetime_mon):02d}")
-        self.bra_parts["day"] = str(f"{datetime_day:04d}")
+        self.bra_parts["day"] = str(f"{datetime_day:02d}")
         self.bra_parts["hour"] = str(f"{bra_hour:02d}")
         self.bra_parts["minute"] = str(f"{datetime_min:02d}")
         self.bra_parts["second"] = str(f"{datetime_sec:02d}")
@@ -648,6 +675,7 @@ class Trend:
             url = getattr(self, url_field)
             if not url:
                 print(f"URL field not assigned. Skipping paywall updatefor {url_field}.")
+                continue
             setattr(self, flag_field, _is_paywalled(url))
 
     # ----- Loaders & Printers -----

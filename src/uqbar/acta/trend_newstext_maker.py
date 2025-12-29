@@ -25,14 +25,14 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from openai import OpenAI
-
+import os
 from pathlib import Path
 import subprocess
-import os
+from time import sleep
 
+from openai import OpenAI
 
-from uqbar.acta.utils import dtnow, Trend, TrendList, chunked_list_to_str
+from uqbar.acta.utils import dtnow, Trend, TrendList, chunked_list_to_str, get_random
 from uqbar.acta.trend_prompt_parser import (
     _get_prompt_string_image_query, 
     _get_prompt_string_mood_query,
@@ -46,7 +46,14 @@ DEFAULT_OPENROUTER_API_KEY: str = (
     "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"
 )
 
-DEFAULT_MODEL: str = "allenai_31"
+DEFAULT_MODEL_LIST: list[str] = [
+    "allenai_31",
+    "mistral_small_24b",
+    "meta_llama_70b",
+    "google_gemma_27b",
+    "deepseek_r1",
+    "arcee_ai"
+]
 
 DEFAULT_ROLE: str = "user"
 
@@ -57,6 +64,20 @@ DEFAULT_API_KEY_LOC:str = "env"
 
 DEFAULT_HEADERS: dict[str, str] = {"HTTP-Referer": "http://localhost:3000"}
 
+
+SLEEP_MIN_BASE: float = 2.6
+
+
+DEFAULT_HEADERS = {
+    "HTTP-Referer": "http://localhost:3000",
+    "X-Title": "Acta Diurna",
+}
+
+response = client.chat.completions.create(
+    model=model_name,
+    messages=message_list,
+    extra_body={"user": "eduardo-local-test"},  # any stable string you choose
+)
 
 # Model Dictionary -> key: [name, id, tokens, context]
 MODEL: dict[str, list[str | int]] = {
@@ -96,6 +117,7 @@ MODEL: dict[str, list[str | int]] = {
     "meta_llama_405b": ["Meta: Llama 3.1 405B Instruct (free)", "meta-llama/llama-3.1-405b-instruct:free", 165_000_000, 131_000],
     "mistral_7b": ["Mistral: Mistral 7B Instruct (free)", "mistralai/mistral-7b-instruct:free", 574_000_000, 33_000],
 }
+
 
 # --------------------------------------------------------------------------------------
 # Helpers
@@ -255,12 +277,16 @@ def _clean_output(
 def query_models(
     trend_list: list[str],
     *,
-    model: str = DEFAULT_MODEL,
+    model_list: str = DEFAULT_MODEL_LIST,
     role: str = DEFAULT_ROLE,
     base_url: str = DEFAULT_BASE_URL,
     apkey: str = DEFAULT_API_KEY_LOC,
     default_headers: dict[str, str] = DEFAULT_HEADERS,
+    sleep_min_base: float = SLEEP_MIN_BASE
 ) -> None:
+
+    # Get one model
+    model = model_list[0]
 
     # Check API key
     api_key = DEFAULT_OPENROUTER_API_KEY
@@ -300,6 +326,7 @@ def query_models(
         )
 
         trend.tts_prompt_response = response_content
+        sleep(get_random() + sleep_min_base)
 
     return None
 

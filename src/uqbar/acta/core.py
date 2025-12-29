@@ -168,49 +168,43 @@ def acta_core(
     # datetime_utc = dtnow(fmt=False).split(" ")[0]
     datetime_utc = "2025-12-27"
     working_path: Path = ROOT_PATH / datetime_utc
+    # try:
+    #     working_path.mkdir(parents=True, exist_ok=True)
+    # except Exception as e:
+    #     print(f"An error occurred during path creation: {e}")
 
-    # Initialization - Path
-    image_path: Path = working_path / "pics"
-    video_path: Path = working_path / "vids"
-    audio_path: Path = working_path / "audi"
-    path_list = [image_path, video_path, audio_path]
-    for path_name in path_list:
-        try:
-            path_name.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
-            print(f"An error occurred during path creation: {e}")
+    # # 1. Get trend xml file
+    # rss_download_path: Path = working_path / "rss_trend.html"
+    # trend_list: TrendList = get_trends(
+    #     rss_download_path=rss_download_path,
+    #     working_path=working_path,
+    #     delete_rss_xml_path=True,
+    # )
 
-    # 1. Get trend xml file
-    rss_download_path: Path = working_path / "rss_trend.html"
-    trend_list: TrendList = get_trends(
-        rss_download_path=rss_download_path,
-        delete_rss_xml_path=True,
-    )
-
-    if trend_list is None:
-        print("[Error] Trend list is None.")
-        return 1
+    # if trend_list is None:
+    #     print("[Error] Trend list is None.")
+    #     return 1
 
     output_path_1 = working_path / "trends_1.json"
-    save_trendlist(trend_list, output_path_1)
+    # # save_trendlist(trend_list, output_path_1)
     # trend_list = load_trendlist(output_path_1)
 
-    # 2. Create prompt input
+    # # 2. Create prompt input
     # create_trend_prompt(
     #     trend_list=trend_list,
     #     overwrite_file=False,
     #     write_file=False,
     # )
 
-    # output_path_2 = working_path / "trends_2.json"
+    output_path_2 = working_path / "trends_2.json"
     # save_trendlist(trend_list, output_path_2)
-    # # trend_list = load_trendlist(output_path_2)
+    trend_list = load_trendlist(output_path_2)
 
-    # # 3. Create news text prompt result
-    # query_models(trend_list=trend_list)
+    # 3. Create news text prompt result
+    query_models(trend_list=trend_list)
 
-    # output_path_3 = working_path / "trends_3.json"
-    # save_trendlist(trend_list, output_path_3)
+    output_path_3 = working_path / "trends_3.json"
+    save_trendlist(trend_list, output_path_3)
     # # trend_list = load_trendlist(output_path_3)
 
     # # 4. Create mood and image prompt results
@@ -247,7 +241,7 @@ __all__: list[str] = [
 ]
 
 # -------------------------------------------------------------------------------------
-# Test | python -m uqbar.acta > out.txt 2>&1
+# Test | python -m uqbar acta > out.txt 2>&1
 # -------------------------------------------------------------------------------------
 # if __name__ == "__main__":
 #     ...

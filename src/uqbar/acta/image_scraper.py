@@ -20,6 +20,7 @@ Metadata
 - License: MIT
 """
 
+
 # --------------------------------------------------------------------------------------
 # Imports
 # --------------------------------------------------------------------------------------
@@ -51,6 +52,8 @@ from selenium.common.exceptions import (
     TimeoutException,
 )
 
+from uqbar.acta.utils import get_random
+
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -65,13 +68,6 @@ MAX_GLOBAL_TRIES: int = 2
 MAX_LOCAL_TRIES: int = 5
 
 NAV_SIZE_WINDOW: tuple[int, int] = (1920, 1080)
-
-
-NORMAL_GENERATOR: Generator = np.random.default_rng()
-
-NORMAL_MEAN: float = 0.5
-NORMAL_STD: float = 0.3
-NORMAL_SIZE: float = 1
 
 
 SCROLL_ACTION_DURATION: int = 150
@@ -110,19 +106,6 @@ NAVBAR_DICT: dict[str, list[str]] = {
 # --------------------------------------------------------------------------------------
 def _get_search_url(query: str) -> str:
     return f"{SEARCH_URL}{query}&iar=images"
-
-
-def _get_random(
-    *,
-    mean: float = NORMAL_MEAN,
-    std: float = NORMAL_STD,
-    size: float = NORMAL_SIZE,
-) -> float:
-    """
-    Placeholder
-    """
-    value = NORMAL_GENERATOR.normal(loc = mean, scale = std, size = size)
-    return max(float(value[0]), 0.0011)
 
 
 def _safeproof_click(
@@ -217,7 +200,7 @@ def _click_location_button(
             )
             break
 
-        sleep(sleep_min_base + _get_random())
+        sleep(sleep_min_base + get_random())
     return
 
 
@@ -241,15 +224,15 @@ def _select_location_dropdown(
 
     # Change locale to US (English)
     _click_on_xpath('//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[1]/div/div[1]')
-    sleep(sleep_min_base + _get_random())
+    sleep(sleep_min_base + get_random())
     _click_on_xpath('//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[1]/div/div[2]/div[2]/div[63]/div/div/div/span[2]')
-    sleep(sleep_max_base + _get_random())
+    sleep(sleep_max_base + get_random())
 
     # Changing Image Sizes to Large
     _click_on_xpath('//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[5]/div/div[1]')
-    sleep(sleep_min_base + _get_random())
+    sleep(sleep_min_base + get_random())
     _click_on_xpath('//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[5]/div/div[2]/div/div[4]/div')
-    sleep(sleep_max_base + _get_random())
+    sleep(sleep_max_base + get_random())
 
     return
 
@@ -310,7 +293,7 @@ def _hyper_loop(
                         web_element_list: list[WebElement] = []
 
 
-                    sleep(sleep_min_base + _get_random())
+                    sleep(sleep_min_base + get_random())
 
                     if len(curr_element_list) >= minimum_unique_elements:
                         flag_condition_met = True
@@ -388,7 +371,7 @@ def _get_uri_list(
             pass
 
         uri_list.append(uri)
-        sleep(sleep_min_base + _get_random())
+        sleep(sleep_min_base + get_random())
 
 
     return uri_list
@@ -464,7 +447,7 @@ def _scroll_down_refresh(
     for i in range(0, 1000):
         actions.scroll_by_amount(
             delta_x=0,
-            delta_y = ceil(scroll_amoung_basis + _get_random())
+            delta_y = ceil(scroll_amoung_basis + get_random())
         )
 
     # Perform sequential chain of actions
@@ -538,7 +521,7 @@ def get_image_links(
     # --------- Main Loop ---------
 
     # Find all <html> elements
-    waiter = WebDriverWait(driver, sleep_max_base + waiter_total_time + _get_random())
+    waiter = WebDriverWait(driver, sleep_max_base + waiter_total_time + get_random())
     curr_element_list: list[WebElement] = waiter.until(EC.presence_of_all_elements_located((By.TAG_NAME, "html")))
 
     # Main Loop - Regular order
@@ -571,7 +554,7 @@ def get_image_links(
     # --------- Main Loop ---------
 
     # Find all <html> elements
-    waiter = WebDriverWait(driver, sleep_max_base+waiter_total_time+_get_random())
+    waiter = WebDriverWait(driver, sleep_max_base+waiter_total_time+get_random())
     curr_element_list: list[WebElement] = waiter.until(EC.presence_of_all_elements_located((By.TAG_NAME, "html")))
 
     # Main Loop - Reversed
