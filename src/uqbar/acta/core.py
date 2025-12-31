@@ -89,7 +89,9 @@ Metadata
 # -------------------------------------------------------------------------------------
 from __future__ import annotations
 
+from enum import Enum
 from pathlib import Path
+import sys
 
 
 from uqbar.acta.utils import (
@@ -100,6 +102,7 @@ from uqbar.acta.utils import (
     dtnow,
     save_trendlist,
     load_trendlist,
+    hyper_random,
     MoodLevel,
     QueryConfig,
     MoodItem,
@@ -130,6 +133,28 @@ from uqbar.acta.mood_predictor import predict_mood
 ROOT_PATH = Path("/Users/egg/acta/content")
 
 
+class Semaphore(Enum):
+    """Placeholder"""
+    ONE: bool = False
+    TWO: bool = True
+    THREE: bool = False
+    FOUR_A: bool = False
+    FIVE_A: bool = False
+    FOUR_B: bool = False
+    FIVE_BI: bool = False
+    FIVE_BII: bool = False
+    SIX: bool = False
+    SEVEN: bool = False
+    EIGHT: bool = False
+    NINE: bool = False
+    TEN: bool = False
+    ELEVEN: bool = False
+    TWELVE: bool = False
+    THIRTEEN: bool = False
+
+TESTING: bool = True
+
+
 # ------------------------------------------------------------------------------------audi--
 # Functions
 # --------------------------------------------------------------------------------------
@@ -139,18 +164,7 @@ def acta_core(
     args: dict[str, Any] | None = None,
 ) -> int:
     """
-    Entry point for `python -m acta` and the console script.
-
-
-    Notes
-    -----
-    Results is a list[list[list[str]]]
-
-    Parameters
-    ----------
-    place_holder :
-        Placeolder
-    """
+    Main `acta` pipeline.
 
     # Parameters
     # project_name: str,
@@ -167,73 +181,253 @@ def acta_core(
     # input_mtrack_background_path: Path,
     # output_video_path: Path,
 
+    Notes
+    -----
+    Placeholder
+
+    Parameters
+    ----------
+    Placeholder : Placeholder
+        Placeholder
+    """
+
+    # Options
+    image_mood_input_by_ai: bool = False
+    hyper_random_for_openroute_user_tts: int = hyper_random([0, 47])
+    hyper_random_for_openroute_model_tts: int = hyper_random([0, 487])
+    hyper_random_for_openroute_user_imgmood: int = hyper_random([0, 47])
+    hyper_random_for_openroute_model_imgmood: int = hyper_random([0, 487])
+
     # Initialization - Date string
-    # datetime_utc = dtnow(fmt=False).split(" ")[0]
-    datetime_utc = "2025-12-27"
+    datetime_utc = dtnow(fmt=False).split(" ")[0]
+    if TESTING:
+        datetime_utc = "2025-12-27"
     working_path: Path = ROOT_PATH / datetime_utc
-    # try:
-    #     working_path.mkdir(parents=True, exist_ok=True)
-    # except Exception as e:
-    #     print(f"An error occurred during path creation: {e}")
+    try:
+        working_path.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        print(f"An error occurred during path creation: {e}")
 
-    # # 1. Get trend xml file
-    # rss_download_path: Path = working_path / "rss_trend.html"
-    # trend_list: TrendList = get_trends(
-    #     rss_download_path=rss_download_path,
-    #     working_path=working_path,
-    #     delete_rss_xml_path=True,
-    # )
+    # 1. [MAIN PATH] Get trend xml file
+    output_log_path = working_path / "trends_1.json"
+    if Semaphore.ONE:
+        rss_download_path: Path = working_path / "rss_trend.html"
+        trend_list: TrendList = get_trends(
+            rss_download_path=rss_download_path,
+            working_path=working_path,
+            delete_rss_xml_path=True,
+        )
 
-    # if trend_list is None:
-    #     print("[Error] Trend list is None.")
-    #     return 1
+        if trend_list is None:
+            print("[Error] Trend list is None.")
+            return 1
 
-    output_path_1 = working_path / "trends_1.json"
-    # # save_trendlist(trend_list, output_path_1)
-    # trend_list = load_trendlist(output_path_1)
+        save_trendlist(trend_list, output_log_path)
+    else:
+        if output_log_path.exists():
+            trend_list = load_trendlist(output_log_path)
+        else:
+            print(f"File {output_log_path} does not exist.")
+            sys.exit(0)
 
-    # # 2. Create prompt input
-    # create_trend_tts_prompt(
-    #     trend_list=trend_list,
-    #     overwrite_file=False,
-    #     write_file=False,
-    # )
+    # 2. [MAIN PATH - AI PROMPT TEXT CREATION] Create TTS prompt input
+    output_log_path = working_path / "trends_2.json"
+    if Semaphore.TWO:
+        create_trend_tts_prompt(
+            trend_list=trend_list,
+            overwrite_file=False,
+            write_file=False,
+        )
+        save_trendlist(trend_list, output_log_path)
+    else:
+        if output_log_path.exists():
+            trend_list = load_trendlist(output_log_path)
+        else:
+            print(f"File {output_log_path} does not exist.")
+            sys.exit(0)
 
-    output_path_2 = working_path / "trends_2.json"
-    # save_trendlist(trend_list, output_path_2)
-    trend_list = load_trendlist(output_path_2)
+    # 3. [MAIN PATH - AI PROMPT EXECUTION] Query TTS prompt to obtain its result
+    output_log_path = working_path / "trends_3.json"
+    if Semaphore.THREE:
+        query_models(
+            trend_list=trend_list,
+            user_counter=hyper_random_for_openroute_user_tts,
+            model_counter=hyper_random_for_openroute_model_tts,
+        )
+        save_trendlist(trend_list, output_log_path)
+    else:
+        if output_log_path.exists():
+            trend_list = load_trendlist(output_log_path)
+        else:
+            print(f"File {output_log_path} does not exist.")
+            sys.exit(0)
 
-    # 3. Create news text prompt result
-    query_models(trend_list=trend_list)
+    # 4/5. [BRANCH A - AI SOLUTION]
+    if image_mood_input_by_ai:
+       
+        # 4.A [BRANCH A - AI PROMPT TEXT CREATION] Create Image/Mood prompt input
+        output_log_path = working_path / "trends_4A.json"
+        if Semaphore.FOUR_A:
+            create_trend_image_mood_prompt(
+                trend_list=trend_list,
+                overwrite_file=False,
+                write_file=False,
+            )
+            save_trendlist(trend_list, output_log_path)
+        else:
+            if output_log_path.exists():
+                trend_list = load_trendlist(output_log_path)
+            else:
+                print(f"File {output_log_path} does not exist.")
+                sys.exit(0)
 
-    output_path_3 = working_path / "trends_3.json"
-    save_trendlist(trend_list, output_path_3)
-    # # trend_list = load_trendlist(output_path_3)
+        # 5.A [BRANCH A - AI PROMPT EXECUTION] Query Image/Mood prompt to obtain its result
+        output_log_path = working_path / "trends_5A.json"
+        if Semaphore.FIVE_A:
+            query_image_and_mood(
+                trend_list=trend_list,
+                user_counter=hyper_random_for_openroute_user_imgmood,
+                model_counter=hyper_random_for_openroute_model_imgmood,
+            )
+            save_trendlist(trend_list, output_log_path)
+        else:
+            if output_log_path.exists():
+                trend_list = load_trendlist(output_log_path)
+            else:
+                print(f"File {output_log_path} does not exist.")
+                sys.exit(0)
 
-    # # 4. Create mood and image prompt results
-    # create_trend_image_mood_prompt
-    # query_image_and_mood(trend_list=trend_list)
+
+    # 4/5. [BRANCH B - HEURISTICS SOLUTION]
+    else:
+
+        # 4.B [BRANCH B - HEURISTICS IMAGE KEYWORD CREATION] Create Image query keywords based on data
+        output_log_path = working_path / "trends_4B.json"
+        if Semaphore.FOUR_B:
+            save_trendlist(trend_list, output_log_path)
+        else:
+            if output_log_path.exists():
+                trend_list = load_trendlist(output_log_path)
+            else:
+                print(f"File {output_log_path} does not exist.")
+                sys.exit(0)
 
 
-    # output_path_4 = working_path / "trends_4.json"
-    # save_trendlist(trend_list, output_path_4)
-    # # trend_list = load_trendlist(output_path_4)
+        # 5.B.I [BRANCH B - HEURISTICS MOOD QUERY CREATION] Create mood query based on heuristics
+        output_log_path = working_path / "trends_5Bi.json"
+        if Semaphore.FIVE_BI:
+            save_trendlist(trend_list, output_log_path)
+        else:
+            if output_log_path.exists():
+                trend_list = load_trendlist(output_log_path)
+            else:
+                print(f"File {output_log_path} does not exist.")
+                sys.exit(0)
 
-    # # 5. Create mood results
-    # predict_mood(trend_list=trend_list)
 
-    # output_path_5 = working_path / "trends_5.json"
-    # save_trendlist(trend_list, output_path_5)
-    # trend_list = load_trendlist(output_path_5)
+        # 5.B.II [BRANCH B - HEURISTICS MOOD PREDICTION] Predict mood query based on heuristics
+        output_log_path = working_path / "trends_5Bii.json"
+        if Semaphore.FIVE_BII:
+            predict_mood(trend_list=trend_list)
+            save_trendlist(trend_list, output_log_path)
+        else:
+            if output_log_path.exists():
+                trend_list = load_trendlist(output_log_path)
+            else:
+                print(f"File {output_log_path} does not exist.")
+                sys.exit(0)
 
-    # 6. Download images
-    # download_images(trend_list)
+    # 6. [MAIN PATH - XXXXXXX] Search for images
+    output_log_path = working_path / "trends_6.json"
+    if Semaphore.SIX:
+        save_trendlist(trend_list, output_log_path)
+    else:
+        if output_log_path.exists():
+            trend_list = load_trendlist(output_log_path)
+        else:
+            print(f"File {output_log_path} does not exist.")
+            sys.exit(0)
 
-    # 7. Create audio tts from query model's responses
+    # 7. [MAIN PATH - XXXXXXX] Download images
+    output_log_path = working_path / "trends_7.json"
+    if Semaphore.SEVEN:
+        download_images(trend_list)
+        save_trendlist(trend_list, output_log_path)
+    else:
+        if output_log_path.exists():
+            trend_list = load_trendlist(output_log_path)
+        else:
+            print(f"File {output_log_path} does not exist.")
+            sys.exit(0)
 
-    # 8. Generate background music based on audio's length
+    # 8. [MAIN PATH - XXXXXXX] Parse images:
+    #    - Standardize file extensions resolving compression
+    #    - Remove duplicates by name and by AI
+    #    - Standardize numeric ordered name
+    output_log_path = working_path / "trends_8.json"
+    if Semaphore.EIGHT:
+        save_trendlist(trend_list, output_log_path)
+    else:
+        if output_log_path.exists():
+            trend_list = load_trendlist(output_log_path)
+        else:
+            print(f"File {output_log_path} does not exist.")
+            sys.exit(0)
 
-    # 9. Create video from: tts audio, images downloaded, background music
+    # 9. [MAIN PATH - XXXXXXX] Create audio tts from query model's responses
+    output_log_path = working_path / "trends_9.json"
+    if Semaphore.NINE:
+        save_trendlist(trend_list, output_log_path)
+    else:
+        if output_log_path.exists():
+            trend_list = load_trendlist(output_log_path)
+        else:
+            print(f"File {output_log_path} does not exist.")
+            sys.exit(0)
+
+    # 10. [MAIN PATH - XXXXXXX] Generate background music based on mood and audio's length
+    output_log_path = working_path / "trends_10.json"
+    if Semaphore.TEN:
+        save_trendlist(trend_list, output_log_path)
+    else:
+        if output_log_path.exists():
+            trend_list = load_trendlist(output_log_path)
+        else:
+            print(f"File {output_log_path} does not exist.")
+            sys.exit(0)
+
+    # 11. [MAIN PATH - XXXXXXX] Create thumbnails, ribbons and metadata
+    output_log_path = working_path / "trends_11.json"
+    if Semaphore.ELEVEN:
+        save_trendlist(trend_list, output_log_path)
+    else:
+        if output_log_path.exists():
+            trend_list = load_trendlist(output_log_path)
+        else:
+            print(f"File {output_log_path} does not exist.")
+            sys.exit(0)
+
+    # 12. [MAIN PATH - XXXXXXX] Create video from: tts audio, images downloaded, background music
+    output_log_path = working_path / "trends_12.json"
+    if Semaphore.TWELVE:
+        save_trendlist(trend_list, output_log_path)
+    else:
+        if output_log_path.exists():
+            trend_list = load_trendlist(output_log_path)
+        else:
+            print(f"File {output_log_path} does not exist.")
+            sys.exit(0)
+
+    # 13. [MAIN PATH - XXXXXXX] Upload video to youtube with correct thumbs and metadata
+    output_log_path = working_path / "trends_13.json"
+    if Semaphore.THIRTEEN:
+        save_trendlist(trend_list, output_log_path)
+    else:
+        if output_log_path.exists():
+            trend_list = load_trendlist(output_log_path)
+        else:
+            print(f"File {output_log_path} does not exist.")
+            sys.exit(0)
 
     return 0
 

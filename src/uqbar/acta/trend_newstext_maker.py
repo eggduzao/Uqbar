@@ -799,31 +799,31 @@ def query_models(
     sleep_min_base: float = SLEEP_MIN_BASE,
 ) -> None:
 
-    # Get model
-    api_model_id, api_key_id = _get_model_name_and_key(
-        user_counter,
-        model_counter,
-        model_name_list,
-        model_key_dict,
-    )
-
-    # Check API key
-    if not api_key_id:
-        print(f"{dtnow()} ERROR:")
-        print(
-            f"{dtnow()} You need to give an OpenRouter Key. Check"
-            f" https://openrouter.ai/docs/guides/overview/auth/oauth"
-        )
-        return
-
-    # Check model
-    if not api_model_id:
-        print(f"{dtnow()} ERROR:")
-        print(f"{dtnow()} Model ID invalid. Try: 'allenai_31'")
-        return
-
     # Create result list
-    for trend in trend_list:
+    for counter, trend in enumerate(trend_list):
+
+        # Get model
+        api_model_id, api_key_id = _get_model_name_and_key(
+            user_counter+counter,
+            model_counter+counter,
+            model_name_list,
+            model_key_dict,
+        )
+
+        # Check API key
+        if not api_key_id:
+            print(f"{dtnow()} ERROR:")
+            print(
+                f"{dtnow()} You need to give an OpenRouter Key. Check"
+                f" https://openrouter.ai/docs/guides/overview/auth/oauth"
+            )
+            return
+
+        # Check model
+        if not api_model_id:
+            print(f"{dtnow()} ERROR:")
+            print(f"{dtnow()} Model ID invalid. Try: 'allenai_31'")
+            return
 
         query: str = trend.tts_prompt_query
 
@@ -876,31 +876,31 @@ def query_image_and_mood(
     sleep_min_base: float = SLEEP_MIN_BASE,
 ) -> None:
 
-    # Get model
-    api_model_id, api_key_id = _get_model_name_and_key(
-        user_counter,
-        model_counter,
-        model_name_list,
-        model_key_dict,
-    )
-
-    # Check API key
-    if not api_key_id:
-        print(f"{dtnow()} ERROR:")
-        print(
-            f"{dtnow()} You need to give an OpenRouter Key. Check"
-            f" https://openrouter.ai/docs/guides/overview/auth/oauth"
-        )
-        return
-
-    # Check model
-    if not api_model_id:
-        print(f"{dtnow()} ERROR:")
-        print(f"{dtnow()} Model ID invalid. Try: 'allenai_31'")
-        return
-
     # Create result list
-    for trend in trend_list:
+    for counter, trend in enumerate(trend_list):
+
+        # Get model
+        api_model_id, api_key_id = _get_model_name_and_key(
+            user_counter+counter,
+            model_counter+counter,
+            model_name_list,
+            model_key_dict,
+        )
+
+        # Check API key
+        if not api_key_id:
+            print(f"{dtnow()} ERROR:")
+            print(
+                f"{dtnow()} You need to give an OpenRouter Key. Check"
+                f" https://openrouter.ai/docs/guides/overview/auth/oauth"
+            )
+            return
+
+        # Check model
+        if not api_model_id:
+            print(f"{dtnow()} ERROR:")
+            print(f"{dtnow()} Model ID invalid. Try: 'allenai_31'")
+            return
 
         # Image and Mood query
         mood_prompt_query: str = trend.image_mood_prompt_query
