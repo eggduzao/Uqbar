@@ -109,7 +109,10 @@ from uqbar.acta.utils import (
 )
 
 from uqbar.acta.trend_download_scraper import get_trends
-from uqbar.acta.trend_prompt_parser import create_trend_prompt
+from uqbar.acta.trend_prompt_parser import (
+    create_trend_tts_prompt,
+    create_trend_image_mood_prompt,
+)
 from uqbar.acta.trend_newstext_maker import query_models, query_image_and_mood
 
 from uqbar.acta.mood_predictor import predict_mood
@@ -190,7 +193,7 @@ def acta_core(
     # trend_list = load_trendlist(output_path_1)
 
     # # 2. Create prompt input
-    # create_trend_prompt(
+    # create_trend_tts_prompt(
     #     trend_list=trend_list,
     #     overwrite_file=False,
     #     write_file=False,
@@ -208,7 +211,9 @@ def acta_core(
     # # trend_list = load_trendlist(output_path_3)
 
     # # 4. Create mood and image prompt results
+    # create_trend_image_mood_prompt
     # query_image_and_mood(trend_list=trend_list)
+
 
     # output_path_4 = working_path / "trends_4.json"
     # save_trendlist(trend_list, output_path_4)

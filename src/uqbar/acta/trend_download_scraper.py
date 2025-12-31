@@ -357,8 +357,6 @@ def get_trends(
 
 
 # ------------------------------------ DEPRECATED -------------------------------------
-
-
 @deprecated("Version 0.1.0 - Manual Download")
 def get_trend_tags_legacy(
     trend_list: list[str],

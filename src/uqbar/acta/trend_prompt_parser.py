@@ -27,7 +27,7 @@ from pathlib import Path
 import re
 from sortedcontainers import SortedList
 
-from uqbar.acta.utils import Trend, TrendList
+from uqbar.acta.utils import Trend, TrendList, GO_EMOTIONS_LABELS
 
 
 # -------------------------------------------------------------------------------------
@@ -39,9 +39,10 @@ NOW: str = str(datetime.now())
 
 OUT: Path = Path("/Users/egg/Desktop")
 
-PROMPT_FILE_PATH: Path = (
-    OUT / "2025-12-18_13-01-55.txt"
-)  # str("_".join(NOW.split(".")[0].split(" ")) + ".txt").replace(":", "-")
+
+DEFAULT_PROMPT_TTS_PATH: Path = OUT / "tts.txt"
+
+DEFAULT_PROMPT_IMG_MOOD_PATH: Path = OUT / "img_mood.txt"
 
 
 # Rulers
@@ -50,9 +51,9 @@ BIG_RULER_LEN: int = 170
 SMALL_RULER_LEN: int = 25
 
 # Word Count
-TOTAL_WORD_COUNT: int = 12_000
+TOTAL_WORD_COUNT: int = 1_200
 
-TOTAL_PARAGRAPH_WORD_COUNT: int = 60
+SUMMARY_WORD_COUNT: int = 100
 
 TOTAL_WORD_IMAGE_COUNT: int = 10
 
@@ -77,6 +78,7 @@ def _get_prompt_string(
     total_count: int,
     *,
     total_word_count: int = TOTAL_WORD_COUNT,
+    summary_word_count: int = SUMMARY_WORD_COUNT,
     small_ruler_len: int = SMALL_RULER_LEN,
     big_ruler_len: int = BIG_RULER_LEN,
 ) -> str:
@@ -112,7 +114,10 @@ def _get_prompt_string(
         f"         seriousness or job-market structure.\n"
         f"    5.3. Avoid hyphens and other TTS-unfriendly characters.\n"
         f"\n"
-        f"6. Please return the text in a triple-backtick code block."
+        f"6. Please return:\n"
+        f"    6.1. The full text in a triple-backtick code block.\n"
+        f"    6.2. A ~{SUMMARY_WORD_COUNT} words (±20%) summary of the full text in another\n"
+        f"         triple-backtick code block.\n"
     )
 
     special_prompt: str = (
@@ -132,9 +137,9 @@ def _get_prompt_string(
     return regular_prompt, special_prompt
 
 
-def _get_prompt_string_image_query(
+def _get_prompt_string_image_mood_query(
     is_last: bool,
-    news_piece: str,
+    news_piece_summary: str,
     current_count: int,
     total_count: int,
     *,
@@ -150,75 +155,34 @@ def _get_prompt_string_image_query(
         last_ruler: str = f""
 
     regular_prompt: str = (
-        f"1. Goal: Give me the most representative ~{total_word_image_count} \n"
-        f"words (±5 words), for a 'Google-like' Image Query; synthesizing \n"
-        f"the following news piece: \n"
+        f"Background: Based on the following news paragraph:\n"
         f"```\n"
-        f"{news_piece}\n"
+        f"{news_piece_summary}\n"
         f"```\n"
         f"\n"
-        f"2. Give me the words separated by spaces.\n"
+        f"1. Goal 1: Give me the TOP ~{total_word_image_count} most \n"
+        f"representative keywords (±5 words).\n"
+        f"  1.1. This list of keywords should be optimised for a 'Google-like' \n"
+        f"  Image Query;\n"
+        f"  1.2. This list of keywords should be separated by spaces.\n"
+        f"  1.3. This list of keywords should be returned in a triple-backtick \n"
+        f"  code block.\n"
         f"\n"
-        f"3. Please return the words **only** in a triple-backtick code block.\n"
+        f"2. Goal 2: Select from the list of moods below, the one the best \n"
+        f"describes the text.\n"
+        f"```\n"
+        f"{"\n".join(GO_EMOTIONS_LABELS)}\n"
+        f"```\n"
+        f"\n"
+        f"3. Return:\n"
+        f"  3.1 `Goal 1` as a space-separated list of words inside a \n"
+        f"  triple-backtick codebox.\n"
+        f"  3.2 `Goal 2` as a single word inside a triple-backtick codebox.\n"
     )
 
     special_prompt: str = (
         f"{first_ruler}"
-        f"> TREND PROMPTS [{current_count:02d} of {total_count:02d}]\n"
-        f"\n"
-        f"Honeybun,\n"
-        f"\n"
-        f"{regular_prompt}\n"
-        f"\n"
-        f"{'-'*small_ruler_len}\n"
-        f"\n"
-        f"XXXXX\n"
-        f"{last_ruler}"
-    )
-
-    return regular_prompt, special_prompt
-
-
-def _get_prompt_string_mood_query(
-    is_last: bool,
-    news_piece: str,
-    current_count: int,
-    total_count: int,
-    *,
-    total_paragraph_word_count: int = TOTAL_PARAGRAPH_WORD_COUNT,
-    small_ruler_len: int = SMALL_RULER_LEN,
-    big_ruler_len: int = BIG_RULER_LEN,
-) -> str:
-
-    first_ruler: str = f"{'-'*big_ruler_len}\n\n"
-    last_ruler: str = f"\n"
-    if is_last:
-        first_ruler: str = f"{'-'*big_ruler_len}\n\n"
-        last_ruler: str = f""
-
-    regular_prompt: str = (
-        f"1. Goal: Write a short paragraph with Continuous Prose as a Professional \n"
-        f"Calm  News-Media Narrator, targeting a 'Mood Predictor'; based on the \n"
-        f"following news piece: \n"
-        f"```\n"
-        f"{news_piece}\n"
-        f"```\n"
-        f"\n"
-        f"2. Length of paragraph: ~{total_paragraph_word_count:,} words (±30%).\n"
-        f"\n"
-        f"3. Style & Strategy: Optimize the textual flow and key words for Deep \n"
-        f"Neural Net-based Mood Predictor. Make sure to use key words to express \n"
-        f"the mood of the news piece.\n"
-        f"\n"
-        f"4. Avoid wording that may counfounf the Deep Learning-Based Mood \n"
-        f"Predictor, such as double negatives, etc. \n"
-        f"\n"
-        f"6. Please return the text **only** in a triple-backtick code block.\n"
-    )
-
-    special_prompt: str = (
-        f"{first_ruler}"
-        f"> MOOD PROMPTS [{current_count:02d} of {total_count:02d}]\n"
+        f"> IMAGE QUERY AND MOOD PROMPTS [{current_count:02d} of {total_count:02d}]\n"
         f"\n"
         f"Honeybun,\n"
         f"\n"
@@ -261,15 +225,15 @@ def _flush_prompt(
 # --------------------------------------------------------------------------------------
 # Functions
 # --------------------------------------------------------------------------------------
-def create_trend_prompt(
+def create_trend_tts_prompt(
     trend_list: TrendList,
     *,
-    prompt_file_path: Path = PROMPT_FILE_PATH,
+    prompt_file_path: Path = DEFAULT_PROMPT_TTS_PATH,
     overwrite_file: bool = False,
     write_file: bool = False,
 ) -> Path | None:
     """
-    Create Trends Prompt for Chat GPT
+    Create Trends Prompt for Chat GPT or OpenRouter models.
     """
 
     # Check file
@@ -298,7 +262,7 @@ def create_trend_prompt(
         )
 
         trend.tts_prompt_query = tts_prompt_query
-        trend.file_prompt_query = file_prompt_query
+        trend.tts_file_prompt_query = file_prompt_query
 
     # Check whether to write in a file
     if not write_file:
@@ -308,6 +272,53 @@ def create_trend_prompt(
     with open(prompt_file_path, "w") as file:
         for trend in trend_list:
             file.write(trend.file_prompt_query)
+
+    return prompt_file_path
+
+
+def create_trend_image_mood_prompt(
+    trend_list: TrendList,
+    *,
+    prompt_file_path: Path = DEFAULT_PROMPT_IMG_MOOD_PATH,
+    overwrite_file: bool = False,
+    write_file: bool = False,
+) -> Path | None:
+    """
+    Create Trends Prompt for Chat GPT or OpenRouter models.
+    """
+
+    # Check file
+    prompt_file_path.parent.mkdir(parents=True, exist_ok=True)
+    if prompt_file_path.exists() and not overwrite_file:
+        return prompt_file_path
+
+    # Check length of multi-prompt
+    total_size: int = len(trend_list)
+
+    # Iterate through trends
+    for counter, trend in enumerate(trend_list, start=1):
+
+        # Get news_url_list
+        news_piece_summary: list[str] = trend.tts_presult_summary_text
+
+        mood_prompt_query, file_prompt_query = _get_prompt_string_image_mood_query(
+            is_last=counter == total_size,
+            news_url_list=news_piece_summary,
+            current_count=counter,
+            total_count=total_size,
+        )
+
+        trend.image_mood_prompt_query: str = mood_prompt_query
+        trend.image_mood_file_prompt_query: str = file_prompt_query
+
+    # Check whether to write in a file
+    if not write_file:
+        return prompt_file_path
+
+    # Write Output to file and return Path
+    with open(prompt_file_path, "w") as file:
+        for trend in trend_list:
+            file.write(trend.image_mood_file_prompt_query)
 
     return prompt_file_path
 
@@ -436,8 +447,8 @@ def read_trend_prompt(
 # Exports
 # --------------------------------------------------------------------------------------
 __all__: list[str] = [
-    "create_trend_prompt",
-    "read_trend_prompt",
+    "create_trend_tts_prompt",
+    "create_trend_image_mood_prompt",
 ]
 
 

@@ -428,9 +428,95 @@ def load_trendlist(path: Path) -> TrendList:
     return tl
 
 
+def execute_multiple(
+    command_list: List[str],
+    *,
+    multiple_sessions: bool = True,
+    join_string: str = " ; ",
+    **kwargs,
+) -> Tuple[str, str]:
+    """
+    Execute a list of shell commands sequentially in the same session.
+    
+    Args:
+        command_list: A list of shell commands as strings.
+        
+    Returns:
+        A tuple (stdout, stderr) containing the combined output and error messages.
+
+    - Join commands with " && " or " ; ":
+      " && " stops execution on failure; " ; " executes all regardless
+    """
+    # Join commands with "&&" or ";"
+    # "&&" stops execution on failure; ";" executes all regardless
+    full_command = " ; ".join(command_list)
+    pass
+
+
+def execute(
+    full_command: str,
+    *,
+    stdout: int | None = None,
+    stderr: int | None = None,
+    capture_output: bool = True,
+    text: bool = True,
+    check: bool = True,
+    shell: bool = False,
+    env: str | None = None,
+    executable: str = "/bin/bash",
+) -> Tuple[str, str]:
+    """
+    Execute a single shell command.
+
+    class subprocess.Popen(
+        args, bufsize=-1, executable=None, stdin=None, stdout=None, stderr=None,
+        preexec_fn=None, close_fds=True, shell=False, cwd=None, env=None,
+        universal_newlines=None, startupinfo=None, creationflags=0,
+        restore_signals=True, start_new_session=False, pass_fds=(), *, group=None,
+        extra_groups=None, user=None, umask=-1, encoding=None, errors=None,
+        text=None, pipesize=-1, process_group=None
+    )
+
+    env={"PATH": "/usr/bin", "MYVAR": "42"}
+
+    Implementation Notes
+    --------------------
+    stdout and stderr are Emums which can be:
+    `None` (default)
+    `subprocess.subprocess.PIPE`
+    `subprocess.subprocess.STDOUT`
+    `subprocess.subprocess.DEVNULL`
+    `TextIO`
+    """
+    if not shell:
+        # Join command
+        full_command = [e.strip() for e in join_string.split(full_command.strip())]
+
+    # Run in a single shell session
+    process = subprocess.Popen(
+        full_command,
+        stdout = stdout,
+        stderr = stderr,
+        capture_output = capture_output,
+        text = text,
+        encoding="utf-8",
+        check = check,
+        shell = shell,
+        env = env,
+        executable=executable,
+    )
+    stdout, stderr = process.communicate()
+
+    return stdout.strip(), stderr.strip()
+
+
 # --------------------------------------------------------------------------------------
 # Classes
 # --------------------------------------------------------------------------------------
+class PassError(Exception):
+    pass
+
+
 class MoodLevel(Enum):
     """Placeholder"""
 
@@ -658,12 +744,15 @@ class Trend:
 
     # Prompt Fields
     tts_prompt_query: str | None = None
-    file_prompt_query: str | None = None
+    tts_file_prompt_query: str | None = None
+    image_mood_prompt_query: str | None = None
+    image_mood_file_prompt_query: str | None = None
 
     # Prompt Response Fields
-    tts_prompt_response: list[list[str]] = field(default_factory=list)
-    image_prompt_response: list[str] = field(default_factory=list)
-    mood_prompt_response: str | None = None
+    tts_presult_full_text: list[list[list[str]]] = field(default_factory=list)
+    tts_presult_summary_text: list[str] = field(default_factory=list)
+    image_mood_presult_keywords: list[list[str]] = field(default_factory=list)
+    mood_mood_presult_words : list[str] = field(default_factory=list)
 
     # News mood fields
     mood_scores: dict[str, Any] = field(default_factory=dict)
