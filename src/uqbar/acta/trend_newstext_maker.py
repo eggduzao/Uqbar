@@ -25,6 +25,7 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass
 import os
 from pathlib import Path
@@ -56,7 +57,7 @@ DEFAULT_OPENROUTER_API_KEY: str = (
     "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"
 )
 
-DEFAULT_MODEL_ID = "allenai/olmo-3.1-32b-think:free"
+DEFAULT_MODEL_ID: str = "allenai/olmo-3.1-32b-think:free"
 
 DEFAULT_ROLE: str = "user"
 
@@ -69,7 +70,9 @@ DEFAULT_HEADERS: dict[str, str] = {
     "X-Title": "Acta Diurna",
 }
 
-DEFAULT_EXTRA_BODY = {"user": "eduardo-local-test"}
+DEFAULT_EXTRA_BODY: dict[str, str] = {"user": "eduardo-local-test"}
+
+DEFAULT_MAX_RETRIES_MODEL: int = 3
 
 SLEEP_MIN_BASE: float = 2.6
 
@@ -442,7 +445,7 @@ MODEL_KEY_DICT: dict[str, list[str]] = {
 }
 
 
-JSONType = dict[str, Any]
+TEXTType = str
 
 ROLEType = Literal["system", "user", "assistant", "developer"]
 
@@ -471,7 +474,7 @@ def _get_model_name_and_key(
         model_idx = 0
 
         user_idx = (user_counter%3) + 1
-        model_key_idx = model_counter%(len(model_name_list)+1)
+        model_key_idx = model_counter%len(model_name_list)
 
         model_key = model_name_list[model_key_idx]
         api_model_id = model_key_dict[model_key][model_idx]
@@ -552,8 +555,8 @@ def _perform_query_trend(
     extra_body: dict[str, Any] | None = None,
     *,
     # OpenRouter attribution (optional, but good practice)
-    app_url: str | None = None,          # -> "HTTP-Referer"
-    app_title: str | None = None,        # -> "X-Title"
+    app_url: str | None = None,
+    app_title: str | None = None,
 
     # Model behavior
     temperature: float | None = None,
@@ -563,7 +566,7 @@ def _perform_query_trend(
 
     # Request shaping
     stop: str | Sequence[str] | None = None,
-    response_format: JSONType | None = None,     # e.g., {"type":"json_object"} if supported by the model/provider
+    response_format: TEXTType | None = None,
     logit_bias: dict[str, int] | None = None,
 
     # Reliability / hygiene
@@ -654,7 +657,13 @@ def _perform_query_trend(
         payload.update(extra_body)
 
     # --- Call ---
-    response: ChatCompletion = client.chat.completions.create(**payload)
+    try:
+        response: ChatCompletion = client.chat.completions.create(**payload)
+    except Exception:
+        print(f"Could not execute model: {model} with api-key = {apkey[-6:]}")
+        print(f"Query = {query}")
+        print(f"Will try a new model.{"-"*50}\n")
+        return None
     return response
 
 
@@ -790,14 +799,25 @@ def query_models(
     model_key_dict: dict[str, list[str]] = MODEL_KEY_DICT,
     role: str = DEFAULT_ROLE,
     base_url: str = DEFAULT_BASE_URL,
-    key_dict: str = MODEL_KEY_DICT,
+    key_dict: dict[str, list[str]] = MODEL_KEY_DICT,
     default_headers: dict[str, str] = DEFAULT_HEADERS,
     default_extra_body: dict[str, str] = DEFAULT_EXTRA_BODY,
     sleep_min_base: float = SLEEP_MIN_BASE,
+    max_retries: int = DEFAULT_MAX_RETRIES_MODEL,
 ) -> None:
 
+    # Initialize trend trend_stack
+    trend_stack: deque[Trend] = deque([t for t in trend_list])
+
     # Create result list
-    for counter, trend in enumerate(trend_list):
+    counter = -1
+    retry_count = 0
+    while trend_stack:
+
+        # Initialize trend
+        counter += 1
+        retry_count += 1
+        trend = trend_stack.pop()
 
         # Get model
         api_model_id, api_key_id = _get_model_name_and_key(
@@ -837,23 +857,102 @@ def query_models(
             response_format={"type":"json_object"},
         )
 
+        # Check reponse and response.choices
+        if not response or not response.choices:
+            if retry_count < max_retries:
+                trend_stack.append(trend)
+            else:
+                retry_count = 0
+            sleep(get_random() + sleep_min_base)
+            continue
+        else:
+
+        # Create stack with response.choices
+        response_choices_stack = stack(response.choices)
+
+        # Output structures
         trend.tts_presult_full_text: list[list[list[str]]] = []
         trend.tts_presult_summary_text: list[str] = []
-        for idx in range(0, len(response.choices)):
+
+        # Loop management structures
+        idx = -1
+        success_choice: dict[int: list[bool]] = dict()
+        while response_choices_stack:
+
+            idx += 1
+
+            resp = response_choices_stack.pop()
+            if not resp:
+                print(f"..{dtnow()} ERROR:")
+                print(f"..No response_choices_stack[{idx}] was found.")
+                if retry_count < max_retries:
+                    success_choice[idx].append(False)
+                    print(f"..Continuing loop with signal to requeue.")
+                else:
+                    success_choice[idx].append(True)
+                    print(f"..Continuing loop without signal to requeue.")
+                continue
+
+            # Populating success_choice dictionary
+            success_test = success_choice.get(idx)
+            if not isinstance(success_test, list):
+                success_choice[idx]: list[bool] = []
+
+            # Check if content exists
+            if not resp.message.content:
+                print(f"..{dtnow()} ERROR:")
+                print(f"..No response_choices_stack[{idx}].message.content was found.")
+                if retry_count < max_retries:
+                    success_choice[idx].append(False)
+                    print(f"..Continuing loop with signal to requeue.")
+                else:
+                    success_choice[idx].append(True)
+                    print(f"..Continuing loop without signal to requeue.")
+                continue
 
             results: list[str] = _clean_output(
-                prompt_result=response.choices[idx].message.content,
+                prompt_result=resp.message.content,
                 split_words=False,
             )
 
-            max_idx: int = max(enumerate(results), key=lambda x: len(x[1]))[0]
-            min_idx: int = min(enumerate(results), key=lambda x: len(x[1]))[0]
+            if not results:
+                print(f"..{dtnow()} ERROR:")
+                print(f"..Could not clean response_choices_stack[{idx}].message.content.")
+                if retry_count < max_retries:
+                    success_choice[idx].append(False)
+                    print(f"..Continuing loop with signal to requeue.")
+                else:
+                    success_choice[idx].append(True)
+                    print(f"..Continuing loop without signal to requeue.")
+                continue
+            else:
+                success_choice[idx].append(True)
 
-            main_text_chunked: list[list[str]] = _chunk_prompt_result(results[max_idx])
-            trend.tts_presult_full_text.append(main_text_chunked)
-            trend.tts_presult_summary_text.append(results[min_idx])
+            try:
+                max_idx: int = max(enumerate(results), key=lambda x: len(x[1]))[0]
+                min_idx: int = min(enumerate(results), key=lambda x: len(x[1]))[0]
+
+                main_text_chunked: list[list[str]] = _chunk_prompt_result(results[max_idx])
+                trend.tts_presult_full_text.append(main_text_chunked)
+                trend.tts_presult_summary_text.append(results[min_idx])
+            raise Exception as e:
+                print(f"..{dtnow()} ERROR:")
+                print(e)
+                if retry_count < max_retries:
+                    success_choice[idx].append(False)
+                    print(f"..Continuing loop with signal to requeue.")
+                else:
+                    success_choice[idx].append(True)
+                    print(f"..Continuing loop without signal to requeue.")
+                continue
 
         sleep(get_random() + sleep_min_base)
+
+        if not sum([x for _, x in success_choice.items()]):
+            retry_count += 1
+            continue
+
+        retry_count = 0
 
     return None
 
@@ -871,10 +970,21 @@ def query_image_and_mood(
     default_headers: dict[str, str] = DEFAULT_HEADERS,
     default_extra_body: dict[str, str] = DEFAULT_EXTRA_BODY,
     sleep_min_base: float = SLEEP_MIN_BASE,
+    max_retries: int = DEFAULT_MAX_RETRIES_MODEL,
 ) -> None:
 
+    # Initialize trend stack
+    stack: deque[Trend] = deque(trend_list)
+
     # Create result list
-    for counter, trend in enumerate(trend_list):
+    counter = -1
+    retry_count = 0
+    while stack:
+
+        # Initialize trend
+        counter += 1
+        retry_count += 1
+        trend = stack.pop()
 
         # Get model
         api_model_id, api_key_id = _get_model_name_and_key(
@@ -914,6 +1024,16 @@ def query_image_and_mood(
             app_title="X-Title",
             response_format={"type":"json_object"},
         )
+
+        if not response:
+            if retry_count < max_retries:
+                stack.append(trend)
+            else:
+                retry_count = 0
+            sleep(get_random() + sleep_min_base)
+            continue
+
+        retry_count = 0
 
         trend.image_mood_presult_keywords: list[list[str]] = []
         trend.mood_mood_presult_words: list[str] = []

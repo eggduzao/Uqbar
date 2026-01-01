@@ -495,6 +495,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"Please select one of the available tools and use -h"
             f"if you need further help."
         )
+    return return_status
 
 
 # --------------------------------------------------------------------------------------
