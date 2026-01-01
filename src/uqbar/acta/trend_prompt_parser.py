@@ -325,7 +325,7 @@ def create_trend_image_mood_prompt(
 
 def read_trend_prompt(
     *,
-    prompt_file_path: Path = PROMPT_FILE_PATH,
+    prompt_file_path: Path = DEFAULT_PROMPT_TTS_PATH,
 ) -> list[list[str]]:
     """
     Placeholder.

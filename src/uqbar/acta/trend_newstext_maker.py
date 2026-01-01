@@ -37,7 +37,7 @@ from openai import OpenAI
 from openai.types.chat import ChatCompletion
 
 from uqbar.acta.utils import (
-    deprecated
+    deprecated,
     dtnow,
     Trend,
     TrendList,
@@ -46,10 +46,7 @@ from uqbar.acta.utils import (
     PassError,
     execute,
 )
-from uqbar.acta.trend_prompt_parser import (
-    _get_model_name_and_key, 
-    _get_prompt_string_image_mood_query,
-)
+from uqbar.acta.trend_prompt_parser import _get_prompt_string_image_mood_query
 
 
 # -------------------------------------------------------------------------------------
@@ -480,9 +477,9 @@ def _get_model_name_and_key(
         api_model_id = model_key_dict[model_key][model_idx]
         api_key_id = model_key_dict[model_key][user_idx]
 
-        if not api_model_id or not api_key_id
+        if not api_model_id or not api_key_id:
             raise PassError("pass")
-        if ":free" ot in api_model_id:
+        if ":free" not in api_model_id:
             raise PassError("pass")
         if "sk-or-v1" not in api_key_id:
             raise PassError("pass")
@@ -692,8 +689,8 @@ def _clean_output(
 
 
 # ------------------------------------ DEPRECATED -------------------------------------
-@deprecated
-def _perform_query_trend(
+@deprecated("Version 0.1.0 - Manual Download")
+def _perform_query_trend_legacy(
     query: str,
     model: str,
     role: str,
@@ -751,7 +748,7 @@ def _perform_query_trend(
     return response
 
 
-@deprecated
+@deprecated("Version 0.1.0 - Manual Download")
 def _clean_output_legacy(
     prompt_result: str,
     split_words: bool = False,

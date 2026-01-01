@@ -89,7 +89,7 @@ Metadata
 # -------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from enum import Enum
+from dataclasses import dataclass
 from pathlib import Path
 import sys
 
@@ -133,11 +133,12 @@ from uqbar.acta.mood_predictor import predict_mood
 ROOT_PATH = Path("/Users/egg/acta/content")
 
 
-class Semaphore(Enum):
+@dataclass
+class Semaphore:
     """Placeholder"""
     ONE: bool = False
-    TWO: bool = True
-    THREE: bool = False
+    TWO: bool = False
+    THREE: bool = True
     FOUR_A: bool = False
     FIVE_A: bool = False
     FOUR_B: bool = False
@@ -159,7 +160,6 @@ TESTING: bool = True
 # Functions
 # --------------------------------------------------------------------------------------
 def acta_core(
-    positional_argument,
     *,
     args: dict[str, Any] | None = None,
 ) -> int:
@@ -217,11 +217,9 @@ def acta_core(
             working_path=working_path,
             delete_rss_xml_path=True,
         )
-
         if trend_list is None:
             print("[Error] Trend list is None.")
             return 1
-
         save_trendlist(trend_list, output_log_path)
     else:
         if output_log_path.exists():
