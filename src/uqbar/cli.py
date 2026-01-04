@@ -33,6 +33,8 @@ from uqbar._version import version
 # --------------------------------------------------------------------------------------
 __version__: str = version()
 
+CURRENT_WORKING_DIR: Path = Path.cwd()
+
 
 UQBAR: str = "uqbar" # Main container name | Homes all tools
 
@@ -43,6 +45,8 @@ MILOU: str = "milou"  # Program to mass download youtube vides seamlessly
 QUINCAS: str = "quincas"  # Program to produce music effortlesly without DAWs
 
 FAUST: str = "faust"  # Program to search for strings in dirs, files and inside
+
+TIETA: str = "tieta"  # Program to generate claude prompts for summary-expansion
 
 DEFAULT: str = "default"  # Program to search for strings in dirs, files and inside
 
@@ -166,15 +170,19 @@ def milou_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
     parser = argparse.ArgumentParser(
         prog=MILOU,
         description=(
-            f"{MILOU} - a reference CLI demonstrating clean argparse patterns.\n\n"
-            "It includes mandatory positional inputs (int/float/bool/str/path) and optional\n"
-            "flags with both short and long forms. Copy/paste and tailor as needed."
+            f"{MILOU} - a CLI tool to fetch artefacts from the internet: from \n"
+            "youtube videos to books in various formats.\n\n"
+            "Milou - known as Snowy in English - is a fictional white Wire Fox \n"
+            "Terrier who is a companion to Tintin, the series' protagonist. Snowy \n"
+            "made his debut on 1929, helping Tintin in variety of ways, including \n"
+            "fetching missing artifacts.\n\n"
         ),
         epilog=(
             f"Examples:\n"
-            f"  $ {UQBAR} {MILOU} 3 0.25 true 'hello' ./data\n"
-            f"  $ {UQBAR} {MILOU} 3 0.25 false 'hello' ./data --the-int 7 --the-path ~/Downloads\n"
-            f"  $ {UQBAR} {MILOU} 3 0.25 yes 'hello' ./data -e --the-boolean off\n"
+            f"  $ {UQBAR} {MILOU} book -i ~/Desktop/search_terms.txt -o ~\n"
+            f"  $ {UQBAR} {MILOU} book -q 'the,adventures,of,tintim,herge' -s "
+            "'google,duckduckgo' -o ~\n"
+            f"  $ {UQBAR} {MILOU} book -i ~/Desktop/search_terms.txt -f 'pdf,epub,djvu' -o ~\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -189,28 +197,59 @@ def milou_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
 
     # Positional arguments
     parser.add_argument(
-        "input_int",
-        type=int,
-        metavar="INPUT_INT",
-        help="Required integer input (e.g., 3).",
+        "command_subtipe",
+        type=str,
+        metavar="SUBCOMMAND",
+        help="Requested item to be fetched. Currently in ['youtube', 'book']",
     )
 
     # Optional arguments
     parser.add_argument(
-        "--the-boolean",
-        dest="the_boolean",
-        type=_parse_bool,
-        default=None,
-        metavar="{true|false}",
-        help="Optional boolean override: true/false, yes/no, on/off, 1/0.",
-    )
-    parser.add_argument(
-        "--the-path",
-        dest="the_path",
+        "-i",
+        "--input-path",
+        dest="input_path",
         type=_as_path,
         default=None,
         metavar="PATH",
-        help="Optional path override to a file or directory (existence not enforced by default).",
+        help="Input path as a text file with one query list of strings per line.",
+    )
+    parser.add_argument(
+        "-o",
+        "--output-path",
+        dest="output_path",
+        type=_as_path,
+        default=CURRENT_WORKING_DIR,
+        metavar="PATH",
+        help="Location to output the search results.",
+    )
+    parser.add_argument(
+        "-q",
+        "--query",
+        dest="query",
+        type=str,
+        default=None,
+        metavar="INPUT_STR,[INPUT_STR2,...]",
+        help="Optional single comma-separated list of strings as a query.",
+    )
+    # Optional arguments
+    parser.add_argument(
+        "-s",
+        "--search-engines",
+        dest="search_engines",
+        type=str,
+        default=None,
+        metavar="INPUT_STR,[INPUT_STR2,...]",
+        help="Optional comma-separated list of formats allowed.",
+    )
+    # Optional arguments
+    parser.add_argument(
+        "-f",
+        "--formats-allowed",
+        dest="formats_allowed",
+        type=str,
+        default=None,
+        metavar="INPUT_STR,[INPUT_STR2,...]",
+        help="Optional comma-separated list of formats allowed.",
     )
 
     ns = parser.parse_args(argv)
@@ -378,6 +417,111 @@ def faust_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
     return vars(ns)
 
 
+def tieta_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
+    """
+    Parse CLI arguments for the program `tieta` and return a plain dict[str, Any].
+
+    Parameters
+    ----------
+    argv:
+        Sequence of argument strings, typically `sys.argv[1:]`.
+        If None, argparse uses `sys.argv[1:]` automatically.
+
+    Returns
+    -------
+    dict[str, Any]
+        A dict with parsed values. Keys match the argument `dest` names.
+    """
+    if not argv:
+        argv = sys.argv[1:]
+
+    parser = argparse.ArgumentParser(
+        prog=TIETA,
+        description=(
+            f"{TIETA} - a CLI tool to create input text prompts for Claude, based "
+            "on an input `pdf` file.\n\nTieta is a character from the homonimous "
+            "book by the Brazilian writer Jorge Amado. This fascinating novel "
+            "revolves around a young woman, named Tieta, who lives in a small town "
+            "in Brazil. Tieta is a naive girl, who is ostracised by the entire "
+            "community, for her exhuberant beauty. She leaves the town to go to "
+            "a big city, where she becomes rich and powerful; and when she decides "
+            "to return to her home town, things are not quite the same."
+        ),
+        epilog=(
+            f"Examples:\n"
+            f"  $ {UQBAR} {TIETA} 3 0.25 true 'hello' ./data\n"
+            f"  $ {UQBAR} {TIETA} 3 0.25 false 'hello' ./data --the-int 7 --the-path ~/Downloads\n"
+            f"  $ {UQBAR} {TIETA} 3 0.25 yes 'hello' ./data -e --the-boolean off\n"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
+    # Version flag
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"{DEFAULT} {__version__}",
+        help="Show program version and exit.",
+    )
+
+    # Positional arguments
+    parser.add_argument(
+        "input_path",
+        type=_as_path,
+        metavar="PATH",
+        help="Required input pdf path.",
+    )
+    parser.add_argument(
+        "output_path",
+        type=_as_path,
+        metavar="PATH",
+        help="Required output text path.",
+    )
+
+    # Optional arguments
+    parser.add_argument(
+        "-s",
+        "--start-page",
+        dest="start_page",
+        type=int,
+        default=None,
+        metavar="INPUT_INT",
+        help="Optional number of first page to be parsed and returned.",
+    )
+    # Optional arguments
+    parser.add_argument(
+        "-f",
+        "--final-page",
+        dest="final_page",
+        type=int,
+        default=None,
+        metavar="INPUT_INT",
+        help="Optional number of last page to be parsed and returned.",
+    )
+    # Optional arguments
+    parser.add_argument(
+        "-r",
+        "--redflags",
+        dest="redflags",
+        type=_parse_bool,
+        default=None,
+        metavar="{true|false}",
+        help="Optional boolean. Whether to print pdf parsing red flags.",
+    )
+    parser.add_argument(
+        "-p",
+        "--redflags-path",
+        dest="redflags_path",
+        type=_as_path,
+        default=None,
+        metavar="PATH",
+        help="Optional path. Location where pdf parsing red flags will be written.",
+    )
+
+    ns = parser.parse_args(argv)
+    return vars(ns)
+
+
 def default_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
     """
     Parse CLI arguments for the program `default` and return a plain dict[str, Any].
@@ -481,6 +625,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         return_code: int = 2
         from uqbar.faust.core import faust_core
         return_status = faust_core(args=faust_parser(argv[1:]))
+
+    elif argv[0] == TIETA:
+        return_code: int = 2
+        from uqbar.faust.core import faust_core
+        return_status = tieta_core(args=tieta_parser(argv[1:]))
 
     elif argv[0] == DEFAULT:
         return_code: int = 2

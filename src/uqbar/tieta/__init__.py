@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
-# uqbar/milou/__init__.py
+# uqbar/tieta/__init__.py
 """
-Milou
+Tieta
 =====
 
 Overview
@@ -10,7 +10,7 @@ Placeholder.
 
 Metadata
 --------
-- Project: Milou
+- Project: Tieta
 - License: MIT
 """
 
@@ -19,12 +19,12 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from uqbar.milou.core import milou_core
+from uqbar.tieta.core import tieta_core
 
 
 # --------------------------------------------------------------------------------------
 # Exports
 # --------------------------------------------------------------------------------------
 __all__: list[str] = [
-    "milou_core",
+    "tieta_core",
 ]

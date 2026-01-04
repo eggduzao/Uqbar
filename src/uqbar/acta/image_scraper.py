@@ -353,6 +353,8 @@ def _unique_remove_empty(
 def _get_uri_list(
     driver: webdriver,
     element_list: list[WebElement],
+    *,
+    sleep_min_base: int = SLEEP_MIN_BASE,
 ) -> list[str]:
 
     # Getting baseURI property
@@ -360,7 +362,7 @@ def _get_uri_list(
     for element in element_list:
 
         try:
-               _safeproof_click(
+            _safeproof_click(
                 driver=driver,
                 element_or_list=element,
             )
@@ -554,7 +556,7 @@ def get_image_links(
     # --------- Main Loop ---------
 
     # Find all <html> elements
-    waiter = WebDriverWait(driver, sleep_max_base+waiter_total_time+get_random())
+    waiter = WebDriverWait(driver, sleep_max_base+waiter_total_time_base+get_random())
     curr_element_list: list[WebElement] = waiter.until(EC.presence_of_all_elements_located((By.TAG_NAME, "html")))
 
     # Main Loop - Reversed

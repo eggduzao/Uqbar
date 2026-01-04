@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
-# uqbar/milou/utils.py
+# uqbar/tieta/utils.py
 """
-Milou | Utils
+Tieta | Utils
 =============
 
 Overview
@@ -10,7 +10,7 @@ Placeholder.
 
 Metadata
 --------
-- Project: Milou
+- Project: Tieta
 - License: MIT
 """
 
@@ -19,7 +19,6 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from datetime import datetime
 import functools
 import warnings
@@ -52,72 +51,7 @@ def deprecated(reason: str):
 # --------------------------------------------------------------------------------------
 # Helpers
 # --------------------------------------------------------------------------------------
-def _safeproof_click(
-    driver: webdriver,
-    element_or_list: WebElement | list[WebElement],
-    *,
-    wait_for_action: bool = False,
-    timeout: int = 10,
-) -> None:
-    """
-    Placeholder
-    """
 
-    _safe_click(
-        driver: webdriver,
-        web_element: WebElement,
-        *,
-        wait_for_action: bool = False,
-        timeout: int = 10,
-    ) -> None:
-
-        try:
-
-            # Wait until the element is actually clickable
-            if wait_for_action:
-                wait: WebDriverWait = WebDriverWait(driver, timeout)
-                wait.until(EC.element_to_be_clickable(web_element))
-            
-            # Try standard Selenium click (mimics real user)
-            web_element.click()
-        except Exception:
-
-            # Fallback: JavaScript click (bypasses overlays/visibility issues)
-            driver.execute_script("arguments[0].click();", web_element)
-
-    # 1. Determine if it's a list or single element
-    if not isinstance(element_or_list, WebElement):
-
-        for element in element_or_list:
-            _safeproof_click(
-                driver=driver,
-                element_or_list=element_or_list,
-                wait_for_action=wait_for_action,
-                timeout=timeout,
-            )
-        return
-
-    _safe_click(
-        driver=driver,
-        element_or_list=element_or_list,
-        wait_for_action=wait_for_action,
-        timeout=timeout,
-    )
-    return
-
-
-def _click_on_xpath(driver: webdriver, xpath: str) -> None:
-    """
-    Placeholder
-    """
-
-    element_list: list[WebElement] = driver.find_elements(By.XPATH, xpath)
-
-    for element in element_list:
-        _safeproof_click(
-            driver=driver,
-            element_or_list=element,
-        )
 
 
 # --------------------------------------------------------------------------------------
@@ -127,6 +61,12 @@ def dtnow(*, fmt: bool = True):
     if fmt:
         return f"[{str(datetime.now()).split(".")[0]}]"
     return datetime.now()
+
+
+
+# --------------------------------------------------------------------------------------
+# Classes
+# --------------------------------------------------------------------------------------
 
 
 # --------------------------------------------------------------------------------------
