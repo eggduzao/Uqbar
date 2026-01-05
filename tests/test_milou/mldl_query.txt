@@ -1,0 +1,36 @@
+weapons of math destruction cathy oneil
+algorithms of oppression safiya umoja noble
+fairness and machine learning solon barocas moritz hardt arvind narayanan
+teaching and learning computer programming anthony robins janet rountree nathan rountree
+race after technology ruha benjamin
+artificial intelligence a modern approach stuart russell peter norvig
+machine learning a probabilistic perspective kevin p murphy
+pattern recognition and machine learning christopher m bishop
+reinforcement learning an introduction richard s sutton andrew g barto
+the elements of statistical learning trevor hastie robert tibshirani jerome friedman
+deep learning ian goodfellow yoshua bengio aaron courville
+neural networks and deep learning michael nielsen
+deep learning for coders with fastai and pytorch jeremy howard sylvain gugger
+deep reinforcement learning hands on maxim lapan
+representation learning yoshua bengio
+fluent python luciano ramalho
+python cookbook david beazley brian k jones
+cpython internals anthony shaw
+the art of r programming norman matloff
+advanced r hadley wickham
+the r inferno patrick burns
+the linux command line william shotts
+bash reference manual brian fox chet ramey
+the art of unix programming eric s raymond
+the c programming language brian w kernighan dennis m ritchie
+effective c plus plus scott meyers
+the c plus plus programming language bjarne stroustrup
+database system concepts abraham silberschatz henry f korth s sudarshan
+database systems the complete book hector garcia molina jeffrey d ullman jennifer widom
+database internals alex petrov
+effective java joshua bloch
+java concurrency in practice brian goetz tim peierls joshua bloch joseph bowbeer david holmes doug lea
+the java language specification james gosling bill joy guy steele gilad bracha
+javascript the definitive guide david flanagan
+you dont know js yet kyle simpson
+learning react alex banks eve porcello

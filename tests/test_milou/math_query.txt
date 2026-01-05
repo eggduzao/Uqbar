@@ -1,0 +1,21 @@
+foundations of modern probability olav kallenberg
+probability theory and examples rick durrett
+probability and measure patrick billingsley
+an introduction to kolmogorov complexity and its applications ming li paul vitanyi
+algorithmic randomness and complexity rod downey denis hirschfeldt
+computability and randomness andre nies
+statistical inference george casella roger l berger
+all of statistics larry wasserman
+introduction to mathematical statistics robert v hogg joseph w mckean allan craig
+testing statistical hypotheses erich l lehmann joseph p romano
+asymptotic statistics a w van der vaart
+convex optimization stephen p boyd lieven vandenberghe
+numerical optimization jorge nocedal stephen j wright
+nonlinear programming dimitri p bertsekas
+practical optimization j e gill w murray s j wright
+introductory lectures on convex optimization yosef ben tal arkadi nemirovski
+linear algebra done right sheldon j axler
+linear algebra and its applications gilbert strang
+linear algebra kenneth kunze harold howard hoffman
+finite dimensional vector spaces paul halmos
+matrix analysis roger a horn charles r johnson

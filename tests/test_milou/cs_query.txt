@@ -1,0 +1,48 @@
+introduction to algorithms thomas h cormen charles e leiserson ronald l rivest clifford stein
+algorithms robert sedgewick kevin wayne
+algorithm design jon kleinberg e tsitsiklis tardos
+algorithms sanjoy dasgupta christos papadimitriou uvazirani
+the algorithm design manual steven s skiena
+introduction to algorithms thomas h cormen charles e leiserson ronald l rivest clifford stein
+computational complexity a modern approach sanjeev arora boaz barak
+randomized algorithms rajeev motwani prabhakar raghavan
+the design of approximation algorithms david p williamson david b shmoys
+combinatorial optimization polyhedra and efficiency alexander schrijver
+mining of massive datasets jure leskovec anand rajaraman jeffrey d ullman
+designing data intensive applications martin kleppmann
+data intensive text processing with mapreduce jimmy lin chris dyer
+scaling up machine learning leon bottou frank e curtis jorge nocedal
+foundations of data science avrim blum john hopcroft ravindran kannan
+introduction to the theory of computation michael sipser
+computational complexity christos h papadimitriou
+automata and computability john e hopcroft jeffrey d ullman
+computers and intractability michael r garey david s johnson
+elements of the theory of computation harry r lewis christos h papadimitriou
+computer architecture a quantitative approach john l hennessy david a patterson
+computer organization and design david a patterson john l hennessy
+structured computer organization andrew s tanenbaum todd austin
+modern processor design fundamentals of superscalar processors john paul shen mikko h lipasti
+memory systems cache dram disk bruce jacob spyridon k stiliadis
+software engineering roger s pressman bruce r maxim
+software engineering a practitioners approach ian sommerville
+design patterns elements of reusable object oriented software erich gamma richard helm ralph johnson john vlissides
+software abstractions logic language and analysis daniel jackson
+introduction to software testing glenford j myers corey sandler tom badgett
+designing data intensive applications martin kleppmann
+site reliability engineering betsey beyer chris jones jennifer petoff niall murphy
+accelerate nicole forsgren jez humble gene kim
+the mythical man month frederick p brooks
+software architecture in practice len bass paul clements rick kazman
+database system concepts silberschatz korth sudarshan
+database systems the complete book molina ullman widom
+database internals petrov
+computer networks andrew s tanenbaum david j wetherall
+computer networking a top down approach james f kurose keith w ross
+tcp ip illustrated volume 1 the protocols william richard stevens
+high performance browser networking ilya grigorik
+interconnections bridges routers switches and internetworking protocols radia perlman
+database system concepts abraham silberschatz henry f korth s sudarshan
+database systems the complete book hector garcia molina jeffrey d ullman jennifer widom
+readings in database systems joseph m hellerstein michael stonebraker
+designing data intensive applications martin kleppmann
+transaction processing concepts and techniques jim gray andreas reuter

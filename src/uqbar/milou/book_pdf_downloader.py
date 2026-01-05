@@ -79,157 +79,160 @@ def search_for_links(
     ebook_link_list: list[str] = []
 
     # Loop on each link
-    for search_url in link_list:
+    for link_url in link_list:
 
-        # Driver Main
-        driver: webdriver = webdriver.Chrome(service=service, options=options)
+        # Loop on each extension
+        for search_url in ["+".join(link_url, y) for y in query_format_list]:
 
-        # Create window to maximize chance
-        driver.maximize_window()
-        driver.set_window_size(*nav_window_size)
+            # Driver Main
+            driver: webdriver = webdriver.Chrome(service=service, options=options)
 
-        # Navigate to the URL
-        driver.get(search_url)
-        sleep(3.0)
-        driver.refresh()
-        sleep(3.0)
+            # Create window to maximize chance
+            driver.maximize_window()
+            driver.set_window_size(*nav_window_size)
 
-        # Find all <html> elements
-        web_element_list = driver.find_element(By.XPATH, "/html")
+            # Navigate to the URL
+            driver.get(search_url)
+            sleep(3.0)
+            driver.refresh()
+            sleep(3.0)
 
-        # Find all /html/body/div[2] elements
-        max_tries: int = 0
-        curr_element_list: list[WebElement] | WebElement = []
-        while not curr_element_list or max_tries < 3:
-            try:
-                wait = WebDriverWait(web_element_list, timeout=10)
-                web_element_list = wait.until(
-                    lambda p: p.find_element(
-                        By.XPATH,
-                        "//*/body/div[2]"
-                    )
-                )
-                sleep(waiter_total_time_base + random())
-                is_it, curr_element_list = _resolve_iterable(web_element_list)
-            except (StaleElementReferenceException, TimeoutException) as es:
-                pass
-            except Exception as ex:
-                pass
-            max_tries += 1
+            # Find all <html> elements
+            web_element_list = driver.find_element(By.XPATH, "/html")
 
-
-        # Find all /html/body/div[2]/div[6]/div[4] elements
-        max_tries: int = 0
-        curr_element_list: list[WebElement] | WebElement = []
-        while not curr_element_list or max_tries < 3:
-            try:
-                wait = WebDriverWait(web_element_list, timeout=10)
-                web_element_list = wait.until(
-                    lambda p: p.find_element(
-                        By.XPATH,
-                        "//*/div[6]/div[4]"
-                    )
-                )
-                sleep(waiter_total_time_base + random())
-                is_it, curr_element_list = _resolve_iterable(web_element_list)
-            except (StaleElementReferenceException, TimeoutException) as es:
-                pass
-            except Exception as ex:
-                pass
-            max_tries += 1
-
-        # Find all /html/body/div[2]/div[6]/div[4]/div/div/div elements
-        max_tries: int = 0
-        curr_element_list: list[WebElement] | WebElement = []
-        while not curr_element_list or max_tries < 3:
-            try:
-                wait = WebDriverWait(web_element_list, timeout=10)
-                web_element_list = wait.until(
-                    lambda p: p.find_element(
-                        By.XPATH,
-                        "//*/div/div/div"
-                    )
-                )
-                sleep(waiter_total_time_base + random())
-                is_it, curr_element_list = _resolve_iterable(web_element_list)
-            except (StaleElementReferenceException, TimeoutException) as es:
-                pass
-            except Exception as ex:
-                pass
-            max_tries += 1
-
-        # Find all /html/body/div[2]/div[6]/div[4]/div/div/div/div[2]/section[1]/ol
-        # elements
-        max_tries: int = 0
-        curr_element_list: list[WebElement] | WebElement = []
-        while not curr_element_list or max_tries < 3:
-            try:
-                wait = WebDriverWait(web_element_list, timeout=10)
-                web_element_list = wait.until(
-                    lambda p: p.find_element(
-                        By.XPATH,
-                        "//*/div[2]/section[1]/ol"
-                    )
-                )
-                sleep(waiter_total_time_base + random())
-                is_it, curr_element_list = _resolve_iterable(web_element_list)
-            except (StaleElementReferenceException, TimeoutException) as es:
-                pass
-            except Exception as ex:
-                pass
-            max_tries += 1
-
-        # Iterate on 10 (first page) li items
-        for idx in range(10):
-
+            # Find all /html/body/div[2] elements
             max_tries: int = 0
-            wel_list: list[WebElement] | WebElement = []
-            while not wel_list or max_tries < 3:
-                try: 
-
+            curr_element_list: list[WebElement] | WebElement = []
+            while not curr_element_list or max_tries < 3:
+                try:
                     wait = WebDriverWait(web_element_list, timeout=10)
-
-                    wel_list = wait.until(
-                    lambda p: p.find_element(
-                        By.XPATH,
-                        f"//*/li[{idx}]/article/div[3]/h2/a"
+                    web_element_list = wait.until(
+                        lambda p: p.find_element(
+                            By.XPATH,
+                            "//*/body/div[2]"
                         )
                     )
-                    sleep(sleep_base + get_random())
-                    is_it, curr_element_list = _resolve_iterable(wel_list)
-
+                    sleep(waiter_total_time_base + random())
+                    is_it, curr_element_list = _resolve_iterable(web_element_list)
                 except (StaleElementReferenceException, TimeoutException) as es:
                     pass
                 except Exception as ex:
                     pass
                 max_tries += 1
 
-                if not wel_list:
-                    break
 
-                if is_it:
-                    for wel in wel_list:
-                        if not wel:
-                            continue
-                        try:
-                            web_link = wel.get_property("href")
-                            web_ext = web_link.split(".")[-1]
-                            if web_ext in query_format_list:
-                                ebook_link_list.append(web_link)
-                            sleep(sleep_base + get_random())
-                        except Exception as exx:
-                            continue
-
-                        if not wel:
-                            continue
-                    continue
-
+            # Find all /html/body/div[2]/div[6]/div[4] elements
+            max_tries: int = 0
+            curr_element_list: list[WebElement] | WebElement = []
+            while not curr_element_list or max_tries < 3:
                 try:
-                    web_link = wel_list.get_property("href")
-                    web_ext = web_link.split(".")[-1]
-                    if web_ext in query_format_list:
-                        ebook_link_list.append(web_link)
-                    sleep(sleep_base + get_random())
+                    wait = WebDriverWait(web_element_list, timeout=10)
+                    web_element_list = wait.until(
+                        lambda p: p.find_element(
+                            By.XPATH,
+                            "//*/div[6]/div[4]"
+                        )
+                    )
+                    sleep(waiter_total_time_base + random())
+                    is_it, curr_element_list = _resolve_iterable(web_element_list)
+                except (StaleElementReferenceException, TimeoutException) as es:
+                    pass
+                except Exception as ex:
+                    pass
+                max_tries += 1
+
+            # Find all /html/body/div[2]/div[6]/div[4]/div/div/div elements
+            max_tries: int = 0
+            curr_element_list: list[WebElement] | WebElement = []
+            while not curr_element_list or max_tries < 3:
+                try:
+                    wait = WebDriverWait(web_element_list, timeout=10)
+                    web_element_list = wait.until(
+                        lambda p: p.find_element(
+                            By.XPATH,
+                            "//*/div/div/div"
+                        )
+                    )
+                    sleep(waiter_total_time_base + random())
+                    is_it, curr_element_list = _resolve_iterable(web_element_list)
+                except (StaleElementReferenceException, TimeoutException) as es:
+                    pass
+                except Exception as ex:
+                    pass
+                max_tries += 1
+
+            # Find all /html/body/div[2]/div[6]/div[4]/div/div/div/div[2]/section[1]/ol
+            # elements
+            max_tries: int = 0
+            curr_element_list: list[WebElement] | WebElement = []
+            while not curr_element_list or max_tries < 3:
+                try:
+                    wait = WebDriverWait(web_element_list, timeout=10)
+                    web_element_list = wait.until(
+                        lambda p: p.find_element(
+                            By.XPATH,
+                            "//*/div[2]/section[1]/ol"
+                        )
+                    )
+                    sleep(waiter_total_time_base + random())
+                    is_it, curr_element_list = _resolve_iterable(web_element_list)
+                except (StaleElementReferenceException, TimeoutException) as es:
+                    pass
+                except Exception as ex:
+                    pass
+                max_tries += 1
+
+            # Iterate on 10 (first page) li items
+            for idx in range(10):
+
+                max_tries: int = 0
+                wel_list: list[WebElement] | WebElement = []
+                while not wel_list or max_tries < 3:
+                    try: 
+
+                        wait = WebDriverWait(web_element_list, timeout=10)
+
+                        wel_list = wait.until(
+                        lambda p: p.find_element(
+                            By.XPATH,
+                            f"//*/li[{idx}]/article/div[3]/h2/a"
+                            )
+                        )
+                        sleep(sleep_base + get_random())
+                        is_it, curr_element_list = _resolve_iterable(wel_list)
+
+                    except (StaleElementReferenceException, TimeoutException) as es:
+                        pass
+                    except Exception as ex:
+                        pass
+                    max_tries += 1
+
+                    if not wel_list:
+                        break
+
+                    if is_it:
+                        for wel in wel_list:
+                            if not wel:
+                                continue
+                            try:
+                                web_link = wel.get_property("href")
+                                web_ext = web_link.split(".")[-1]
+                                if web_ext in query_format_list:
+                                    ebook_link_list.append(web_link)
+                                sleep(sleep_base + get_random())
+                            except Exception as exx:
+                                continue
+
+                            if not wel:
+                                continue
+                        continue
+
+                    try:
+                        web_link = wel_list.get_property("href")
+                        web_ext = web_link.split(".")[-1]
+                        if web_ext in query_format_list:
+                            ebook_link_list.append(web_link)
+                        sleep(sleep_base + get_random())
 
         # Quit driver
         driver.quit()

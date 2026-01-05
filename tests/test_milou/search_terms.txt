@@ -1,0 +1,568 @@
+foundations of modern probability olav kallenberg
+probability theory and examples rick durrett
+probability and measure patrick billingsley
+
+an introduction to kolmogorov complexity and its applications ming li paul vitanyi
+algorithmic randomness and complexity rod downey denis hirschfeldt
+computability and randomness andre nies
+
+---------------
+
+Top 5 books on Probability and Statistics
+1) Casella & Berger - Statistical Inference
+2) Wasserman - All of Statistics
+3) Hogg, McKean & Craig - Introduction to Mathematical Statistics
+4) Lehmann & Romano - Testing Statistical Hypotheses
+5) van der Vaart - Asymptotic Statistics
+
+📘 TOP 5 Books on Mathematical Optimization
+1) Convex Optimization - Boyd & Vandenberghe
+2) Numerical Optimization - Nocedal & Wright
+3) Nonlinear Programming - Dimitri P. Bertsekas
+4) Practical Optimization - Gill, Murray & Wright
+5) Introductory Lectures on Convex Optimization - Ben-Tal & Nemirovski
+
+📘 TOP 5 Books on Vector and Linear Algebra
+1) Linear Algebra Done Right - Sheldon Axler
+2) Linear Algebra and Its Applications - Gilbert Strang
+3) Linear Algebra - Hoffman & Kunze
+4) Finite-Dimensional Vector Spaces - Paul Halmos
+5) Matrix Analysis - Horn & Johnson
+
+TOP 5 - Algorithms & Data Structures (Undergraduate)
+1) Cormen-Leiserson-Rivest-Stein (CLRS) - Introduction to Algorithms
+2) Sedgewick & Wayne - Algorithms (4th ed.)
+3) Kleinberg & Tardos - Algorithm Design
+4) Dasgupta-Papadimitriou-Vazirani - Algorithms
+5) Skiena - The Algorithm Design Manual
+
+statistical inference george casella roger l berger
+all of statistics larry wasserman
+introduction to mathematical statistics robert v hogg joseph w mckean allan craig
+testing statistical hypotheses erich l lehmann joseph p romano
+asymptotic statistics a w van der vaart
+
+convex optimization stephen p boyd lieven vandenberghe
+numerical optimization jorge nocedal stephen j wright
+nonlinear programming dimitri p bertsekas
+practical optimization j e gill w murray s j wright
+introductory lectures on convex optimization yosef ben tal arkadi nemirovski
+
+linear algebra done right sheldon j axler
+linear algebra and its applications gilbert strang
+linear algebra kenneth kunze harold howard hoffman
+finite dimensional vector spaces paul halmos
+matrix analysis roger a horn charles r johnson
+
+introduction to algorithms thomas h cormen charles e leiserson ronald l rivest clifford stein
+algorithms robert sedgewick kevin wayne
+algorithm design jon kleinberg e tsitsiklis tardos
+algorithms sanjoy dasgupta christos papadimitriou uvazirani
+the algorithm design manual steven s skiena
+
+---------------
+
+TOP 5 - Algorithms, Data Structures & Complexity Analysis (Graduate)
+1) CLRS - Introduction to Algorithms
+2) Arora & Barak - Computational Complexity: A Modern Approach
+3) Motwani & Raghavan - Randomized Algorithms
+4) Williamson & Shmoys - The Design of Approximation Algorithms
+5) Schrijver - Combinatorial Optimization: Polyhedra and Efficiency
+
+📘 TOP 5 Books on Big Data Analysis
+1) Mining of Massive Datasets - Leskovec, Rajaraman & Ullman
+2) Designing Data-Intensive Applications - Martin Kleppmann
+3) Data-Intensive Text Processing with MapReduce - Lin & Dyer
+4) Scaling Up Machine Learning - Bottou et al. (eds.)
+5) Foundations of Data Science - Blum, Hopcroft & Kannan
+
+📘 TOP 5 Books on Computation Theory
+1) Introduction to the Theory of Computation - Michael Sipser
+2) Computational Complexity - Christos Papadimitriou
+3) Automata and Computability - Hopcroft & Ullman
+4) Computers and Intractability - Garey & Johnson
+5) Elements of the Theory of Computation - Lewis & Papadimitriou
+
+📘 TOP 5 Books on Computational Hardware Infrastructure
+1) Computer Architecture: A Quantitative Approach - Hennessy & Patterson
+2) Computer Organization and Design - Hennessy & Patterson
+3) Structured Computer Organization - Andrew S. Tanenbaum & Todd Austin
+4) Modern Processor Design: Fundamentals of Superscalar Processors - Yan-Kai Lai
+5) Memory Systems: Cache, DRAM, Disk - Bes & Stiliadis (Multiple editions)
+
+introduction to algorithms thomas h cormen charles e leiserson ronald l rivest clifford stein
+computational complexity a modern approach sanjeev arora boaz barak
+randomized algorithms rajeev motwani prabhakar raghavan
+the design of approximation algorithms david p williamson david b shmoys
+combinatorial optimization polyhedra and efficiency alexander schrijver
+
+mining of massive datasets jure leskovec anand rajaraman jeffrey d ullman
+designing data intensive applications martin kleppmann
+data intensive text processing with mapreduce jimmy lin chris dyer
+scaling up machine learning leon bottou frank e curtis jorge nocedal
+foundations of data science avrim blum john hopcroft ravindran kannan
+
+introduction to the theory of computation michael sipser
+computational complexity christos h papadimitriou
+automata and computability john e hopcroft jeffrey d ullman
+computers and intractability michael r garey david s johnson
+elements of the theory of computation harry r lewis christos h papadimitriou
+
+computer architecture a quantitative approach john l hennessy david a patterson
+computer organization and design david a patterson john l hennessy
+structured computer organization andrew s tanenbaum todd austin
+modern processor design fundamentals of superscalar processors john paul shen mikko h lipasti
+memory systems cache dram disk bruce jacob spyridon k stiliadis
+
+---------------
+
+📘 TOP 5 Books on Software Engineering & Formal Methods
+1) Software Engineering (10th Edition) - Pressman & Maxim
+2) Software Engineering: A Practitioner's Approach - Ian Sommerville
+3) Design Patterns: Elements of Reusable Object-Oriented Software - The Gang of Four
+4) Software Abstractions: Logic, Language, and Analysis - Daniel Jackson
+5) Introduction to Software Testing - Myers, Sandler & Badgett
+
+📘 TOP 5 Books on Modern Software Production
+1) Designing Data-Intensive Applications - Martin Kleppmann
+2) Site Reliability Engineering - Google SRE Team
+3) Accelerate - Forsgren, Humble & Kim
+4) The Mythical Man-Month - Frederick P. Brooks, Jr.
+5) Software Architecture in Practice - Bass, Clements & Kazman
+
+📘 TOP 5 Books on Ethics, Education & Inclusion in Computer Science
+1) Weapons of Math Destruction - Cathy O'Neil
+2) Algorithms of Oppression - Safiya Umoja Noble
+3) Fairness and Machine Learning - Barocas, Hardt & Narayanan
+4) Teaching and Learning Computer Programming - Robins et al.
+5) Race After Technology - Ruha Benjamin
+
+🧠 TOP 5 Books on Artificial Intelligence (Broad + Classics with Machine Learning)
+1) Artificial Intelligence: A Modern Approach - Stuart Russell & Peter Norvig
+2) Machine Learning: A Probabilistic Perspective - Kevin Murphy
+3) Pattern Recognition and Machine Learning - Christopher M. Bishop
+4) Reinforcement Learning: An Introduction - Sutton & Barto
+5) The Elements of Statistical Learning - Hastie, Tibshirani & Friedman
+
+software engineering roger s pressman bruce r maxim
+software engineering a practitioners approach ian sommerville
+design patterns elements of reusable object oriented software erich gamma richard helm ralph johnson john vlissides
+software abstractions logic language and analysis daniel jackson
+introduction to software testing glenford j myers corey sandler tom badgett
+
+designing data intensive applications martin kleppmann
+site reliability engineering betsey beyer chris jones jennifer petoff niall murphy
+accelerate nicole forsgren jez humble gene kim
+the mythical man month frederick p brooks
+software architecture in practice len bass paul clements rick kazman
+
+weapons of math destruction cathy oneil
+algorithms of oppression safiya umoja noble
+fairness and machine learning solon barocas moritz hardt arvind narayanan
+teaching and learning computer programming anthony robins janet rountree nathan rountree
+race after technology ruha benjamin
+
+artificial intelligence a modern approach stuart russell peter norvig
+machine learning a probabilistic perspective kevin p murphy
+pattern recognition and machine learning christopher m bishop
+reinforcement learning an introduction richard s sutton andrew g barto
+the elements of statistical learning trevor hastie robert tibshirani jerome friedman
+
+---------------
+
+🧠 TOP 5 Books on Deep Learning
+1) Deep Learning - Ian Goodfellow, Yoshua Bengio & Aaron Courville
+2) Neural Networks and Deep Learning - Michael Nielsen
+3) Deep Learning for Coders with fastai and PyTorch - Jeremy Howard & Sylvain Gugger (fastai)
+4) Deep Reinforcement Learning Hands-On - Levine / RL in deep nets
+5) Representation Learning - Yoshua Bengio, et al.
+
+📘 TOP 3 Books on Python
+1) Fluent Python - Luciano Ramalho
+2) Python Cookbook (3rd Ed.) - David Beazley & Brian K. Jones
+3) CPython Internals / Dive Into Python Internals - (Beazley & others)
+
+📘 TOP 3 Books on R
+1) The Art of R Programming - Norman Matloff
+2) Advanced R - Hadley Wickham
+3) R Inferno - Patrick Burns
+
+📘 TOP 3 Books on CLI and Bash (including at least one hyper-hardcore)
+1) The Linux Command Line - William Shotts
+2) Bash Reference Manual + POSIX Shell Specifications (official standards)
+3) Classic Unix Tools + Pipes (Various canonical sources)
+
+deep learning ian goodfellow yoshua bengio aaron courville
+neural networks and deep learning michael nielsen
+deep learning for coders with fastai and pytorch jeremy howard sylvain gugger
+deep reinforcement learning hands on maxim lapan
+representation learning yoshua bengio
+
+fluent python luciano ramalho
+python cookbook david beazley brian k jones
+cpython internals anthony shaw
+
+the art of r programming norman matloff
+advanced r hadley wickham
+the r inferno patrick burns
+
+the linux command line william shotts
+bash reference manual brian fox chet ramey
+the art of unix programming eric s raymond
+
+---------------
+
+📘 TOP 3 Books on C/C++
+1) The C Programming Language - Kernighan & Ritchie (K&R)
+2) Effective C++ / More Effective C++ - Scott Meyers
+3) The C++ Programming Language - Bjarne Stroustrup
+
+TOP 3 - SQL (and "bonus: very modern database")
+1. Database System Concepts - Silberschatz, Korth, Sudarshan￼
+2. Database Systems: The Complete Book - Garcia-Molina, Ullman, Widom ￼
+3. Database Internals - Alex Petrov ✅ your "very modern DB" pick ￼
+
+TOP 3 - Java
+1. Effective Java - Joshua Bloch (3rd ed.)￼
+2. Java Concurrency in Practice - Brian Goetz et al.
+3. The Java Language Specification (JLS) - Gosling/Joy/Steele/Bracha (and newer Oracle specs)
+
+TOP 3 - JavaScript and Modern Web Development
+1. JavaScript: The Definitive Guide (7th ed.) - David Flanagan￼
+2. You Don't Know JS Yet (2nd ed. series) - Kyle Simpson
+3. Learning React (Modern Patterns) - Alex Banks & Eve Porcello
+
+the c programming language brian w kernighan dennis m ritchie
+effective c plus plus scott meyers
+the c plus plus programming language bjarne stroustrup
+
+database system concepts abraham silberschatz henry f korth s sudarshan
+database systems the complete book hector garcia molina jeffrey d ullman jennifer widom
+database internals alex petrov
+
+effective java joshua bloch
+java concurrency in practice brian goetz tim peierls joshua bloch joseph bowbeer david holmes doug lea
+the java language specification james gosling bill joy guy steele gilad bracha
+
+javascript the definitive guide david flanagan
+you dont know js yet kyle simpson
+learning react alex banks eve porcello
+
+---------------
+
+📘 TOP 5 Books on Computational Network Infrastructure
+1) Computer Networks - Andrew S. Tanenbaum & David J. Wetherall
+2) Computer Networking: A Top-Down Approach - Kurose & Ross
+3) TCP/IP Illustrated, Vol. 1: The Protocols - W. Richard Stevens
+4) High-Performance Browser Networking - Ilya Grigorik
+5) Interconnections: Bridges, Routers, Switches, and Internetworking Protocols - Radia Perlman
+
+📘 TOP 5 Books on Database and Database Management Systems
+1) Database System Concepts - Silberschatz, Korth & Sudarshan
+2) Database Systems: The Complete Book - Garcia-Molina, Ullman & Widom
+3) Readings in Database Systems - "The Red Book" (Edited by Hellerstein & Stonebraker)
+4) Designing Data-Intensive Applications - Martin Kleppmann
+5) Transaction Processing: Concepts and Techniques - Jim Gray & Andreas Reuter
+
+TOP 5 - Genomics
+📗 TOP 5 Books on Regulation of Gene Expression & Transcriptomics
+🥇 Molecular Biology of the Gene - Watson et al.
+🥈 Gene Control - David Latchman
+🥉 RNA-seq Data Analysis: A Practical Approach - Eija Korpelainen et al.
+4) Bioinformatics and Functional Genomics - Pevsner
+5) Statistical Analysis of Next Generation Sequencing Data - Dr. Dzamba et al.
+
+# Genomics Top 5
+genomes 4 t a brown
+bioinformatics and functional genomics jonathan pevsner
+an introduction to bioinformatics algorithms neil c jones pavel a pevzner
+bioinformatics algorithms an active learning approach pierre compeau pavel a pevzner
+variant calling methods and protocols springer editors
+
+# Epigenomics Top 5
+epigenetics second edition c david allis marie laur caparros thomas jenuwein danny reinberg
+epigenomics from chromatin biology to therapeutics krishnarao appasani
+introduction to epigenetics paro authors
+epigenomics methods and protocols springer editors
+epigenetics methods trygve o tollefsbol
+
+# regulation of gene expression and transcriptomics top 5
+molecular biology of the gene james d watson et al
+gene control david s latchman
+rna seq data analysis a practical approach eija korpelainen et al
+bioinformatics and functional genomics jonathan pevsner
+statistical analysis of next generation sequencing data gerry dzamba et al
+
+# proteomics top 5
+fundamentals of proteomics matthias mann and jens s jensen
+introduction to proteomics principles and applications alexey nesvizhskii
+mass spectrometry a textbook jurgen gross
+protein structure and function gregory a petsko and dagmar ringe
+computational proteomics marco brocchieri and sandra c de souza
+
+# metabolomics top 5
+metabolomics jeremy k nicholson elaine holmes and john c lindon
+introduction to metabolomics uwe roessner and jennifer bowne
+mass spectrometry in metabolomics wilfried m a niessen
+statistical analysis of metabolomics data jianguo xia and david s wishart
+metabolic profiling john c lindon george m tranter and douglas koppenaal
+
+# pharmacogenomics top 5
+pharmacogenomics werner kalow judith meyer and gary tucker
+principles of pharmacogenetics and pharmacogenomics david lishman
+pharmacogenomics in drug discovery and development john pearson
+genomic and personalized medicine geoffrey s ginsburg and huntington f willard
+clinical pharmacogenomics felix w frueh
+
+📘 TOP 5 Books on Proteomics
+🥇 Fundamentals of Proteomics - Mann & Jensen
+🥈 Introduction to Proteomics: Principles and Applications - Nesvizhskii
+🥉 Mass Spectrometry: A Textbook - Jürgen Gross
+4) Protein Structure and Function - Petsko & Ringe
+5) Computational Proteomics - Brocchieri (ed.) / de Souza (ed.)
+
+computer networks andrew s tanenbaum david j wetherall
+computer networking a top down approach james f kurose keith w ross
+tcp ip illustrated volume 1 the protocols william richard stevens
+high performance browser networking ilya grigorik
+interconnections bridges routers switches and internetworking protocols radia perlman
+
+database system concepts abraham silberschatz henry f korth s sudarshan
+database systems the complete book hector garcia molina jeffrey d ullman jennifer widom
+readings in database systems joseph m hellerstein michael stonebraker
+designing data intensive applications martin kleppmann
+transaction processing concepts and techniques jim gray andreas reuter
+
+molecular biology of the gene james d watson t a baker s p bell a gann m levine r losick
+gene control david s latchman
+rna seq data analysis a practical approach eija korpelainen jarno tuimala perttu somervuo matti hietanen garry wong
+bioinformatics and functional genomics jonathan pevsner
+statistical analysis of next generation sequencing data somnath datta susmita datta
+
+proteomics from protein sequence to function matthias mann ole n jensen
+introduction to proteomics principles and applications alexey nesvizhskii
+mass spectrometry a textbook juergen gross
+protein structure and function gregory a petsko dagmar ringe
+computational proteomics marco brocchieri eddie de souza
+
+---------------
+
+📘 TOP 5 Books on Metabolomics
+1) Metabolomics - Nicholson, Lindon & Holmes
+2) Introduction to Metabolomics - Roessner & Bowne
+3) Mass Spectrometry in Metabolomics - Niessen
+4) Statistical Analysis of Metabolomics Data - Xia & Wishart
+5) Metabolic Profiling - Lindon, Tranter & Koppenaal
+
+1) Pharmacogenomics - Kalow, Meyer & Tucker
+2) Principles of Pharmacogenetics and Pharmacogenomics - Lishman
+3) Pharmacogenomics in Drug Discovery and Development - Pearson
+4) Genomic and Personalized Medicine - Ginsburg & Willard
+5) Clinical Pharmacogenomics - Frueh
+
+🧪 TOP 3 Books on Organic Chemistry
+1) Organic Chemistry - Clayden, Greeves & Warren
+2) Organic Chemistry - Carey & Sundberg
+3) March's Advanced Organic Chemistry - March & Smith
+
+🩺 TOP 3 Books on Chemistry for Medicine
+1) Foye's Principles of Medicinal Chemistry
+2) An Introduction to Medicinal Chemistry - Graham Patrick
+3) The Organic Chemistry of Drug Design and Drug Action - Silverman & Holladay
+
+metabolomics jeremy k nicholson john c lindon elaine holmes
+introduction to metabolomics uwe roessner william bowne
+mass spectrometry in metabolomics wilfried m a niessen
+statistical analysis of metabolomics data jianguo xia david s wishart
+metabolic profiling john c lindon george e tranter douglas koppenaal
+
+pharmacogenomics werner kalow urs a meyer rachel l tucker
+principles of pharmacogenetics and pharmacogenomics lesley lishman
+pharmacogenomics in drug discovery and development peter pearson
+genomic and personalized medicine geoffrey s ginsburg eric d willard
+clinical pharmacogenomics felix m frueh
+
+organic chemistry jonathan clayden nick greeves stuart warren peter wothers
+organic chemistry francis a carey richard j sundberg
+marchs advanced organic chemistry michael b smith jerry march
+
+foyes principles of medicinal chemistry david a williams thomas l lemke
+an introduction to medicinal chemistry graham patrick
+the organic chemistry of drug design and drug action richard b silverman mark w holladay
+
+---------------
+
+1) Lehninger Principles of Biochemistry
+2) Biochemistry - Berg, Tymoczko & Stryer
+3) Biochemistry - Voet, Voet & Pratt
+
+🧍‍♂️ TOP 3 - Human Anatomy
+1) Gray's Anatomy
+2) Clinically Oriented Anatomy
+3) Atlas of Human Anatomy
+
+🔬 TOP 3 - Human Pathology
+1) Robbins and Cotran Pathologic Basis of Disease
+2) Robbins Basic Pathology
+3) Rosai and Ackerman's Surgical Pathology
+
+🫀 TOP 3 - Human Physiology
+1) Guyton and Hall Textbook of Medical Physiology
+2) Medical Physiology
+3) Physiology
+
+lehninger principles of biochemistry david l nelson michael m cox
+biochemistry jeremy m berg john l tymoczko lubert stryer
+biochemistry donald voet judith g voet charlotte w pratt
+
+grays anatomy susan standring
+clinically oriented anatomy keith l moore arthur f dalley anne m r agur
+atlas of human anatomy frank h netter
+
+robbins and cotran pathologic basis of disease vinay kumar abul k abbas jon c aster
+robbins basic pathology vinay kumar abul k abbas jon c aster
+rosai and ackermans surgical pathology juan rosai
+
+guyton and hall textbook of medical physiology john e hall
+medical physiology walter f boron emile l boulpaep
+physiology linda s costanzo
+
+---------------
+
+💊 TOP 3 - Human Pharmacology
+1) Goodman & Gilman's The Pharmacological Basis of Therapeutics
+2) Katzung & Trevor's Basic and Clinical Pharmacology
+3) Rang & Dale's Pharmacology
+
+🦠 TOP 3 - Human Microbiology
+1) Medical Microbiology
+2) Jawetz, Melnick & Adelberg's Medical Microbiology
+3) Prescott's Microbiology
+
+🔬 TOP 3 - Human Histology
+1) Junqueira's Basic Histology
+2) Histology: A Text and Atlas
+3) Wheater's Functional Histology
+
+🛡️ TOP 5 - Human Immunology
+1) Janeway's Immunobiology
+2) The Immune System - Peter Parham
+3) Fundamental Immunology
+4) Clinical Immunology
+5) Cellular and Molecular Immunology
+
+goodman and gilmans the pharmacological basis of therapeutics laurence l brunton randa hilal dandan bjorn c knollmann
+basic and clinical pharmacology bertram g katzung anthony j trevor
+rangs and dales pharmacology james m ritter rod j flower graeme henderson
+
+medical microbiology patrick r murray ken s rosenthal michael a pfaller
+jawetz melnick and adelbergs medical microbiology george f brooks karen c carroll janet s butel stephen a morse timothy a mietzner
+prescotts microbiology joanne m willey linda m sherwood christopher j woolverton
+
+junqueiras basic histology anthony l mescher
+histology a text and atlas michael h ross wojciech pawlina
+wheaters functional histology barbara young philip woodford geraldine o dowd
+
+janeways immunobiology kenneth murphy casey weaver
+the immune system peter parham
+fundamental immunology william e paul
+clinical immunology robert r rich thomas a fleisher harry w schroeder
+cellular and molecular immunology abul k abbas andrew h lichtman shiv pillai
+
+---------------
+
+🧠 TOP 5 - Human Neurobiology
+1) Principles of Neural Science
+2) From Neuron to Brain
+3) Neuroscience
+4) Fundamental Neuroscience
+5) Neurobiology of Disease
+
+🧬 TOP 5 - Precision (Personalized) Medicine
+1) Genomic and Precision Medicine
+2) Principles of Precision Medicine
+3) Precision Medicine
+4) Translational Bioinformatics for Precision Medicine
+5) Precision Medicine in Oncology
+
+🧫 TOP 5 - Cell Biology
+1) Molecular Biology of the Cell
+2) Essential Cell Biology
+3) Cell Biology
+4) Cell and Molecular Biology
+5) The Cell
+
+principles of neural science eric r kandel james h schwartz thomas m jessel steven a siegelbaum a j hudspeth
+from neuron to brain john g nicholls a robert martin bruce g wallace
+neuroscience dale purves george j augustine david fitzpatrick william c hall anthony s lamantia leonard e white
+fundamental neuroscience larry r squire darwin berg floyd e bloom sascha du lac anirvan ghosh
+neurobiology of disease geoffrey j zigmond floyd e bloom scott t landis robert j roberts
+
+genomic and precision medicine geoffrey s ginsburg eric d willard
+principles of precision medicine michael snyder
+precision medicine larry jameson daniel longo
+translational bioinformatics for precision medicine russ b altman isabelle dunkel
+precision medicine in oncology levi a garraway
+
+molecular biology of the cell bruce alberts alexander johnson julian lewis martin raff keith roberts peter walter
+essential cell biology bruce alberts alexander johnson julian lewis martin raff keith roberts peter walter
+cell biology thomas d pollard william c earnshaw jennifer lippincott schwartz
+cell and molecular biology gerald karp
+the cell cooper robert e hausman
+
+---------------
+
+🎗️ TOP 3 - Cancer Biology
+1) The Biology of Cancer
+2) Cancer Biology
+3) Molecular Biology of Cancer
+
+🧫 TOP 3 - Cell Therapy
+1) Cell Therapy
+2) Stem Cell Biology and Regenerative Medicine
+3) Cell-Based Therapies
+
+🧬 TOP 3 - Disease Biomarkers
+1) Biomarkers in Medicine
+2) Biomarkers
+3) Clinical Biomarkers
+
+the biology of cancer robert a weinberg
+cancer biology raymond w roberge levi a garraway
+molecular biology of cancer lauren pecorino
+
+cell therapy darla m nolta
+stem cell biology and regenerative medicine david r marshak richard l gardner david gottlieb
+cell based therapies kharid bhatt marcus s carter
+
+biomarkers in medicine emanuele petricoin lance a liotta
+biomarkers vishnu s vaidyanathan
+clinical biomarkers johnson ghazal
+
+---------------
+
+🧬 TOP 5 - Cloning / Core Molecular Biology Methods
+1) Molecular Cloning: A Laboratory Manual
+2) Current Protocols in Molecular Biology
+3) DNA Cloning and Assembly Methods
+4) Guide to Molecular Cloning Techniques
+5) Principles of Gene Manipulation and Genomics
+
+🔬 TOP 5 - Wet-Lab Equipment & Practical Procedures
+1) Molecular Biology Techniques
+2) Essential Molecular Biology
+3) Laboratory Techniques in Biochemistry and Molecular Biology
+4) Introduction to Biotechnology
+5) Practical Skills in Biomolecular Sciences
+
+molecular cloning a laboratory manual joseph sambrook david w russell
+current protocols in molecular biology frederick m ausubel roger brent robert e kingston david d moore jonathan g seidman john a smith kevin struhl
+dna cloning and assembly methods nathaniel d green joseph sambrook
+guide to molecular cloning techniques shelby l berger alan r kimmel
+principles of gene manipulation and genomics sandy b primrose richard twyman
+
+molecular biology techniques john m walker
+essential molecular biology tom brown
+laboratory techniques in biochemistry and molecular biology keith wilson john walker
+introduction to biotechnology william j thieman michael a palladino
+practical skills in biomolecular sciences allan j reid charlotte j holmes
