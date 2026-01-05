@@ -69,6 +69,7 @@ _SPLIT_RE = re.compile(r"[\s,;|\-+]+")
 
 
 _FORMATS_ALLOWED: list[str] = [
+    "pdf",
     "epub",
     "mobi",
     "azw3",

@@ -119,7 +119,7 @@ def _safeproof_click(
     Placeholder
     """
 
-    _safe_click(
+    def _safe_click(
         driver: webdriver,
         web_element: WebElement,
         *,
@@ -145,9 +145,9 @@ def _safeproof_click(
     if not isinstance(element_or_list, WebElement):
 
         for element in element_or_list:
-            _safeproof_click(
+            _safeproof_click( 
                 driver=driver,
-                element_or_list=element_or_list,
+                element_or_list=element,
                 wait_for_action=wait_for_action,
                 timeout=timeout,
             )
@@ -155,7 +155,7 @@ def _safeproof_click(
 
     _safe_click(
         driver=driver,
-        element_or_list=element_or_list,
+        web_element=element_or_list,
         wait_for_action=wait_for_action,
         timeout=timeout,
     )

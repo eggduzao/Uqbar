@@ -32,7 +32,6 @@ import argparse
 from pathlib import Path
 
 from uqbar.milou.book_preprocessor import (
-    _normalize_query,
     parse_query,
     get_search_engine_links,
     form_final_query_list,
@@ -64,13 +63,16 @@ class Args:
 @dataclass
 class Semaphore:
     """Placeholder"""
-    A_ONE: bool = True
+    ZERO: bool = True
+    A_ONE: bool = False
     A_TWO: bool = False
     A_THREE: bool = False
     B_ONE: bool = True
     B_TWO: bool = False
     B_THREE: bool = False
-
+    B_FOUR: bool = False
+    B_FIVE: bool = False
+    B_SIX: bool = False
 
 # -------------------------------------------------------------------------------------
 # Helpers
@@ -103,53 +105,64 @@ def milou_core(
     return_code: int = 0
 
     # 0. Setup
-    command_subtipe: str = args[Subcommand.YOUTUBE]
-    input_path: str = args[Args.INPUT_PATH]
-    output_path: str = args[Args.OUTPUT_PATH]
-    query: str = args[Args.QUERY]
-    search_engines: str = args[Args.SEARCH_ENGINES]
-    formats_allowed: str = args[Args.FORMATS_ALLOWED]
+    if Semaphore.ZERO:
+        command_subtipe: str = args[Subcommand.YOUTUBE]
+        input_path: str = args[Args.INPUT_PATH]
+        output_path: str = args[Args.OUTPUT_PATH]
+        query: str = args[Args.QUERY]
+        search_engines: str = args[Args.SEARCH_ENGINES]
+        formats_allowed: str = args[Args.FORMATS_ALLOWED]
 
     # A. Youtube Video/Audio Fetch
     if command_subtipe == Subcommand.YOUTUBE:
         
         # A.1. Youtube Search
-        pass
+        if Semaphore.A_ONE:
+            pass
 
     # B. Book Search
     elif command_subtipe == Subcommand.BOOK:
         
         # B.1. Parsing input
-        query_list: list[str] = parse_query(single_query=query, input_path=input_path)
+        if Semaphore.B_ONE:
+            query_list: list[str] = parse_query(
+                single_query=query,
+                input_path=input_path
+            )
 
         # B.2. Get search engines links
-        search_engine_links: list[str] = get_search_engine_links(
-            search_engines=search_engines,
-        )
+        if Semaphore.B_TWO:
+            search_engine_links: list[str] = get_search_engine_links(
+                search_engines=search_engines,
+            )
 
         # B.3. Verify query formats
-        query_format_list: list[str] = verify_query_formats(
-            formats_allowed=formats_allowed,
-        )
+        if Semaphore.B_THREE:
+            query_format_list: list[str] = verify_query_formats(
+                formats_allowed=formats_allowed,
+            )
 
         # B.4. Get final query links
-        link_list: list[str] = form_final_query_list(
-            query_list=query_list,
-            search_engine_list=search_engine_links,
-        )
+        if Semaphore.B_FOUR:
+            link_list: list[str] = form_final_query_list(
+                query_list=query_list,
+                search_engine_list=search_engine_links,
+            )
 
-        # B.4. Search for links
-        query_link_list: list[str] = search_for_links(
-            link_list=link_list,
-            query_format_list=query_format_list,
-        )
+        # B.5. Search for links
+        if Semaphore.B_FIVE:
+            query_link_list: list[str] = search_for_links(
+                link_list=link_list,
+                query_format_list=query_format_list,
+            )
  
-        # B.5. Download links to output to directory
-        download_write(
-            query_link_list=query_link_list,
-            output_path=output_path,
-            write_dictionary=True,
-        )
+        # B.6. Download links to output to directory
+        if Semaphore.B_SIX:
+            download_write(
+                query_link_list=query_link_list,
+                output_path=output_path,
+                write_dictionary=True,
+            )
 
     # Return
     return return_code

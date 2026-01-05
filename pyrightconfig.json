@@ -1,23 +1,30 @@
 {
-  "$schema": "https://raw.githubusercontent.com/microsoft/pyright/main/packages/pyright/schema/pyrightconfig.schema.json",
+  "$schema": "https://github.com/microsoft/pyright/blob/main/packages/vscode-pyright/schemas/pyrightconfig.schema.json",
 
-  "include": ["src/magnetohydrodynamics", "tests"],
-  "exclude": ["build", "dist", ".nox", ".venv", "docs/_build"],
+  "include": ["src", "tests"],
+  "exclude": ["build", "dist", ".nox", ".venv", "docs/_build", "**/__pycache__"],
 
   "typeCheckingMode": "strict",
 
-  "reportMissingImports": true,
-  "reportMissingTypeStubs": false,
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Darwin",
+
+  "reportMissingImports": "error",
+  "reportMissingTypeStubs": "none",
   "reportUnusedImport": "warning",
   "reportUnusedVariable": "warning",
+  "reportPossiblyUnboundVariable": "warning",
 
-  "pythonVersion": "3.10",
-  "pythonPlatform": "Darwin",
+  "settings": {
+    "python.pythonPath": "/Users/egg/micromamba/envs/web/bin/python"
+  },
 
   "executionEnvironments": [
     {
-      "root": "src/magnetohydrodynamics",
-      "extraPaths": ["src"]
+      "root": "src",
+      "extraPaths": ["src"],
+      "venvPath": "/Users/egg/micromamba/envs/",
+      "venv": "web"
     }
   ]
 }

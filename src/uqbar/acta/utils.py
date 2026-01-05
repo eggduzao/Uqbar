@@ -124,15 +124,6 @@ _MONTHS_DICT: dict[str, str] = {
 }
 
 
-NORMAL_GENERATOR: Generator = np.random.default_rng()
-
-NORMAL_MEAN: float = 0.5
-
-NORMAL_STD: float = 0.3
-
-NORMAL_SIZE: float = 1
-
-
 GO_EMOTIONS_LABELS: list[str] = [
     "admiration",
     "amusement",
@@ -256,9 +247,6 @@ NEWS_CATEGORIES = {
 }
 
 
-_SCHEMA_VERSION = 1
-
-
 # --------------------------------------------------------------------------------------
 # Helpers
 # --------------------------------------------------------------------------------------
@@ -368,19 +356,6 @@ def chunked_list_to_str(chunked_list: list[list[str]]) -> str:
     return texty.strip()
 
 
-def get_random(
-    *,
-    mean: float = NORMAL_MEAN,
-    std: float = NORMAL_STD,
-    size: float = NORMAL_SIZE,
-) -> float:
-    """
-    Placeholder
-    """
-    value = NORMAL_GENERATOR.normal(loc = mean, scale = std, size = size)
-    return max(float(value[0]), 0.0011)
-
-
 def save_trendlist(trend_list: TrendList, path: Path) -> None:
     payload: dict[str, Any] = {
         "schema_version": _SCHEMA_VERSION,
@@ -430,217 +405,6 @@ def load_trendlist(path: Path) -> TrendList:
         tl.append(_dict_to_trend(item))
 
     return tl
-
-
-def execute_multiple(
-    command_list: List[str],
-    *,
-    multiple_sessions: bool = True,
-    join_string: str = " ; ",
-    **kwargs,
-) -> Tuple[str, str]:
-    """
-    Execute a list of shell commands sequentially in the same session.
-    
-    Args:
-        command_list: A list of shell commands as strings.
-        
-    Returns:
-        A tuple (stdout, stderr) containing the combined output and error messages.
-
-    - Join commands with " && " or " ; ":
-      " && " stops execution on failure; " ; " executes all regardless
-    """
-    # Join commands with "&&" or ";"
-    # "&&" stops execution on failure; ";" executes all regardless
-    full_command = " ; ".join(command_list)
-    pass
-
-
-def execute(
-    full_command: str,
-    *,
-    stdout: int | None = None,
-    stderr: int | None = None,
-    capture_output: bool = True,
-    text: bool = True,
-    check: bool = True,
-    shell: bool = False,
-    env: str | None = None,
-    executable: str = "/bin/bash",
-) -> Tuple[str, str]:
-    """
-    Execute a single shell command.
-
-    class subprocess.Popen(
-        args, bufsize=-1, executable=None, stdin=None, stdout=None, stderr=None,
-        preexec_fn=None, close_fds=True, shell=False, cwd=None, env=None,
-        universal_newlines=None, startupinfo=None, creationflags=0,
-        restore_signals=True, start_new_session=False, pass_fds=(), *, group=None,
-        extra_groups=None, user=None, umask=-1, encoding=None, errors=None,
-        text=None, pipesize=-1, process_group=None
-    )
-
-    env={"PATH": "/usr/bin", "MYVAR": "42"}
-
-    Implementation Notes
-    --------------------
-    stdout and stderr are Emums which can be:
-    `None` (default)
-    `subprocess.subprocess.PIPE`
-    `subprocess.subprocess.STDOUT`
-    `subprocess.subprocess.DEVNULL`
-    `TextIO`
-    """
-    if not shell:
-        # Join command
-        full_command = [e.strip() for e in join_string.split(full_command.strip())]
-
-    # Run in a single shell session
-    process = subprocess.Popen(
-        full_command,
-        stdout = stdout,
-        stderr = stderr,
-        capture_output = capture_output,
-        text = text,
-        encoding="utf-8",
-        check = check,
-        shell = shell,
-        env = env,
-        executable=executable,
-    )
-    stdout, stderr = process.communicate()
-
-    return stdout.strip(), stderr.strip()
-
-
-def hyper_random(
-    interval: Optional[List[Any]] = None,
-    *,
-    number: int = 1,
-    mode: str = "without"
-) -> Any:
-    """
-    Generate hyper-random values that never repeat with any seed,
-    using high-entropy system randomness.
-
-    Parameters
-    ----------
-    interval : Optional[List[Any]]
-        - If None: return random integers (unbounded).
-        - If a list of length == 2 and both elements are ints:
-              interpreted as an integer range (closed interval).
-        - If a list of arbitrary objects:
-              sample from this list. If `number == 1`, returns a single object.
-              If `number > 1`, returns a list of objects.
-              Sampling respects `mode` ("with" or "without" replacement).
-
-    number : int
-        Number of values to return. If 1 -> return a single object.
-        If >1 -> return a list.
-
-    mode : str
-        "without": sample without replacement.
-        "with": sample with replacement.
-        Ignored if `interval` is a numerical 2-int range.
-
-    Returns
-    -------
-    Any
-        - A single object or list of objects depending on `number`.
-        - If interval=None: returns int or List[int].
-        - If interval=[a,b] w/ ints: integer(s) in [a, b].
-        - If interval is a list of objects: random selections from that list.
-
-    Notes
-    -----
-    - Randomness is cryptographically strong: random.seed() is *not* used for
-      primary entropy. All draws use secrets.randbelow().
-    - Edge cases:
-        - interval=[]: raises ValueError.
-        - interval=[obj]: only one object exists -> returned always.
-        - number > len(interval) with mode="without": raises ValueError.
-    """
-
-    # ----------------------------------------
-    # SEED ENTROPY: chaotic, non-repeatable
-    # ----------------------------------------
-    # This affects *ONLY* fallback random module usage.
-    # The real entropy comes from `secrets`, but this helps avoid predictability.
-    seed_material = (
-        secrets.randbits(256)
-        ^ int(time.time_ns())
-        ^ os.getpid()
-        ^ id(object())  # even more entropy from object memory identity
-    )
-    random.seed(seed_material)
-
-    # -------------------------------------------------------
-    # CASE 1 — No interval passed → return hyper-random ints
-    # -------------------------------------------------------
-    if interval is None:
-        if number == 1:
-            return secrets.randbits(64)
-        return [secrets.randbits(64) for _ in range(number)]
-
-    # -------------------------------------------------------
-    # CASE 2 — interval is a 2-int numeric range
-    # -------------------------------------------------------
-    if (
-        isinstance(interval, list)
-        and len(interval) == 2
-        and all(isinstance(i, int) for i in interval)
-    ):
-        a, b = interval
-        if a > b:
-            a, b = b, a  # fix reversed interval
-
-        # secrets.randbelow is [0, n), so we do a shift:
-        if number == 1:
-            return a + secrets.randbelow(b - a + 1)
-        return [a + secrets.randbelow(b - a + 1) for _ in range(number)]
-
-    # -------------------------------------------------------
-    # CASE 3 — interval is a list of arbitrary objects
-    # -------------------------------------------------------
-    if not isinstance(interval, list):
-        raise TypeError("`interval` must be a list or None.")
-
-    if len(interval) == 0:
-        raise ValueError("`interval` cannot be an empty list.")
-
-    # Only one element → always return it
-    if len(interval) == 1:
-        return interval[0] if number == 1 else [interval[0]] * number
-
-    # --- Sampling mode ---
-    if mode not in ("with", "without"):
-        raise ValueError("mode must be either 'with' or 'without'.")
-
-    # WITHOUT replacement
-    if mode == "without":
-        if number > len(interval):
-            raise ValueError(
-                f"Cannot sample {number} unique values from "
-                f"a list of size {len(interval)}."
-            )
-        # Use secrets for cryptographically strong shuffle-selection
-        shuffled = interval.copy()
-        for i in range(len(shuffled) - 1, 0, -1):
-            j = secrets.randbelow(i + 1)
-            shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
-        result = shuffled[:number]
-        return result[0] if number == 1 else result
-
-    # WITH replacement
-    else:
-        def pick_one():
-            return interval[secrets.randbelow(len(interval))]
-
-        if number == 1:
-            return pick_one()
-        return [pick_one() for _ in range(number)]
-
 
 # --------------------------------------------------------------------------------------
 # Classes
@@ -1063,13 +827,13 @@ class TrendList(MutableSequence[Trend]):
 
 
     # ----- Loading and Printing -----
-    @deprecated
-    def print(self, output_path: Path) -> None:
+    @deprecated("")
+    def print(self, output_path: Path | None) -> None:
         """Prints this list of trends in a loadable manner"""
 
         if not isinstance(output_path, Path):
             print("Not a Path object")
-            return
+            return None
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -1110,13 +874,16 @@ class TrendList(MutableSequence[Trend]):
 
             file.write(f"[END]")
 
-    @deprecated
-    def load(self, input_path: Path) -> TrendList:
+    @deprecated("")
+    def load(self, input_path: Path) -> TrendList | None:
         """Populates this list given a `.trends` file"""
 
-        with open(output_path, "r", encoding="utf-8") as file:
+        if not input_path:
+            return None
+
+        with open(input_path, "r", encoding="utf-8") as file:
             pass
-        return
+        return None
 
 
 # --------------------------------------------------------------------------------------

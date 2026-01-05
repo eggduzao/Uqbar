@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
-# uqbar/milou/utils.py
+# uqbar/utils/utils.py
 """
-Milou | Utils
-=============
+Uqbar | Utils | Utils
+=====================
 
 Overview
 --------
@@ -10,7 +10,7 @@ Placeholder.
 
 Metadata
 --------
-- Project: Milou
+- Project: Uqbar
 - License: MIT
 """
 
@@ -19,10 +19,28 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
+from datetime import datetime
+import functools
+import warnings
+
 
 # --------------------------------------------------------------------------------------
 # Early utilities
 # --------------------------------------------------------------------------------------
+def deprecated(reason: str):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            warnings.warn(
+                f"{func.__name__} is deprecated: {reason}",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 # -------------------------------------------------------------------------------------
@@ -35,14 +53,20 @@ from __future__ import annotations
 # --------------------------------------------------------------------------------------
 
 
+
 # --------------------------------------------------------------------------------------
 # Functions
 # --------------------------------------------------------------------------------------
+def dtnow(*, fmt: bool = True):
+    if fmt:
+        return f"[{str(datetime.now()).split(".")[0]}]"
+    return datetime.now()
 
 
 # --------------------------------------------------------------------------------------
 # Exports
 # --------------------------------------------------------------------------------------
 __all__: list[str] = [
-    "None",
+    "deprecated",
+    "dtnow",
 ]

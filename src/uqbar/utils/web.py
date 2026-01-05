@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
-# uqbar/cli.py
+# uqbar/utils/web.py
 """
-Uqbar MultiTool | CLI
-=====================
+Uqbar | Utils | Web
+===================
 
 Overview
 --------
@@ -20,9 +20,9 @@ Metadata
 from __future__ import annotations
 
 from pathlib import Path
-import subprocess
 
 
+from uqbar.utils.executor import execute
 
 # --------------------------------------------------------------------------------------
 # Constants
@@ -34,15 +34,13 @@ import subprocess
 # -------------------------------------------------------------------------------------
 
 
-
-
 # -------------------------------------------------------------------------------------
 # Functions
 # -------------------------------------------------------------------------------------
 def download_path_wget(
     download_url: str,
-    output_path: Path
-) -> Path | tuple(str, str):
+    output_path: Path,
+) -> tuple[str | None, str | None]:
     """
     Downloads the argument path.
 
@@ -261,8 +259,7 @@ def download_path_wget(
     - Does not rely on shell aliases.
     - Avoids shell redirection; writes output via Python.
     """
-    if not path.exists():
-        print(f"Download path does not exist: {path}.")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
     command: list[str] = (
         [  # --no-clobber --page-requisites --convert-links --adjust-extension
@@ -280,15 +277,19 @@ def download_path_wget(
             str(download_url),
         ]
     )
-    result = subprocess.run(command, capture_output=True, text=True, check=True)
 
-    download_path = output_path / str(download_url.split("/")[-1].strip())
+    stdout, stderr = execute(
+        full_command=command,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+    download_path: Path = output_path / str(download_url.split("/")[-1].strip())
     download_path.resolve()
 
-    if download_path.exists():
-        return download_path
-    else:
-        return result.stdout, result.stderr
+    return stdout, stderr
+
 
 # --------------------------------------------------------------------------------------
 # Exports

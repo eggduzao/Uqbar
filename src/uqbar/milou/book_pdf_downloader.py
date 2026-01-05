@@ -11,18 +11,13 @@ micromamba install -c conda-forge yt-dlp
 # -------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from collections.abc import Generator, Iterator
-from datetime import datetime as dt
-import difflib
-from io import BytesIO
-from math import ceil
-import numpy as np
+from collections.abc import Iterable
 from pathlib import Path
-from PIL import Image
-import requests
-from time import sleep, time
-from urllib.parse import urlparse, parse_qs, unquote
+from time import sleep
+from typing import Any
 
+
+import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -38,21 +33,15 @@ from selenium.common.exceptions import (
 )
 
 
-from uqbar.utils.download import download_path_wget ########### MAKE UTILS GLOBAL
-
+from uqbar.utils.web import download_path_wget
+from uqbar.utils.stats import get_random
 
 # -------------------------------------------------------------------------------------
 # Constants
 # -------------------------------------------------------------------------------------
-WAITER_TOTAL_TIME_BASE: float = 20.0
+WAITER_TOTAL_TIME_BASE: float = 2.0
 
-SLEEP_MIN_BASE: float = 0.1
-
-SLEEP_MAX_BASE: float = 2.0
-
-MAX_GLOBAL_TRIES: int = 2
-
-MAX_LOCAL_TRIES: int = 5
+SLEEP_BASE: float = 1.0
 
 NAV_SIZE_WINDOW: tuple[int, int] = (1920, 1080)
 
@@ -60,86 +49,14 @@ NAV_SIZE_WINDOW: tuple[int, int] = (1920, 1080)
 # -------------------------------------------------------------------------------------
 # Helpers
 # -------------------------------------------------------------------------------------
-def _safeproof_click(
-    driver: webdriver,
-    element_or_list: WebElement | list[WebElement],
-    *,
-    wait_for_action: bool = False,
-    timeout: int = 10,
-) -> None:
-    """
-    Placeholder
-    """
-
-    _safe_click(
-        driver: webdriver,
-        web_element: WebElement,
-        *,
-        wait_for_action: bool = False,
-        timeout: int = 10,
-    ) -> None:
-
-        try:
-
-            # Wait until the element is actually clickable
-            if wait_for_action:
-                wait: WebDriverWait = WebDriverWait(driver, timeout)
-                wait.until(EC.element_to_be_clickable(web_element))
-            
-            # Try standard Selenium click (mimics real user)
-            web_element.click()
-        except Exception:
-
-            # Fallback: JavaScript click (bypasses overlays/visibility issues)
-            driver.execute_script("arguments[0].click();", web_element)
-
-    # 1. Determine if it's a list or single element
-    if not isinstance(element_or_list, WebElement):
-
-        for element in element_or_list:
-            _safeproof_click(
-                driver=driver,
-                element_or_list=element_or_list,
-                wait_for_action=wait_for_action,
-                timeout=timeout,
-            )
-        return
-
-    _safe_click(
-        driver=driver,
-        element_or_list=element_or_list,
-        wait_for_action=wait_for_action,
-        timeout=timeout,
-    )
-    return
-
-
-def _get_uri_list(
-    driver: webdriver,
-    element_list: list[WebElement],
-) -> list[str]:
-
-    # Getting baseURI property
-    uri_list: list[str] = []
-    for element in element_list:
-
-        try:
-            _safeproof_click(
-                driver=driver,
-                element_or_list=element,
-            )
-
-            uri = element.get_property("baseURI") ############ CHECK
-
-        except Exception as e:
-            pass
-
-        uri_list.append(uri)
-        sleep(sleep_min_base + get_random())
-
-
-    return uri_list
-
+def _resolve_iterable(obj: Any) -> tuple[bool, Any] | None:
+    """Placeholder"""
+    if not obj:
+        return None
+    if isinstance(obj, Iterable):
+        return True, obj.copy()
+    else:
+        return False, obj.copy()
 
 # --------------------------------------------------------------------------------------
 # Functions
@@ -151,15 +68,15 @@ def search_for_links(
     options: Options = Options(),
     service: Service = Service(ChromeDriverManager().install()),
     nav_window_size: tuple[int, int] = NAV_SIZE_WINDOW,
-    waiter_total_time_base: int = WAITER_TOTAL_TIME_BASE,
-    sleep_min_base: int = SLEEP_MIN_BASE,
-    sleep_max_base: int = SLEEP_MAX_BASE,
-    max_global_tries: int = MAX_GLOBAL_TRIES,
-    max_local_tries: int = MAX_LOCAL_TRIES,
-) -> list[str]:
+    waiter_total_time_base: float = WAITER_TOTAL_TIME_BASE,
+    sleep_base: float = SLEEP_BASE,
+) -> list[str] | None:
     """
     Placeholder
     """
+
+    # Create ebook link list
+    ebook_link_list: list[str] = []
 
     # Loop on each link
     for search_url in link_list:
@@ -173,67 +90,189 @@ def search_for_links(
 
         # Navigate to the URL
         driver.get(search_url)
-        sleep(5)
+        sleep(3.0)
         driver.refresh()
-        sleep(5)
+        sleep(3.0)
 
         # Find all <html> elements
-        waiter = WebDriverWait(
-            driver,
-            sleep_max_base + waiter_total_time_base + get_random()
-        )
-        web_element_list: list[WebElement] = waiter.until(
-            EC.presence_of_all_elements_located(
-                (By.TAG_NAME, "html")
-            )
-        )
+        web_element_list = driver.find_element(By.XPATH, "/html")
 
-        # Find all <body> elements
-        waiter = WebDriverWait(
-            driver,
-            sleep_max_base + waiter_total_time_base + get_random()
-        )
-        web_element_list: list[WebElement] = waiter.until(
-            EC.presence_of_all_elements_located(
-                (By.TAG_NAME, "body")
-            )
-        )
+        # Find all /html/body/div[2] elements
+        max_tries: int = 0
+        curr_element_list: list[WebElement] | WebElement = []
+        while not curr_element_list or max_tries < 3:
+            try:
+                wait = WebDriverWait(web_element_list, timeout=10)
+                web_element_list = wait.until(
+                    lambda p: p.find_element(
+                        By.XPATH,
+                        "//*/body/div[2]"
+                    )
+                )
+                sleep(waiter_total_time_base + random())
+                is_it, curr_element_list = _resolve_iterable(web_element_list)
+            except (StaleElementReferenceException, TimeoutException) as es:
+                pass
+            except Exception as ex:
+                pass
+            max_tries += 1
 
-        # Find all <div> elements
-        waiter = WebDriverWait(
-            driver,
-            sleep_max_base + waiter_total_time_base + get_random()
-        )
-        web_element_list: list[WebElement] = waiter.until(
-            EC.presence_of_all_elements_located(
-                (By.TAG_NAME, "div")
-            )
-        )
 
-        # Get baseURI property
-        uri_list: list[str] = _get_uri_list(
-            driver=driver,
-            element_list=web_element_list,
-        )
+        # Find all /html/body/div[2]/div[6]/div[4] elements
+        max_tries: int = 0
+        curr_element_list: list[WebElement] | WebElement = []
+        while not curr_element_list or max_tries < 3:
+            try:
+                wait = WebDriverWait(web_element_list, timeout=10)
+                web_element_list = wait.until(
+                    lambda p: p.find_element(
+                        By.XPATH,
+                        "//*/div[6]/div[4]"
+                    )
+                )
+                sleep(waiter_total_time_base + random())
+                is_it, curr_element_list = _resolve_iterable(web_element_list)
+            except (StaleElementReferenceException, TimeoutException) as es:
+                pass
+            except Exception as ex:
+                pass
+            max_tries += 1
 
-        # Create image links
-        ebook_link_list: list[str] = []
-        for uri in uri_list:
-            ebook_link = _clean_uri(uri) ############# IMPLEMENT
-            ebook_link_list.append(ebook_link)
+        # Find all /html/body/div[2]/div[6]/div[4]/div/div/div elements
+        max_tries: int = 0
+        curr_element_list: list[WebElement] | WebElement = []
+        while not curr_element_list or max_tries < 3:
+            try:
+                wait = WebDriverWait(web_element_list, timeout=10)
+                web_element_list = wait.until(
+                    lambda p: p.find_element(
+                        By.XPATH,
+                        "//*/div/div/div"
+                    )
+                )
+                sleep(waiter_total_time_base + random())
+                is_it, curr_element_list = _resolve_iterable(web_element_list)
+            except (StaleElementReferenceException, TimeoutException) as es:
+                pass
+            except Exception as ex:
+                pass
+            max_tries += 1
+
+        # Find all /html/body/div[2]/div[6]/div[4]/div/div/div/div[2]/section[1]/ol
+        # elements
+        max_tries: int = 0
+        curr_element_list: list[WebElement] | WebElement = []
+        while not curr_element_list or max_tries < 3:
+            try:
+                wait = WebDriverWait(web_element_list, timeout=10)
+                web_element_list = wait.until(
+                    lambda p: p.find_element(
+                        By.XPATH,
+                        "//*/div[2]/section[1]/ol"
+                    )
+                )
+                sleep(waiter_total_time_base + random())
+                is_it, curr_element_list = _resolve_iterable(web_element_list)
+            except (StaleElementReferenceException, TimeoutException) as es:
+                pass
+            except Exception as ex:
+                pass
+            max_tries += 1
+
+        # Iterate on 10 (first page) li items
+        for idx in range(10):
+
+            max_tries: int = 0
+            wel_list: list[WebElement] | WebElement = []
+            while not wel_list or max_tries < 3:
+                try: 
+
+                    wait = WebDriverWait(web_element_list, timeout=10)
+
+                    wel_list = wait.until(
+                    lambda p: p.find_element(
+                        By.XPATH,
+                        f"//*/li[{idx}]/article/div[3]/h2/a"
+                        )
+                    )
+                    sleep(sleep_base + get_random())
+                    is_it, curr_element_list = _resolve_iterable(wel_list)
+
+                except (StaleElementReferenceException, TimeoutException) as es:
+                    pass
+                except Exception as ex:
+                    pass
+                max_tries += 1
+
+                if not wel_list:
+                    break
+
+                if is_it:
+                    for wel in wel_list:
+                        if not wel:
+                            continue
+                        try:
+                            web_link = wel.get_property("href")
+                            web_ext = web_link.split(".")[-1]
+                            if web_ext in query_format_list:
+                                ebook_link_list.append(web_link)
+                            sleep(sleep_base + get_random())
+                        except Exception as exx:
+                            continue
+
+                        if not wel:
+                            continue
+                    continue
+
+                try:
+                    web_link = wel_list.get_property("href")
+                    web_ext = web_link.split(".")[-1]
+                    if web_ext in query_format_list:
+                        ebook_link_list.append(web_link)
+                    sleep(sleep_base + get_random())
 
         # Quit driver
         driver.quit()
 
-        return ebook_link_list
+    return ebook_link_list
 
 
 def download_write(
-            query_link_list=query_link_list,
-            output_path=output_path,
-            write_dictionary=True,
+    query_link_list: list[str],
+    output_path: Path,
+    *,
+    write_dictionary=True,
 ) -> None:
 
+    if not output_path.exists():
+        raise FileNotFoundError(f"output_path does not exist: {output_path}")
+    if not output_path.is_file():
+        raise ValueError(f"output_path is not a file: {output_path}")
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    donwloaded_files: dict[str, list[str]] = dict()
+
+    for query_link in query_link_list:
+        strout, stderr = download_path_wget(
+            download_url=query_link,
+            output_path=output_path,
+        )
+        if write_dictionary:
+            this_query: str = Path(query_link).name
+            this_folder: str = output_path.name
+            try:
+                donwloaded_files[this_folder].append(this_query)
+            except Exception as e:
+                donwloaded_files[this_folder] = [this_query]
+
+    if write_dictionary:
+        output_file_path = output_path / "index.txt"
+        with open(output_file_path, "w", encoding="utf-8") as file:
+            for key, val in donwloaded_files.items():
+                file.write(f"### {key}:\n")
+                for el in val:
+                    file.write(f"{el}\n")
+                file.write(f"{"-"*100}\n\n")
 
 
 # --------------------------------------------------------------------------------------
