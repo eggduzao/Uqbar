@@ -28,22 +28,22 @@ Metadata
 from __future__ import annotations
 
 import fnmatch
-from pathlib import Path
 import re
 import sys
-from typing import Iterable
+from collections.abc import Iterable
+from pathlib import Path
+from typing import Any
 
 from uqbar.faust.ansi import supports_ansi
-from uqbar.faust.constants import SearchType, OutField, DEFAULT_TYPES, DEFAULT_OUT
+from uqbar.faust.constants import DEFAULT_OUT, DEFAULT_TYPES, OutField, SearchType
 from uqbar.faust.io import build_row
 from uqbar.faust.matching import (
+    Hit,
+    search_content,
     search_dirnames,
     search_filenames,
-    search_content,
     search_metadata,
-    Hit,
 )
-
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -51,7 +51,7 @@ from uqbar.faust.matching import (
 ALLOWED_TYPE_LIST: list[str] = ["dir", "file", "content", "metadata"]
 
 ALLOWED_OUTPUT_LIST: list[str] = [
-    "absdir", "reldir", "filename", "fileline", 
+    "absdir", "reldir", "filename", "fileline",
     "fullline", "trim50", "trim100", "trim250"
 ]
 
@@ -93,12 +93,10 @@ def _iter_targets(locations: list[Path], recursive: bool) -> Iterable[Path]:
 
         if not recursive:
             # only immediate children
-            for child in loc.iterdir():
-                yield child
+            yield from loc.iterdir()
         else:
             yield loc
-            for p in loc.rglob("*"):
-                yield p
+            yield from loc.rglob("*")
 
 
 def _expand_types(raw: list[str] | None) -> list[SearchType]:
@@ -176,7 +174,7 @@ def faust_core(args: dict[str, Any]) -> int:
 
     for loc in locations:
         base = loc if loc.is_dir() else loc.parent
-        targets = _iter_targets([loc], recursive)
+        _iter_targets([loc], recursive)
 
         hits: list[Hit] = []
 

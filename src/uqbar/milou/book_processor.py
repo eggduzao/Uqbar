@@ -46,13 +46,14 @@ Metadata
 # -------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from dataclasses import dataclass
-from pathlib import Path
 import re
 import unicodedata
+from dataclasses import dataclass
+from pathlib import Path
 from urllib.parse import urlsplit
 
 import requests
+
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -124,7 +125,7 @@ def _normalize_query(s: str) -> str | None:
         return None
 
     s: str | list[str] | None = _strip_diacritics(s, fmt="str")
-    if s is None or isinstance(list, s):
+    if s is None or isinstance(s, list):
         return None
 
     s = s.lower()
@@ -292,42 +293,9 @@ def get_search_engine_links(*, search_engines: str) -> list[str]:
     return out
 
 
-def form_final_query_list(
-    *,
-    query_list: list[str],
-    search_engine_list: list[str]
-) -> list[str]:
-    """
-    Join every engine prefix with every query, verify reachability,
-    and return working URLs.
-    """
-    if not query_list:
-        raise ValueError("query_list is empty.")
-    if not search_engine_list:
-        raise ValueError("search_engine_list is empty.")
-
-    final_urls: list[str] = []
-
-    for engine_prefix in search_engine_list:
-        engine_prefix = engine_prefix.strip()
-        if not engine_prefix:
-            continue
-
-        for q in query_list:
-            q = q.strip()
-            if not q:
-                continue
-
-            url = f"{engine_prefix}{q}"
-            if _url_reachable(url):
-                final_urls.append(url)
-
-    return final_urls
-
-
 def verify_query_formats(
     *,
-    formats_allowed: list[str]
+    formats_allowed: list[str],
 ) -> list[str] | None:
     """
     - epub, mobi, azw3 - common ebook/container formats
@@ -342,21 +310,61 @@ def verify_query_formats(
     - lit, prc - legacy ebook formats
     """
 
-    ext_list = [x for x in formats_allowed if x]
-    if not ext_list:
-        continue
+    if not formats_allowed:
+        return None
 
-    new_formats_list: list[str] = _strip_diacritics(ext.strip().lower(), fmt="list")
-    new_formats_list = [x.strip(".") for x in new_formats_list]
-    new_formats_list = [x for x in _FORMATS_ALLOWED]
+    ext_list: list[str] = _normalize_query(formats_allowed).split("+")
+    ext_list = [x.strip(".") for x in ext_list]
+    ext_list = [x for x in ext_list if x in _FORMATS_ALLOWED]
 
-    return new_formats_list
+    return ext_list
+
+
+def form_final_query_list(
+    *,
+    query_list: list[str],
+    search_engine_list: list[str],
+    format_list: list[str],
+) -> list[str]:
+    """
+    Join every engine prefix with every query, verify reachability,
+    and return working URLs.
+    """
+    if not query_list:
+        raise ValueError("query_list is empty.")
+    if not search_engine_list:
+        raise ValueError("search_engine_list is empty.")
+    if not format_list:
+        raise ValueError("format_list is empty.")
+
+    final_urls: list[str] = []
+
+    for engine_prefix in search_engine_list:
+        engine_prefix = engine_prefix.strip()
+        if not engine_prefix:
+            continue
+
+        for q in query_list:
+            q = q.strip()
+            if not q:
+                continue
+
+            for f in format_list:
+                f = f.strip()
+                if not f:
+                    continue
+
+                url = f"{engine_prefix}{q}+{f}"
+                if _url_reachable(url):
+                    final_urls.append(url)
+
+    return final_urls
+
 
 # --------------------------------------------------------------------------------------
 # Exports
 # --------------------------------------------------------------------------------------
 __all__: list[str] = [
-    "_normalize_query",
     "parse_query",
     "get_search_engine_links",
     "form_final_query_list",

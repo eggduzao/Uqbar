@@ -19,13 +19,12 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from datetime import timezone, timedelta, datetime
-import functools
-import os
 import subprocess
 from typing import TextIO
-import warnings
 
+# Type aliases for backwards compatibility
+List = list
+Tuple = tuple
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -50,10 +49,10 @@ def execute_multiple(
 ) -> Tuple[str, str]:
     """
     Execute a list of shell commands sequentially in the same session.
-    
+
     Args:
         command_list: A list of shell commands as strings.
-        
+
     Returns:
         A tuple (stdout, stderr) containing the combined output and error messages.
 
@@ -62,7 +61,7 @@ def execute_multiple(
     """
     # Join commands with "&&" or ";"
     # "&&" stops execution on failure; ";" executes all regardless
-    full_command = " ; ".join(command_list)
+    " ; ".join(command_list)
     pass
 
 
@@ -103,13 +102,13 @@ def execute(
     `subprocess.subprocess.DEVNULL`
     `TextIO`
     """
+    command: str | list[str] = full_command
     if isinstance(full_command, str):
 
         if not shell:
             # Split command
             command: list[str] = full_command.strip().split(split_string)
 
-        full_command = 
     if isinstance(full_command, list):
 
         if shell:
@@ -118,14 +117,18 @@ def execute(
             command: str = join_string.join(temp_vec).strip()
 
     # Run in a single shell session
+    # Note: Popen doesn't support capture_output, so we set
+    # stdout/stderr to PIPE if capture_output is True
+    if capture_output and stdout is None and stderr is None:
+        stdout = subprocess.PIPE
+        stderr = subprocess.PIPE
+
     process: subprocess.Popen | None = subprocess.Popen(
         command,
         stdout = stdout,
         stderr = stderr,
-        capture_output = capture_output,
         text = text,
         encoding="utf-8",
-        check = check,
         shell = shell,
         env = env,
         executable=executable,

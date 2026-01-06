@@ -25,30 +25,22 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from collections import deque
-from dataclasses import dataclass
-import os
-from pathlib import Path
 import re
-import subprocess
+from collections import deque
+from collections.abc import Mapping, Sequence
 from time import sleep
-from typing import Any, Literal, Mapping, Sequence
+from typing import Any, Literal
 
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
 
 from uqbar.acta.utils import (
+    PassError,
+    Trend,
     deprecated,
     dtnow,
-    Trend,
-    TrendList,
-    chunked_list_to_str,
     get_random,
-    PassError,
-    execute,
 )
-from uqbar.acta.trend_prompt_parser import _get_prompt_string_image_mood_query
-
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -487,7 +479,7 @@ def _get_model_name_and_key(
         if "sk-or-v1" not in api_key_id:
             raise PassError("pass")
 
-    except Exception as e:
+    except Exception:
         return DEFAULT_MODEL_ID, DEFAULT_OPENROUTER_API_KEY
 
     return api_model_id, api_key_id
@@ -865,9 +857,9 @@ def query_models(
                 retry_count = 0
             sleep(get_random() + sleep_min_base)
             continue
-        else:
 
         # Create stack with response.choices
+        from collections import deque as stack
         response_choices_stack = stack(response.choices)
 
         # Output structures
@@ -887,10 +879,10 @@ def query_models(
                 print(f"..No response_choices_stack[{idx}] was found.")
                 if retry_count < max_retries:
                     success_choice[idx].append(False)
-                    print(f"..Continuing loop with signal to requeue.")
+                    print("..Continuing loop with signal to requeue.")
                 else:
                     success_choice[idx].append(True)
-                    print(f"..Continuing loop without signal to requeue.")
+                    print("..Continuing loop without signal to requeue.")
                 continue
 
             # Populating success_choice dictionary
@@ -904,10 +896,10 @@ def query_models(
                 print(f"..No response_choices_stack[{idx}].message.content was found.")
                 if retry_count < max_retries:
                     success_choice[idx].append(False)
-                    print(f"..Continuing loop with signal to requeue.")
+                    print("..Continuing loop with signal to requeue.")
                 else:
                     success_choice[idx].append(True)
-                    print(f"..Continuing loop without signal to requeue.")
+                    print("..Continuing loop without signal to requeue.")
                 continue
 
             results: list[str] = _clean_output(
@@ -920,10 +912,10 @@ def query_models(
                 print(f"..Could not clean response_choices_stack[{idx}].message.content.")
                 if retry_count < max_retries:
                     success_choice[idx].append(False)
-                    print(f"..Continuing loop with signal to requeue.")
+                    print("..Continuing loop with signal to requeue.")
                 else:
                     success_choice[idx].append(True)
-                    print(f"..Continuing loop without signal to requeue.")
+                    print("..Continuing loop without signal to requeue.")
                 continue
             else:
                 success_choice[idx].append(True)
@@ -935,15 +927,15 @@ def query_models(
                 main_text_chunked: list[list[str]] = _chunk_prompt_result(results[max_idx])
                 trend.tts_presult_full_text.append(main_text_chunked)
                 trend.tts_presult_summary_text.append(results[min_idx])
-            raise Exception as e:
+            except Exception as e:
                 print(f"..{dtnow()} ERROR:")
                 print(e)
                 if retry_count < max_retries:
                     success_choice[idx].append(False)
-                    print(f"..Continuing loop with signal to requeue.")
+                    print("..Continuing loop with signal to requeue.")
                 else:
                     success_choice[idx].append(True)
-                    print(f"..Continuing loop without signal to requeue.")
+                    print("..Continuing loop without signal to requeue.")
                 continue
 
         sleep(get_random() + sleep_min_base)

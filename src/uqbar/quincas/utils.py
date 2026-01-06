@@ -19,21 +19,40 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from collections.abc import MutableSequence, Iterable
-from dataclasses import dataclass, field
-from datetime import timezone, timedelta, datetime
-from email.utils import parsedate_to_datetime
 import functools
-from pathlib import Path
-from typing import overload, Any
-from urllib.parse import urlparse
 import warnings
-
+from collections.abc import Iterable, MutableSequence
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
+from pathlib import Path
+from typing import Any, overload
+from urllib.parse import urlparse
 
 # -------------------------------------------------------------------------------------
 # Constants
 # -------------------------------------------------------------------------------------
+PAYWALL_DOMAINS: set[str] = {  # common hard/soft paywalls
+    "nytimes.com",
+    "wsj.com",
+    "ft.com",
+    "economist.com",
+    "bloomberg.com",
+    "washingtonpost.com",
+    "theatlantic.com",
+    "newyorker.com",
+}
 
+_URL_TO_FLAG: dict[str, str] = {
+    "news_item_url_1": "news_item_paywall_flag_1",
+    "news_item_url_2": "news_item_paywall_flag_2",
+    "news_item_url_3": "news_item_paywall_flag_3",
+}
+
+from datetime import timedelta
+UTC = timezone.utc
+US_EAST_TZ = timezone(timedelta(hours=-5))
+BRAZIL_TZ = timezone(timedelta(hours=-3))
 
 # --------------------------------------------------------------------------------------
 # Helpers

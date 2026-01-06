@@ -19,16 +19,11 @@ Metadata
 # -------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from datetime import datetime
-import numpy as np
-from numpy.typing import NDArray
-import os
-from pathlib import Path
 import re
-from sortedcontainers import SortedList
+from datetime import datetime
+from pathlib import Path
 
-from uqbar.acta.utils import Trend, TrendList, GO_EMOTIONS_LABELS
-
+from uqbar.acta.utils import GO_EMOTIONS_LABELS, TrendList
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -84,10 +79,10 @@ def _get_prompt_string(
 ) -> str:
 
     first_ruler: str = f"{'-'*big_ruler_len}\n\n"
-    last_ruler: str = f"\n"
+    last_ruler: str = "\n"
     if is_last:
         first_ruler: str = f"{'-'*big_ruler_len}\n\n"
-        last_ruler: str = f""
+        last_ruler: str = ""
 
     regular_prompt: str = (
         f"1. Goal: Write a Continuous Prose as a Professional Calm News-Media Narrator,\n"
@@ -149,10 +144,10 @@ def _get_prompt_string_image_mood_query(
 ) -> str:
 
     first_ruler: str = f"{'-'*big_ruler_len}\n\n"
-    last_ruler: str = f"\n"
+    last_ruler: str = "\n"
     if is_last:
         first_ruler: str = f"{'-'*big_ruler_len}\n\n"
-        last_ruler: str = f""
+        last_ruler: str = ""
 
     regular_prompt: str = (
         f"Background: Based on the following news paragraph:\n"
@@ -242,10 +237,10 @@ def create_prompts(
         return prompt_file_path
 
     # Check length of multi-prompt
-    total_size: int = len(trend_list)
+    len(trend_list)
 
     # Iterate through trends
-    for counter, trend in enumerate(trend_list, start=1):
+    for _counter, trend in enumerate(trend_list, start=1):
 
         pass
 

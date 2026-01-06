@@ -31,9 +31,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
-from uqbar.tieta.pdf_parser import read_input_pdf, clean_chunk_string
 from uqbar.tieta.claude_prompt_parser import create_prompts
+from uqbar.tieta.pdf_parser import clean_chunk_string, read_input_pdf
+
 # from uqbar.tieta.utils import read_redflags
 
 # -------------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ def tieta_core(
     final_page: int = int(args[Args.FINAL_PAGE])
     redflags: bool = args[Args.REDFLAGS]
     redflags_path: Path = Path(args[Args.REDFLAGS_PATH])
- 
+
     # 1. Parsing input PDF
     raw_string_list: list[str] = read_input_pdf(
         input_path=input_path,

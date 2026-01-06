@@ -19,14 +19,14 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime
 import re
 import stat
-from typing import Iterable
+from collections.abc import Iterable
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
 
 from uqbar.faust.constants import SearchType
-from uqbar.faust.io import build_row
 
 
 # --------------------------------------------------------------------------------------

@@ -21,7 +21,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 # --------------------------------------------------------------------------------------
 # Constants
 # --------------------------------------------------------------------------------------
@@ -38,7 +37,7 @@ def version() -> str:
     file_name: Path = Path(__file__).resolve().parent
     file_name: Path = file_name.parent.parent / FILENAME
     file_name.resolve()
-    with open(file_name, "r", encoding="utf-8") as file:
+    with open(file_name, encoding="utf-8") as file:
 
         version = file.read()
         version.strip()

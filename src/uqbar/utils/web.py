@@ -19,19 +19,79 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
+import re
+import urllib.request
 from pathlib import Path
-
+from typing import Final
+from urllib.parse import unquote, urlparse
 
 from uqbar.utils.executor import execute
 
 # --------------------------------------------------------------------------------------
 # Constants
 # --------------------------------------------------------------------------------------
+# Conservative filename sanitizer (keeps unicode letters/digits; removes path
+# separators/control chars)
+_INVALID_CHARS_RE: Final[re.Pattern[str]] = re.compile(r'[\\/\x00-\x1f\x7f]+')
+
+_WHITESPACE_RE: Final[re.Pattern[str]] = re.compile(r"\s+")
 
 
 # -------------------------------------------------------------------------------------
 # Helpers
 # -------------------------------------------------------------------------------------
+def _safe_filename(name: str) -> str:
+    name = name.strip()
+    name = _INVALID_CHARS_RE.sub("_", name)
+    name = _WHITESPACE_RE.sub(" ", name)
+    # Avoid Windows reserved names and trailing dots/spaces
+    name = name.strip(" .")
+    if not name:
+        return ""
+    # Very defensive: limit length
+    return name[:240]
+
+
+def _unique_path(dest: Path) -> Path:
+    """If dest exists, append ' (n)' before the suffix."""
+    if not dest.exists():
+        return dest
+    stem = dest.stem
+    suffix = dest.suffix
+    parent = dest.parent
+    for i in range(1, 10_000):
+        candidate = parent / f"{stem} ({i}){suffix}"
+        if not candidate.exists():
+            return candidate
+    raise FileExistsError(f"Could not find a unique filename for: {dest}")
+
+
+def _guess_name_from_url(download_url: str) -> str:
+    p = urlparse(download_url)
+    # Prefer last path segment
+    last = (p.path.split("/")[-1] if p.path else "").strip()
+    last = unquote(last)  # decode %XX
+    return _safe_filename(last)
+
+
+def _guess_ext_from_content_type(content_type: str | None) -> str | None:
+    if not content_type:
+        return None
+    ct = content_type.split(";", 1)[0].strip().lower()
+    mapping = {
+        "text/plain": ".txt",
+        "text/html": ".html",
+        "application/pdf": ".pdf",
+        "application/json": ".json",
+        "text/csv": ".csv",
+        "image/png": ".png",
+        "image/jpeg": ".jpg",
+        "image/webp": ".webp",
+        "application/zip": ".zip",
+        "application/gzip": ".gz",
+        "application/x-tar": ".tar",
+    }
+    return mapping.get(ct)
 
 
 # -------------------------------------------------------------------------------------
@@ -291,9 +351,95 @@ def download_path_wget(
     return stdout, stderr
 
 
+def download_url_to_path(
+    download_url: str,
+    output_path: Path,
+) -> tuple[str | None, str | None]:
+    """
+    Download a URL to a directory, preserving the filename when possible.
+
+    Returns:
+        (saved_file_path, info_message_or_warning)
+        - saved_file_path: absolute path of the downloaded file, or None on failure
+        - info_message_or_warning: None on clean success, else a human-readable note
+          (e.g. "filename was inferred", "server provided filename", "error: ...")
+
+    Notes:
+      - Uses urllib from the stdlib (no extra deps).
+      - Tries to preserve the URL's filename; falls back to server-provided name; then to 'downloaded_file'.
+      - Avoids overwriting by auto-suffixing " (n)" if a file already exists.
+    """
+    try:
+        output_dir = Path(output_path).expanduser().resolve()
+        output_dir.mkdir(parents=True, exist_ok=True)
+        if not output_dir.is_dir():
+            return None, f"error output_path is not a directory: {output_dir}"
+
+        # First guess: from URL path (decoded)
+        guessed_name = _guess_name_from_url(download_url)
+
+        req = urllib.request.Request(
+            download_url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; download_url_to_path/1.0)",
+                "Accept": "*/*",
+            },
+        )
+
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            # Try to use server-suggested filename if URL doesn't have one
+            server_filename = None
+            try:
+                # get_filename reads Content-Disposition, when present
+                server_filename = resp.info().get_filename()
+            except Exception:
+                server_filename = None
+
+            content_type = resp.info().get("Content-Type")
+            note_parts: list[str] = []
+
+            final_name = guessed_name
+            if not final_name and server_filename:
+                final_name = _safe_filename(server_filename)
+                if final_name:
+                    note_parts.append("filename taken from content disposition")
+
+            if not final_name:
+                final_name = "downloaded_file"
+                note_parts.append("filename could not be determined; using downloaded_file")
+
+            # If no extension, maybe infer from content-type
+            if "." not in Path(final_name).name:
+                ext = _guess_ext_from_content_type(content_type)
+                if ext:
+                    final_name = f"{final_name}{ext}"
+                    note_parts.append("extension inferred from content type")
+
+            dest = _unique_path(output_dir / final_name)
+
+            # Stream to disk
+            with open(dest, "wb") as f:
+                while True:
+                    chunk = resp.read(1024 * 64)
+                    if not chunk:
+                        break
+                    f.write(chunk)
+
+        # Basic post-check
+        if dest.stat().st_size == 0:
+            # Don't auto-delete; just report
+            note_parts.append("warning downloaded file is empty")
+
+        return str(dest), ("; ".join(note_parts) if note_parts else None)
+
+    except Exception as e:
+        return None, f"error {type(e).__name__} {e}"
+
+
 # --------------------------------------------------------------------------------------
 # Exports
 # --------------------------------------------------------------------------------------
 __all__: list[str] = [
     "download_path_wget",
+    "download_url_to_path",
 ]

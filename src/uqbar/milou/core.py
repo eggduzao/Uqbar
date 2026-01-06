@@ -27,37 +27,37 @@ Metadata
 # -------------------------------------------------------------------------------------
 from __future__ import annotations
 
-import enum
-import argparse
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
+from typing import Any
 
-from uqbar.milou.book_preprocessor import (
-    parse_query,
-    get_search_engine_links,
+from uqbar.milou.book_pdf_downloader import download_write, search_for_links
+from uqbar.milou.book_processor import (
     form_final_query_list,
+    get_search_engine_links,
+    parse_query,
     verify_query_formats,
 )
-
-from uqbar.milou.book_pdf_downloader import search_for_links, download_write
 
 
 # -------------------------------------------------------------------------------------
 # Constants
 # -------------------------------------------------------------------------------------
-class Subcommand(enum):
+class Subcommand(Enum):
     """Placeholder"""
-    YOUTUBE: str = "youtube"
-    BOOK: str = "book"
+    YOUTUBE = "youtube"
+    BOOK = "book"
 
 
 @dataclass
 class Args:
-    COMMAND_SUBTIPE: str | None = "command_subtipe"
-    INPUT_PATH: str | None = "input_path"
-    OUTPUT_PATH: str | None = "output_path"
-    QUERY: str | None = "query"
-    SEARCH_ENGINES: str | None = "search_engines"
-    FORMATS_ALLOWED: str | None = "formats_allowed"
+    COMMAND_SUBTIPE: str = "command_subtipe"
+    INPUT_PATH: str = "input_path"
+    OUTPUT_PATH: str = "output_path"
+    QUERY: str = "query"
+    SEARCH_ENGINES: str = "search_engines"
+    FORMATS_ALLOWED: str = "formats_allowed"
 
 
 @dataclass
@@ -67,12 +67,15 @@ class Semaphore:
     A_ONE: bool = False
     A_TWO: bool = False
     A_THREE: bool = False
+    A_FOUR: bool = False
+    A_FIVE: bool = False
+    A_SIX: bool = False
     B_ONE: bool = True
-    B_TWO: bool = False
-    B_THREE: bool = False
-    B_FOUR: bool = False
-    B_FIVE: bool = False
-    B_SIX: bool = False
+    B_TWO: bool = True
+    B_THREE: bool = True
+    B_FOUR: bool = True
+    B_FIVE: bool = True
+    B_SIX: bool = True
 
 # -------------------------------------------------------------------------------------
 # Helpers
@@ -106,23 +109,22 @@ def milou_core(
 
     # 0. Setup
     if Semaphore.ZERO:
-        command_subtipe: str = args[Subcommand.YOUTUBE]
-        input_path: str = args[Args.INPUT_PATH]
-        output_path: str = args[Args.OUTPUT_PATH]
+        command_subtipe: str = args[Args.COMMAND_SUBTIPE]
+        input_path: Path = args[Args.INPUT_PATH]
+        output_path: Path = args[Args.OUTPUT_PATH]
         query: str = args[Args.QUERY]
         search_engines: str = args[Args.SEARCH_ENGINES]
         formats_allowed: str = args[Args.FORMATS_ALLOWED]
 
     # A. Youtube Video/Audio Fetch
-    if command_subtipe == Subcommand.YOUTUBE:
-        
+    if command_subtipe == Subcommand.YOUTUBE.value:
+
         # A.1. Youtube Search
-        if Semaphore.A_ONE:
-            pass
+        pass
 
     # B. Book Search
-    elif command_subtipe == Subcommand.BOOK:
-        
+    elif command_subtipe == Subcommand.BOOK.value:
+
         # B.1. Parsing input
         if Semaphore.B_ONE:
             query_list: list[str] = parse_query(
@@ -144,18 +146,19 @@ def milou_core(
 
         # B.4. Get final query links
         if Semaphore.B_FOUR:
-            link_list: list[str] = form_final_query_list(
+            final_link_list: list[str] = form_final_query_list(
                 query_list=query_list,
                 search_engine_list=search_engine_links,
+                format_list=query_format_list,
             )
 
         # B.5. Search for links
         if Semaphore.B_FIVE:
             query_link_list: list[str] = search_for_links(
-                link_list=link_list,
-                query_format_list=query_format_list,
+                link_list=final_link_list,
+                query_format_list=query_format_list
             )
- 
+
         # B.6. Download links to output to directory
         if Semaphore.B_SIX:
             download_write(

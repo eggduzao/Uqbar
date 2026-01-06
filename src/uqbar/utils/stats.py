@@ -19,16 +19,14 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from collections.abc import Generator
 import os
 import random
 import secrets
 import time
+from collections.abc import Generator
 from typing import Any
 
-
 import numpy as np
-
 
 # --------------------------------------------------------------------------------------
 # Constants

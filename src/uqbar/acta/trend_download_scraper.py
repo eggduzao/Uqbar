@@ -19,19 +19,13 @@ Metadata
 # -------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import timezone, timedelta
-from email.utils import parsedate_to_datetime
-from pathlib import Path
-from typing import Iterable
-from urllib.parse import urlparse
 import re
 import subprocess
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
-from uqbar.acta.utils import deprecated, Trend, TrendList
+from uqbar.acta.utils import Trend, TrendList, deprecated
 
-import sys
 # -------------------------------------------------------------------------------------
 # Constants
 # -------------------------------------------------------------------------------------
@@ -56,13 +50,13 @@ def constants_legacy() -> None:
     Legacy Constants
     """
     # Mock URL
-    MOCK_URL = Path("/Users/egg/Desktop/web.html")
+    Path("/Users/egg/Desktop/web.html")
 
     # Precompiled patterns
-    TREND_BREAKDOWN_RE = re.compile(r"Trend breakdown")
-    DATA_TERM_RE = re.compile(r'data-term="([^"]+)"')
-    NEWS_HEADER_RE = re.compile(r"In the news")
-    URL_RE = re.compile(r"https://[^\s\"'>]+")
+    re.compile(r"Trend breakdown")
+    re.compile(r'data-term="([^"]+)"')
+    re.compile(r"In the news")
+    re.compile(r"https://[^\s\"'>]+")
 
 
 # -------------------------------------------------------------------------------------
@@ -192,7 +186,7 @@ def _get_trends_from_local_url_legacy(url_path: Path) -> list[str]:
 
     parsed_file = []
 
-    with open(url_path, "r") as file:
+    with open(url_path) as file:
         for line in file:
             ll = line.strip()
             l = len(ll)
@@ -217,14 +211,14 @@ def _delete_trends_local_url_legacy(url_path: Path) -> tuple[str, str]:
     file_path = str(url_path)
     folder_path = str(url_path.parent / url_path.stem) + "_files/"
 
-    subprocess.run(
+    result = subprocess.run(
         ["rm", "-rf", file_path, folder_path],
         capture_output=True,
         text=True,
         check=True,
     )
 
-    return stdout, stderr
+    return result.stdout, result.stderr
 
 
 # -------------------------------------------------------------------------------------
@@ -270,7 +264,7 @@ def parse_trend_rss_feed(
             # print(f"trend_list.datetime_utc = {trend_list.datetime_utc} | type(trend_list.datetime_utc) = {type(trend_list.datetime_utc)}")
             # sys.exit(0)
             trend_list.update_datetime()
-        
+
         trend.picture_source = _child_text_by_localname(item, "picture_source")
 
         news_items = _children_by_localname(item, "news_item")[:3]

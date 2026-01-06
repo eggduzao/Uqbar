@@ -89,36 +89,30 @@ Metadata
 # -------------------------------------------------------------------------------------
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
 from pathlib import Path
-import sys
-
-
-from uqbar.acta.utils import (
-    PAYWALL_DOMAINS,
-    GO_EMOTIONS_LABELS,
-    NEWS_CATEGORIES,
-    deprecated,
-    dtnow,
-    save_trendlist,
-    load_trendlist,
-    hyper_random,
-    MoodLevel,
-    QueryConfig,
-    MoodItem,
-    DateTimeUTC,
-    Trend,
-    TrendList,
-)
-
-from uqbar.acta.trend_download_scraper import get_trends
-from uqbar.acta.trend_prompt_parser import (
-    create_trend_tts_prompt,
-    create_trend_image_mood_prompt,
-)
-from uqbar.acta.trend_newstext_maker import query_models, query_image_and_mood
+from typing import Any
 
 from uqbar.acta.mood_predictor import predict_mood
+from uqbar.acta.trend_download_scraper import get_trends
+from uqbar.acta.trend_newstext_maker import query_image_and_mood, query_models
+from uqbar.acta.trend_prompt_parser import (
+    create_trend_image_mood_prompt,
+    create_trend_tts_prompt,
+)
+from uqbar.acta.utils import (
+    TrendList,
+    dtnow,
+    load_trendlist,
+    save_trendlist,
+)
+
+
+def hyper_random(values: list[int]) -> int:
+    """Select random value from list."""
+    import random
+    return random.choice(values)
 
 # from uqbar.acta.image_scraper import
 # from uqbar.acta.image_downloader import
@@ -262,7 +256,7 @@ def acta_core(
 
     # 4/5. [BRANCH A - AI SOLUTION]
     if image_mood_input_by_ai:
-       
+
         # 4.A [BRANCH A - AI PROMPT TEXT CREATION] Create Image/Mood prompt input
         output_log_path = working_path / "trends_4A.json"
         if Semaphore.FOUR_A:
@@ -349,7 +343,7 @@ def acta_core(
     # 7. [MAIN PATH - XXXXXXX] Download images
     output_log_path = working_path / "trends_7.json"
     if Semaphore.SEVEN:
-        download_images(trend_list)
+        # download_images(trend_list)  # TODO: implement
         save_trendlist(trend_list, output_log_path)
     else:
         if output_log_path.exists():

@@ -19,24 +19,17 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from collections.abc import MutableSequence, Iterable, Generator
-from dataclasses import dataclass, field, fields
-from datetime import timezone, timedelta, datetime
-from email.utils import parsedate_to_datetime
-from enum import Enum
 import functools
 import json
-from math import ceil
-import os
-from pathlib import Path
-import random
-import secrets
-import time
-from typing import overload, Any, get_type_hints, TextIO
-from urllib.parse import urlparse
 import warnings
-
-import numpy as np
+from collections.abc import Iterable, MutableSequence
+from dataclasses import dataclass, field, fields
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, TextIO, get_type_hints, overload
+from urllib.parse import urlparse
 
 
 # --------------------------------------------------------------------------------------
@@ -358,7 +351,7 @@ def chunked_list_to_str(chunked_list: list[list[str]]) -> str:
 
 def save_trendlist(trend_list: TrendList, path: Path) -> None:
     payload: dict[str, Any] = {
-        "schema_version": _SCHEMA_VERSION,
+        "schema_version": "1.0",  # _SCHEMA_VERSION
         "trendlist": {
             "datetime_utc": trend_list.datetime_utc,
             "datetime_br": trend_list.datetime_br,
@@ -486,7 +479,7 @@ class MoodItem:
             raise ValueError(
                 f"Expected {len(GO_EMOTIONS_LABELS)} values, got {len(values)}."
             )
-        for name, value in zip(GO_EMOTIONS_LABELS, values):
+        for name, value in zip(GO_EMOTIONS_LABELS, values, strict=False):
             setattr(self, name, value)
 
 
@@ -530,7 +523,7 @@ class DateTimeUTC:
         datetime_hou = int(time_list[0])
         datetime_min = int(time_list[1])
         datetime_sec = int(time_list[2])
-        
+
         # 3. Calculating offset
         datetime_offset = int(datetime_list[5])
         utc_offset = UTC_DEFAULT_OFFSET - datetime_offset
@@ -837,10 +830,9 @@ class TrendList(MutableSequence[Trend]):
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        parts_list: list[str] = ["year", "month", "day", "hour", "minute", "second"]
 
         with open(output_path, "w", encoding="utf-8") as file:
-            file.write(f"[START]")
+            file.write("[START]")
 
             if self.datetime_utc:
                 file.write(f"datetime_utc|str\t{self.datetime_utc}")
@@ -864,15 +856,15 @@ class TrendList(MutableSequence[Trend]):
 
             if self._items:
 
-                file.write(f"[TREND START]")
+                file.write("[TREND START]")
 
                 for trend in self._items:
 
                     trend.print(file)
 
-                file.write(f"[TREND END]")
+                file.write("[TREND END]")
 
-            file.write(f"[END]")
+            file.write("[END]")
 
     @deprecated("")
     def load(self, input_path: Path) -> TrendList | None:
@@ -881,7 +873,7 @@ class TrendList(MutableSequence[Trend]):
         if not input_path:
             return None
 
-        with open(input_path, "r", encoding="utf-8") as file:
+        with open(input_path, encoding="utf-8"):
             pass
         return None
 
@@ -897,7 +889,7 @@ __all__: list[str] = [
     "dtnow",
     "save_trendlist",
     "load_trendlist",
-    "hyper_random",
+    # "hyper_random",  # moved to core.py
     "MoodLevel",
     "QueryConfig",
     "MoodItem",

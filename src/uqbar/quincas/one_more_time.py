@@ -2,8 +2,8 @@
 ##### Import
 
 from pathlib import Path
+
 from pydub import AudioSegment
-from pydub.playback import play
 
 ##### Constants
 
@@ -60,7 +60,7 @@ la = mid_samp_stretch
 high_samp_stretch = stretch(high_rep, 0.94)
 lc = high_samp_stretch
 
-sample_1 = la + la + la + lb 
+sample_1 = la + la + la + lb
 sample_2 = lc + lc + lc + lc + lc + lc + lb
 
 sample = sample_1 + sample_1 + sample_1 + sample_2

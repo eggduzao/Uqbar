@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
-# uqbar/acta/audio_tts_maker.py
+# uqbar/acta/audio_background_maker.py
 """
-Acta Diurna | Audio TTS Maker
-=============================
+Acta Diurna | Audio Background Maker
+====================================
 
 Overview
 --------
@@ -19,17 +19,8 @@ Metadata
 # -------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from __future__ import annotations
-
-from datetime import datetime
-import numpy as np
-from numpy.typing import NDArray
-import os
-from pathlib import Path
-import re
-from sortedcontainers import SortedList
 import subprocess
-
+from pathlib import Path
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -44,7 +35,7 @@ def piper_tts(
     text: str,
     output_wav_path: Path,
     *,
-    model_path: Path = ,
+    model_path: Path = MODEL_PATH,
 ) -> None:
     """
     Executes Piper TTS on a string.
@@ -63,128 +54,116 @@ def piper_tts(
     """
 
     subprocess.run(
-        ["piper", "--model", str(model_path), "--output_file", str(out_wav)],
+        ["piper", "--model", str(model_path), "--output_file", str(output_wav_path)],
         input=text,
         text=True,
         check=True,
     )
 
-
-
-
-
-
-# 3. Minimal native Piper example (pure Python)
-
-from piper.voice import PiperVoice
-from pathlib import Path
-
-voice = PiperVoice.load(
-    Path("en_US-lessac-medium.onnx"),
-    Path("en_US-lessac-medium.onnx.json"),
-)
-
-audio_chunks = []
-
-for chunk in voice.synthesize("Hello Honey. This is Piper."):
-    audio_chunks.append(chunk.audio_int16)
-
-# Combine all chunks
-import numpy as np
-audio: NDArray[np.int16] = np.concatenate(audio_chunks)
-
-
-# --------
-
-# 4. Writing to WAV (cleanest first step)
-
-import wave
-
-with wave.open("out.wav", "wb") as wf:
-    wf.setnchannels(1)
-    wf.setsampwidth(2)  # int16
-    wf.setframerate(voice.config.sample_rate)
-    wf.writeframes(audio.tobytes())
-
-
-# --------
-
-# 5. Using soundfile (recommended)
-
-import soundfile as sf
-
-sf.write(
-    "out.wav",
-    audio,
-    voice.config.sample_rate,
-    subtype="PCM_16",
-)
-
-# --------
-
-# 6. Working with chunks (important for paragraph TTS)
-
-chunk.audio_int16        # numpy array
-chunk.audio_int16_bytes  # raw bytes
-
-# Insert silence between paragraphs
-
-def silence(seconds: float, sr: int):
-    return np.zeros(int(seconds * sr), dtype=np.int16)
-
-audio = np.concatenate([
-    paragraph_1_audio,
-    silence(0.3, sr),
-    paragraph_2_audio,
-])
-
-# --------
-
-# 7. Audio manipulation objects you should love
-
-from pydub import AudioSegment
-
-seg = AudioSegment(
-    audio.tobytes(),
-    frame_rate=sr,
-    sample_width=2,
-    channels=1,
-)
-
-seg = seg.fade_in(50).fade_out(100)
-seg.export("out.mp3", format="mp3")
-
-
-# --------
-
-import numpy as np
-import scipy as sc
-import pandas as pd
-
-print(np.__version__)
-print(sc.__version__)
-print(pd.__version__)
-
-libsndfile ffmpeg
-
-python -c "import pydub as pb; print(pb.__version__)"
-python -c "import wave as wa; print(wa.__version__)"
-
-import numpy as np
-import soundfile as sf
-from pydub import AudioSegment
-from piper.voice import PiperVoice
-
-print(np.__version__)
-print(sf.__libsndfile_version__)
-
-# --------
-
-
-# --------
-
-
-# --------
+# -------------------------------------------------------------------------------------
+# Example Code (commented out)
+# -------------------------------------------------------------------------------------
+# # 3. Minimal native Piper example (pure Python)
+#
+# from piper.voice import PiperVoice
+#
+# voice = PiperVoice.load(
+#     Path("en_US-lessac-medium.onnx"),
+#     Path("en_US-lessac-medium.onnx.json"),
+# )
+#
+# audio_chunks = []
+#
+# for chunk in voice.synthesize("Hello Honey. This is Piper."):
+#     audio_chunks.append(chunk.audio_int16)
+#
+# # Combine all chunks
+# audio: NDArray[np.int16] = np.concatenate(audio_chunks)
+#
+#
+# # --------
+#
+# # 4. Writing to WAV (cleanest first step)
+#
+# import wave
+#
+# with wave.open("out.wav", "wb") as wf:
+#     wf.setnchannels(1)
+#     wf.setsampwidth(2)  # int16
+#     wf.setframerate(voice.config.sample_rate)
+#     wf.writeframes(audio.tobytes())
+#
+#
+# # --------
+#
+# # 5. Using soundfile (recommended)
+#
+# import soundfile as sf
+#
+# sf.write(
+#     "out.wav",
+#     audio,
+#     voice.config.sample_rate,
+#     subtype="PCM_16",
+# )
+#
+# # --------
+#
+# # 6. Working with chunks (important for paragraph TTS)
+#
+# # chunk.audio_int16        # numpy array
+# # chunk.audio_int16_bytes  # raw bytes
+#
+# # Insert silence between paragraphs
+#
+# def silence(seconds: float, sr: int):
+#     return np.zeros(int(seconds * sr), dtype=np.int16)
+#
+# audio = np.concatenate([
+#     paragraph_1_audio,
+#     silence(0.3, sr),
+#     paragraph_2_audio,
+# ])
+#
+# # --------
+#
+# # 7. Audio manipulation objects you should love
+#
+# from pydub import AudioSegment
+#
+# seg = AudioSegment(
+#     audio.tobytes(),
+#     frame_rate=sr,
+#     sample_width=2,
+#     channels=1,
+# )
+#
+# seg = seg.fade_in(50).fade_out(100)
+# seg.export("out.mp3", format="mp3")
+#
+#
+# # --------
+#
+# import numpy as np
+# import pandas as pd
+# import scipy as sc
+#
+# print(np.__version__)
+# print(sc.__version__)
+# print(pd.__version__)
+#
+# # libsndfile ffmpeg
+#
+# # python -c "import pydub as pb; print(pb.__version__)"
+# # python -c "import wave as wa; print(wa.__version__)"
+#
+# import numpy as np
+# import soundfile as sf
+# from piper.voice import PiperVoice
+# from pydub import AudioSegment
+#
+# print(np.__version__)
+# print(sf.__libsndfile_version__)
 
 
 # -------------------------------------------------------------------------------------
@@ -205,7 +184,7 @@ __all__: list[str] = [
 
 
 # -------------------------------------------------------------------------------------
-# Test | python -m uqbar.acta.audio_tts_maker > out.txt 2>&1
+# Test | python -m uqbar.acta.audio_background_maker > out.txt 2>&1
 # -------------------------------------------------------------------------------------
 # if __name__ == "__main__":
 #     ...

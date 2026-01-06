@@ -219,3 +219,6 @@ out.txt
 */out.txt
 */*/out.txt
 */*/*/out.txt
+
+# books
+tests/test_milou/books

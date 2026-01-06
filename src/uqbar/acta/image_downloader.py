@@ -39,27 +39,22 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from dataclasses import dataclass
-from pathlib import Path
 import re
-import subprocess
-from typing import Iterable, Sequence
 import unicodedata
+from collections.abc import Sequence
+from pathlib import Path
 
 import spacy
-from spacy.language import Language
 from sklearn.feature_extraction.text import TfidfVectorizer
+from spacy.language import Language
 
-from uqbar.utils.download import download_path_wget
-
-from uqbar.acta.utils import QueryConfig, Trend, TrendList
-from uqbar.acta.image_scaper import get_image_links
 from uqbar.acta.image_processor import (
+    clean_convert_path_image_names,
     clean_name,
     image_dedup,
-    clean_convert_path_image_names,
 )
-
+from uqbar.acta.image_scaper import get_image_links
+from uqbar.acta.utils import QueryConfig, TrendList
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -134,7 +129,7 @@ def _normalize_text(s: str, cfg: QueryConfig) -> str:
     return s
 
 
-def _load_spacy() -> "Language | None":
+def _load_spacy() -> Language | None:
     if spacy is None:
         return None
     try:

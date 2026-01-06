@@ -20,13 +20,12 @@ Metadata
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import sys
-from typing import Any, Sequence
-
+from collections.abc import Sequence
+from pathlib import Path
+from typing import Any
 
 from uqbar._version import version
-
 
 # --------------------------------------------------------------------------------------
 # Constants
@@ -607,43 +606,32 @@ def main(argv: Sequence[str] | None = None) -> int:
     return_status: int = 1
 
     if argv[0] == ACTA:
-        return_code: int = 2
         from uqbar.acta.core import acta_core
         return_status = acta_core(args=acta_parser(argv[1:]))
 
     elif argv[0] == MILOU:
-        return_code: int = 2
         from uqbar.milou.core import milou_core
         return_status = milou_core(args=milou_parser(argv[1:]))
 
     elif argv[0] == QUINCAS:
-        return_code: int = 2
         from uqbar.quincas.core import quincas_core
-        return_status = quicas_core(args=quicas_parser(argv[1:]))
+        return_status = quincas_core(args=quincas_parser(argv[1:]))
 
     elif argv[0] == FAUST:
-        return_code: int = 2
         from uqbar.faust.core import faust_core
         return_status = faust_core(args=faust_parser(argv[1:]))
 
     elif argv[0] == TIETA:
-        return_code: int = 2
-        from uqbar.faust.core import faust_core
+        from uqbar.tieta.core import tieta_core
         return_status = tieta_core(args=tieta_parser(argv[1:]))
 
     elif argv[0] == DEFAULT:
-        return_code: int = 2
         from uqbar.default.core import default_core
         return_status = default_core(args=default_parser(argv[1:]))
 
     if return_status == 1:
 
-        raise_message: str = (
-            f"Available tools in version {__version__} are:"
-            f"{ACTA}, {MILOU}, {QUINCAS}, {FAUST}, {DEFAULT}"
-            f"Please select one of the available tools and use -h"
-            f"if you need further help."
-        )
+        pass
     return return_status
 
 

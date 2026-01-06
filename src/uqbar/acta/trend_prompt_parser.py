@@ -19,16 +19,11 @@ Metadata
 # -------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from datetime import datetime
-import numpy as np
-from numpy.typing import NDArray
-import os
-from pathlib import Path
 import re
-from sortedcontainers import SortedList
+from datetime import datetime
+from pathlib import Path
 
-from uqbar.acta.utils import Trend, TrendList, GO_EMOTIONS_LABELS
-
+from uqbar.acta.utils import GO_EMOTIONS_LABELS, TrendList
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -84,10 +79,10 @@ def _get_prompt_string(
 ) -> str:
 
     first_ruler: str = f"{'-'*big_ruler_len}\n\n"
-    last_ruler: str = f"\n"
+    last_ruler: str = "\n"
     if is_last:
         first_ruler: str = f"{'-'*big_ruler_len}\n\n"
-        last_ruler: str = f""
+        last_ruler: str = ""
 
     regular_prompt: str = (
         f"1. Goal: Write a Continuous Prose as a Professional Calm News-Media Narrator,\n"
@@ -149,10 +144,10 @@ def _get_prompt_string_image_mood_query(
 ) -> str:
 
     first_ruler: str = f"{'-'*big_ruler_len}\n\n"
-    last_ruler: str = f"\n"
+    last_ruler: str = "\n"
     if is_last:
         first_ruler: str = f"{'-'*big_ruler_len}\n\n"
-        last_ruler: str = f""
+        last_ruler: str = ""
 
     regular_prompt: str = (
         f"Background: Based on the following news paragraph:\n"
@@ -343,7 +338,7 @@ def read_trend_prompt(
 
     # Reading file
     file_lines: list[str] = []
-    with open(prompt_file_path, "r", encoding="utf-8") as file:
+    with open(prompt_file_path, encoding="utf-8") as file:
 
         for line in file:
 
@@ -375,8 +370,8 @@ def read_trend_prompt(
 
                     # End of file
                     try:
-                        tline: str = file_lines[counter]
-                    except Exception as e:
+                        file_lines[counter]
+                    except Exception:
                         break
 
                     # End of prompt
@@ -404,7 +399,7 @@ def read_trend_prompt(
             if prompt_header_match:
 
                 prompt_number: int = int(prompt_header_match.group("prompt_number"))
-                prompt_total: int = int(prompt_header_match.group("prompt_total"))
+                int(prompt_header_match.group("prompt_total"))
                 curr_id: int = prompt_number
 
                 cond_id: bool = False

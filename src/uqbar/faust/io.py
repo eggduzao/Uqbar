@@ -19,10 +19,10 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from pathlib import Path
 import re
+from pathlib import Path
 
-from uqbar.faust.ansi import Ansi, _maybe_color, _bold_matches
+from uqbar.faust.ansi import Ansi, _bold_matches, _maybe_color
 from uqbar.faust.constants import OutField
 
 

@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from sklearn.impute._base import _BaseImputer
 from sklearn.impute._iterative import _assign_where
 from sklearn.utils._mask import _get_mask

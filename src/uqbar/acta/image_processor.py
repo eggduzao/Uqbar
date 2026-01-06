@@ -19,14 +19,12 @@ Metadata
 # -------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from imagededup.methods.cnn import CNN
-from imagededup.utils import plot_duplicates  # just in case you want to inspect later
-
-from pathlib import Path
 import re
 import subprocess
 import unicodedata
+from pathlib import Path
 
+from imagededup.methods.cnn import CNN
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -210,7 +208,7 @@ def image_dedup(
 
     # Remove similar images
     image_to_remove_path_list: list[Path] = []
-    for img, dupes in duplicates.items():
+    for _img, dupes in duplicates.items():
 
         if not dupes:  # empty list -> no dupes
             continue
@@ -219,10 +217,10 @@ def image_dedup(
             # d is a dict like {'filename': 'foo.jpg', 'similarity': 0.97}
             # depending on imagededup version, sometimes it's just the filename.
             if isinstance(d, dict):
-                image_to_remove: Path = Path(d["filename"]).resolve()
+                Path(d["filename"]).resolve()
                 image_to_remove_path_list.append()
             else:
-                image_to_remove: Path = Path(d).resolve()
+                Path(d).resolve()
                 image_to_remove_path_list.append()
 
     for image_path in image_to_remove_path_list:

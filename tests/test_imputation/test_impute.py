@@ -7,7 +7,6 @@ import numpy as np
 import pytest
 from scipy import sparse
 from scipy.stats import kstest
-
 from sklearn import tree
 from sklearn.datasets import load_diabetes
 from sklearn.dummy import DummyRegressor
@@ -58,10 +57,7 @@ def _check_statistics(
         - the statistics (mean, median, mode) are correct
         - the missing values are imputed correctly"""
 
-    err_msg = "Parameters: strategy = %s, missing_values = %s, sparse = {0}" % (
-        strategy,
-        missing_values,
-    )
+    err_msg = f"Parameters: strategy = {strategy}, missing_values = {missing_values}, sparse = {{0}}"
 
     assert_ae = assert_array_equal
 

@@ -26,39 +26,31 @@ Metadata
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from collections.abc import Generator, Iterator
-from datetime import datetime as dt
 import difflib
-from io import BytesIO
 from math import ceil
-import numpy as np
-from pathlib import Path
-from PIL import Image
-import requests
-from time import sleep, time
-from urllib.parse import urlparse, parse_qs, unquote
+from time import sleep
+from urllib.parse import parse_qs, unquote, urlparse
 
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import (
     StaleElementReferenceException,
     TimeoutException,
 )
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
 from uqbar.acta.utils import get_random
-
 
 # -------------------------------------------------------------------------------------
 # Constants
 # -------------------------------------------------------------------------------------
-SEARCH_URL: str = f"https://duckduckgo.com/?q="
+SEARCH_URL: str = "https://duckduckgo.com/?q="
 
 
 WAITER_TOTAL_TIME_BASE: float = 20.0
@@ -133,7 +125,7 @@ def _safeproof_click(
             if wait_for_action:
                 wait: WebDriverWait = WebDriverWait(driver, timeout)
                 wait.until(EC.element_to_be_clickable(web_element))
-            
+
             # Try standard Selenium click (mimics real user)
             web_element.click()
         except Exception:
@@ -145,7 +137,7 @@ def _safeproof_click(
     if not isinstance(element_or_list, WebElement):
 
         for element in element_or_list:
-            _safeproof_click( 
+            _safeproof_click(
                 driver=driver,
                 element_or_list=element,
                 wait_for_action=wait_for_action,
@@ -208,21 +200,15 @@ def _select_location_dropdown(
     sleep_min_base: float,
     sleep_max_base: float,
     *,
-    target_text_list: list[str] = [
-        "US (English)",
-        "US",
-        "USA",
-        "Estados Unidos (inglês)",
-        "Estados Unidos",
-        "United States (english)",
-        "United States"
-    ]
+    target_text_list: list[str] = None
 ) -> None:
     """
     Placeholder
     """
 
     # Change locale to US (English)
+    if target_text_list is None:
+        target_text_list = ["US (English)", "US", "USA", "Estados Unidos (inglês)", "Estados Unidos", "United States (english)", "United States"]
     _click_on_xpath('//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[1]/div/div[1]')
     sleep(sleep_min_base + get_random())
     _click_on_xpath('//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[1]/div/div[2]/div[2]/div[63]/div/div/div/span[2]')
@@ -248,11 +234,11 @@ def _hyper_loop(
     reverse_search: float = False,
 ) -> list[WebElement]:
 
-    for element_key, element_value in ELEMENT_DICT.items():
+    for _element_key, element_value in ELEMENT_DICT.items():
 
         by_tag = element_value[0]
         by_val = element_value[1]
-        max_val = element_value[3] 
+        max_val = element_value[3]
         if max_val == 0:
             max_val = element_value[2]
 
@@ -267,7 +253,7 @@ def _hyper_loop(
             if flag_condition_met:
                 break
 
-            for web_element in (reversed(prev_element_list) if reverse_search else prev_element_list):
+            for _web_element in (reversed(prev_element_list) if reverse_search else prev_element_list):
 
                 web_element_list: list[WebElement] = []
                 for _ in range(max_local_tries):
@@ -275,9 +261,9 @@ def _hyper_loop(
                     # Find web elements
                     try:
                         web_element_list = waiter.until(EC.presence_of_all_elements_located((by_tag, by_val)))
-                    except StaleElementReferenceException as sere:
+                    except StaleElementReferenceException:
                         pass
-                    except TimeoutException as toe:
+                    except TimeoutException:
                         pass
                     except Exception as finale:
                         print(finale)
@@ -334,7 +320,7 @@ def _unique_remove_empty(
 
             try:
                 el_id = el.id  # touching .id validates the element
-            except StaleElementReferenceException as ein:
+            except StaleElementReferenceException:
                 continue
 
             if el_id in seen_ids:
@@ -343,7 +329,7 @@ def _unique_remove_empty(
             seen_ids.add(el_id)
             cleaned.append(el)
 
-    except Exception as eout:
+    except Exception:
         cleaned = {x for x in element_list if x}
         cleaned = list(cleaned)
 
@@ -369,7 +355,7 @@ def _get_uri_list(
 
             uri = element.get_property("baseURI")
 
-        except Exception as e:
+        except Exception:
             pass
 
         uri_list.append(uri)
@@ -446,7 +432,7 @@ def _scroll_down_refresh(
     actions: ActionChains = ActionChains(driver, duration=action_duration)
 
     # Iterative scroll to mimic human-like behavior
-    for i in range(0, 1000):
+    for _i in range(0, 1000):
         actions.scroll_by_amount(
             delta_x=0,
             delta_y = ceil(scroll_amoung_basis + get_random())

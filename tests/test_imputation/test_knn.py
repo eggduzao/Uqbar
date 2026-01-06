@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from sklearn import config_context
 from sklearn.impute import KNNImputer
 from sklearn.metrics.pairwise import nan_euclidean_distances, pairwise_distances

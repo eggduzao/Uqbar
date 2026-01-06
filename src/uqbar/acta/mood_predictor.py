@@ -19,26 +19,18 @@ Metadata
 # -------------------------------------------------------------------------------------
 from __future__ import annotations
 
-from collections.abc import Iterable
-from dataclasses import dataclass, asdict
-from math import floor
-from pathlib import Path
-from typing import Any
 import warnings
+from dataclasses import asdict
+from math import floor
+from typing import Any
 
 warnings.filterwarnings("ignore")
 
 
-import datasets
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from tqdm import tqdm
 from transformers import pipeline
 
-
-from uqbar.acta.utils import GO_EMOTIONS_LABELS, NEWS_CATEGORIES, MoodLevel, MoodItem
-
+from uqbar.acta.utils import GO_EMOTIONS_LABELS, NEWS_CATEGORIES, MoodItem, MoodLevel
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -67,7 +59,7 @@ _S015: float = 0.15
 _S010: float = 0.10
 
 
-_POS: set[string] = {
+_POS: set[str] = {
     "joy",
     "love",
     "gratitude",
@@ -79,7 +71,7 @@ _POS: set[string] = {
     "amusement",
     "excitement",
 }
-_NEG: set[string] = {
+_NEG: set[str] = {
     "grief",
     "sadness",
     "remorse",
@@ -146,7 +138,7 @@ def _mhigh(mood: float, mood_level: MoodLevel | list[MoodLevel]) -> bool:
         )
 
     avg_level = sum(ml.value for ml in mood_level) / len(mood_level)
-    threshold = floor_to_multiple(avg_level, multiple=0.5)  # e.g., 3.5
+    threshold = _floor_to_multiple(avg_level, multiple=0.5)  # e.g., 3.5
 
     return level_of_mood >= threshold
 
@@ -279,9 +271,10 @@ def _score_heuristics(
     neutral: float,
     valence: float,
     neutral_gate: float,
-) -> scores:
+) -> dict[int, float]:
 
     scores: dict[int, float] = {}
+    ambiguous = False  # placeholder
 
     # 1. Breaking News (High Alert/Surprise): surprise + nervousness/fear, but not deeply tragic
     scores[1] = (
@@ -497,7 +490,7 @@ def predict_mood(trend_list: TrendList) -> None:
 
         # Get mood keywords
         mood_keywords: list[str] = trend.mood_prompt_response
-        mood_sentence: str = " ".join(mood_keywords)
+        input_text = " ".join(mood_keywords)
 
         # Predict mood
         mood_scores: MoodItem = _predict_mood(input_text)
@@ -507,7 +500,8 @@ def predict_mood(trend_list: TrendList) -> None:
         softmax_scores: list[float] = _softmax(list_of_scores)
         mood_scores.from_list(softmax_scores)
 
-        news_mood = choose_news_music_style(m)
+        # TODO: choose_news_music_style implementation
+        # choose_news_music_style(mood_scores)
         trend.mood_scores = mood_scores
 
     return
@@ -536,7 +530,8 @@ def choose_news_music_style(
     Assumes MoodItem fields are floats in [0,1] (multi-label style).
     """
     d = asdict(mood)
-    get = lambda k: float(d.get(k) or 0.0)
+    def get(k):
+        return float(d.get(k) or 0.0)
 
     # Convenience
     admiration = get("admiration")
@@ -659,7 +654,7 @@ def choose_news_music_style(
             best_id = 22
 
     # Category metadata
-    category_name, audio_brief = NEWS_CATEGORIES.get(best_id, meta[22])
+    category_name, audio_brief = NEWS_CATEGORIES.get(best_id, NEWS_CATEGORIES[22])
 
     return {
         "category_id": best_id,

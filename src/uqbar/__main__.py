@@ -21,9 +21,7 @@ from __future__ import annotations
 
 import sys
 
-
 from uqbar.cli import main
-
 
 # --------------------------------------------------------------------------------------
 # Main
