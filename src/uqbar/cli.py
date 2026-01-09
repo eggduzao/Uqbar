@@ -35,18 +35,28 @@ __version__: str = version()
 CURRENT_WORKING_DIR: Path = Path.cwd()
 
 
+# Main container
 UQBAR: str = "uqbar" # Main container name | Homes all tools
 
+# Automation for social media
 ACTA: str = "acta"  # Program to generate youtube videos automatically
 
-MILOU: str = "milou"  # Program to mass download youtube vides seamlessly
+# Fetch/Send through Network/Web
+MILOU: str = "milou"  # Program to mass download youtube vidos, book pdfs, etc
 
+# Music programming
 QUINCAS: str = "quincas"  # Program to produce music effortlesly without DAWs
 
+# Search of any nature
 FAUST: str = "faust"  # Program to search for strings in dirs, files and inside
 
+# Prompt generator
 TIETA: str = "tieta"  # Program to generate claude prompts for summary-expansion
 
+# Datetime/Calendar-related tasks
+LOLA: str = "lola" # Program to perform datetime-related tasks
+
+# Cookiecutter
 DEFAULT: str = "default"  # Program to search for strings in dirs, files and inside
 
 
@@ -255,7 +265,7 @@ def milou_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
     return vars(ns)
 
 
-def quicas_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
+def quincas_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
     """
     Parse CLI arguments for the program `foo` and return a plain dict[str, Any].
 
@@ -520,6 +530,82 @@ def tieta_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
     ns = parser.parse_args(argv)
     return vars(ns)
 
+def lola_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
+    """
+    Parse CLI arguments for the program `lola` and return a plain dict[str, Any].
+
+    Parameters
+    ----------
+    argv:
+        Sequence of argument strings, typically `sys.argv[1:]`.
+        If None, argparse uses `sys.argv[1:]` automatically.
+
+    Returns
+    -------
+    dict[str, Any]
+        A dict with parsed values. Keys match the argument `dest` names.
+    """
+    if not argv:
+        argv = sys.argv[1:]
+
+    parser = argparse.ArgumentParser(
+        prog=LOLA,
+        description=(
+            f"{LOLA} - a CLI-based tool to perform multiple datetime-related \n"
+            "tasks.\n"
+            "Lola is the main character from the German movie 'Lola Rennt'. \n"
+            "In this movie, it will be shown how an otherwise negligible \n"
+            "difference in a few seconds can change the life of everyone. \n"
+            "Including Lola, who must run exhaustively to save her partner.\n\n"
+        ),
+        epilog=(
+            f"Examples:\n"
+            f"  $ {UQBAR} {LOLA} todo\n"
+            f"  $ {UQBAR} {LOLA} todo -e 2048-10-31\n"
+            f"  $ {UQBAR} {LOLA} todo --date-start 2048-02-01 --date-end 2048-10-31\n"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
+    # Version flag
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"{LOLA} {__version__}",
+        help="Show program version and exit.",
+    )
+
+    # Positional arguments
+    parser.add_argument(
+        "subcommand",
+        type=int,
+        metavar="INPUT_INT",
+        help="Required integer input (e.g., 3).",
+    )
+
+    # Optional arguments
+    parser.add_argument(
+        "-s",
+        "--date-start",
+        dest="date_start",
+        type=str,
+        default=None,
+        metavar="{true|false}",
+        help="Optional boolean override: true/false, yes/no, on/off, 1/0.",
+    )
+    parser.add_argument(
+        "-e",
+        "--date-end",
+        dest="date_end",
+        type=_as_path,
+        default=None,
+        metavar="PATH",
+        help="Optional path override to a file or directory (existence not enforced by default).",
+    )
+
+    ns = parser.parse_args(argv)
+    return vars(ns)
+
 
 def default_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
     """
@@ -624,6 +710,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     elif argv[0] == TIETA:
         from uqbar.tieta.core import tieta_core
         return_status = tieta_core(args=tieta_parser(argv[1:]))
+
+    elif argv[0] == LOLA:
+        from uqbar.lola.core import lola_core
+        return_status = lola_core(args=lola_parser(argv[1:]))
 
     elif argv[0] == DEFAULT:
         from uqbar.default.core import default_core
