@@ -1,6 +1,10 @@
 
 # **Package**
 
+A collection of main/shared modules across multiple GusmaoLab's Projects. Also implements modular and reproducible toolkits for routine computational, machine learning, and bioinformatics task automation.
+
+---
+
 <details>
 
 <summary><strong>📋 Project Standards & CI/CD</strong></summary>
