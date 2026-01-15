@@ -16,15 +16,22 @@
   "reportPossiblyUnboundVariable": "warning",
 
   "settings": {
-    "python.pythonPath": "/Users/egg/micromamba/envs/web/bin/python"
+    "python.pythonPath": "/Users/egg/micromamba/envs/uqbar/bin/python"
   },
+
+  "env": ["uqbar"],
+  "venv": ["uqbar/bin/python"],
+  "micromamba": ["/Users/egg/micromamba/envs/"],
 
   "executionEnvironments": [
     {
-      "root": "src",
-      "extraPaths": ["src"],
+      "root": "/Users/egg/Projects/",
+      "extraPaths": [
+        "BioBook", "Bloom", "GusmaoLab", "LumenNet", "Magnetohydrodynamics", 
+        "Mikrokosmos", "Nightingale", "Phenoteka", "Syzygy", "Uqbar", "Wildlife"
+      ],
       "venvPath": "/Users/egg/micromamba/envs/",
-      "venv": "web"
+      "venv": "uqbar"
     }
   ]
 }

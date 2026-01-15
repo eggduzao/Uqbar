@@ -1,0 +1,5 @@
+# Weekly meetings keyed by English weekday (matches todo_maker.py)
+Wednesday:
+  - ["Psychotherapy", "18:00", "18:50"]
+Friday:
+  - ["Psychotherapy", "09:00", "09:40"]

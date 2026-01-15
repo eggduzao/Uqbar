@@ -1,0 +1,22 @@
+# English weekday -> Portuguese weekday (lowercase) (matches todo_maker.py)
+Monday:
+  - Monday
+  - Segunda
+Tuesday:
+  - Tuesday
+  - Terça
+Wednesday:
+  - Wednesday
+  - Quarta
+Thursday:
+  - Thursday
+  - Quinta
+Friday:
+  - Friday
+  - Sexta
+Saturday:
+  - Saturday
+  - Sábado
+Sunday:
+  - Sunday
+  - Domingo

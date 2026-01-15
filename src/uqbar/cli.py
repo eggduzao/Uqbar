@@ -20,10 +20,11 @@ Metadata
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 from uqbar._version import version
 
@@ -60,7 +61,7 @@ LOLA: str = "lola" # Program to perform datetime-related tasks
 DEFAULT: str = "default"  # Program to search for strings in dirs, files and inside
 
 
-TRUE_VALUE_SET: list[str] = {"true", "t", "yes", "y", "1", "on"}
+TRUE_VALUE_SET: set[str] = {"true", "t", "yes", "y", "1", "on"}
 
 FALSE_VALUE_SET: set[str] = {"false", "f", "no", "n", "0", "off"}
 
@@ -70,7 +71,7 @@ MISSING_VALUE_SET: set[str] = {"none", "null", "nul", "nan", "na", "n/a", "void"
 # -------------------------------------------------------------------------------------
 # Helpers
 # -------------------------------------------------------------------------------------
-def _parse_bool(value: str) -> bool:
+def _parse_bool(value: str) -> bool | None:
     """
     Robust boolean parser for CLI strings.
 
@@ -102,6 +103,54 @@ def _as_path(value: str) -> Path:
     return Path(value).expanduser()
 
 
+def _as_datetime(value: str) -> str | None:
+    """
+    Validate and normalize a date string.
+
+    Accepts the following input formats:
+        - ``DD.MM.YYYY``
+        - ``DD/MM/YYYY``
+        - ``YYYY-MM-DD``
+
+    If valid, returns the date normalized to ISO format ``YYYY-MM-DD``.
+    If invalid, prints a user-facing message and returns ``None``.
+
+    Parameters
+    ----------
+    value : str
+        Date string to be validated and normalized.
+
+    Returns
+    -------
+    str | None
+        Normalized date string in ``YYYY-MM-DD`` format if valid,
+        otherwise ``None``.
+
+    Notes
+    -----
+    - No exceptions are raised.
+    - Parsing is strict (invalid calendar dates are rejected).
+    """
+
+    _FORMATS: Final[tuple[str, ...]] = (
+        "%d.%m.%Y",
+        "%d/%m/%Y",
+        "%Y-%m-%d",
+    )
+
+    for fmt in _FORMATS:
+        try:
+            parsed = dt.datetime.strptime(value, fmt)
+            return parsed.strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+
+    print(
+        "Invalid date format. Please use one of the following: "
+        "DD.MM.YYYY, DD/MM/YYYY, or YYYY-MM-DD."
+    )
+    return None
+
 # --------------------------------------------------------------------------------------
 # Functions
 # --------------------------------------------------------------------------------------
@@ -120,7 +169,7 @@ def acta_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
     dict[str, Any]
         A dict with parsed values. Keys match the argument `dest` names.
     """
-    return None
+
     if not argv:
         argv = sys.argv[1:]
 
@@ -561,7 +610,7 @@ def lola_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
         epilog=(
             f"Examples:\n"
             f"  $ {UQBAR} {LOLA} todo\n"
-            f"  $ {UQBAR} {LOLA} todo -e 2048-10-31\n"
+            f"  $ {UQBAR} {LOLA} todo -e 2048-10-31 -o ~/todo.txt\n"
             f"  $ {UQBAR} {LOLA} todo --date-start 2048-02-01 --date-end 2048-10-31\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -577,10 +626,10 @@ def lola_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
 
     # Positional arguments
     parser.add_argument(
-        "subcommand",
-        type=int,
-        metavar="INPUT_INT",
-        help="Required integer input (e.g., 3).",
+        "command_subtipe",
+        type=str,
+        metavar="SUBCOMMAND",
+        help="Requested item to be fetched. Currently in ['todo']",
     )
 
     # Optional arguments
@@ -588,19 +637,28 @@ def lola_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
         "-s",
         "--date-start",
         dest="date_start",
-        type=str,
+        type=_as_datetime,
         default=None,
-        metavar="{true|false}",
-        help="Optional boolean override: true/false, yes/no, on/off, 1/0.",
+        metavar="DATETIME",
+        help="Optional start date of .todo file creation (default: start of year).",
     )
     parser.add_argument(
         "-e",
         "--date-end",
         dest="date_end",
+        type=_as_datetime,
+        default=None,
+        metavar="DATETIME",
+        help="Optional end date of .todo file creation (default: end of year).",
+    )
+    parser.add_argument(
+        "-o",
+        "--output-path",
+        dest="output_path",
         type=_as_path,
         default=None,
         metavar="PATH",
-        help="Optional path override to a file or directory (existence not enforced by default).",
+        help="Optional path. Location where the .todo file will be written.",
     )
 
     ns = parser.parse_args(argv)
@@ -679,7 +737,7 @@ def default_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
     return vars(ns)
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(argv: Sequence[str] | None) -> int:
     """
     Parse CLI arguments for the multi-program `uqbar`.
 
@@ -690,6 +748,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         If None, argparse uses `sys.argv[1:]` automatically.
     """
     return_status: int = 1
+
+    if not argv:
+        return return_status
 
     if argv[0] == ACTA:
         from uqbar.acta.core import acta_core
@@ -715,13 +776,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         from uqbar.lola.core import lola_core
         return_status = lola_core(args=lola_parser(argv[1:]))
 
-    elif argv[0] == DEFAULT:
-        from uqbar.default.core import default_core
-        return_status = default_core(args=default_parser(argv[1:]))
+    # elif argv[0] == DEFAULT:
+    #     from uqbar.default.core import default_core
+    #     return_status = default_core(args=default_parser(argv[1:]))
 
-    if return_status == 1:
-
-        pass
     return return_status
 
 

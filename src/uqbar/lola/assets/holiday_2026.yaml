@@ -1,0 +1,130 @@
+year: 2026
+
+holidays:
+
+  - rule: single_annual
+    label: "New Year's Day"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [1, 1]
+
+  - rule: single_annual
+    label: "Labor Day"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [5, 1]
+
+  - rule: single_annual
+    label: "Christmas Day"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [12, 25]
+
+  - rule: single_annual
+    label: "PE State Magna Date"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [3, 6]
+
+  - rule: single_absolute
+    label: "Good Friday"
+    holiday_type: PUBLIC_HOLIDAY
+    dt: "2026-04-03"
+
+  - rule: single_absolute
+    label: "Easter Sunday"
+    holiday_type: PUBLIC_HOLIDAY
+    dt: "2026-04-05"
+
+  - rule: single_annual
+    label: "Tiradentes"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [4, 21]
+
+  - rule: single_absolute
+    label: "Corpus Christi"
+    holiday_type: PUBLIC_HOLIDAY
+    dt: "2026-06-04"
+
+  - rule: single_annual
+    label: "Saint John"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [6, 24]
+
+  - rule: single_annual
+    label: "Lady of Mount Carmel"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [7, 16]
+
+  - rule: single_annual
+    label: "Brazilian Independence Day"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [9, 7]
+
+  - rule: single_annual
+    label: "Our Lady Aparecida"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [10, 12]
+
+  - rule: single_annual
+    label: "All Souls' Day"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [11, 2]
+
+  - rule: single_annual
+    label: "Republic Proclamation"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [11, 15]
+
+  - rule: single_annual
+    label: "Black Awareness Day"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [11, 20]
+
+  - rule: single_annual
+    label: "Lady of the Conception"
+    holiday_type: PUBLIC_HOLIDAY
+    md: [12, 8]
+
+  - rule: single_absolute
+    label: "Carnival Monday"
+    holiday_type: PUBLIC_OBSERVANCE
+    dt: "2026-02-16"
+
+  - rule: single_absolute
+    label: "Carnival Tuesday"
+    holiday_type: PUBLIC_OBSERVANCE
+    dt: "2026-02-17"
+
+  - rule: single_absolute
+    label: "Ash Wednesday"
+    holiday_type: PUBLIC_OBSERVANCE
+    dt: "2026-02-18"
+
+  - rule: single_annual
+    label: "Public Servant's Day"
+    holiday_type: PUBLIC_OBSERVANCE
+    md: [10, 28]
+
+  - rule: single_annual
+    label: "Christmas Eve"
+    holiday_type: PUBLIC_OBSERVANCE
+    md: [12, 24]
+
+  - rule: single_annual
+    label: "New Year's Eve"
+    holiday_type: PUBLIC_OBSERVANCE
+    md: [12, 31]
+
+  - rule: range_absolute
+    label: "Personal Holiday"
+    holiday_type: HOLIDAY
+    start_dt: "2026-01-01"
+    end_dt: "2026-01-18"
+
+  - rule: range_absolute
+    label: "Personal Holiday"
+    holiday_type: HOLIDAY
+    start_dt: "2026-12-21"
+    end_dt: "2027-01-01"
+
+  - rule: single_absolute
+    label: "AWS Certification"
+    holiday_type: OTHER
+    dt: "2026-03-01"
