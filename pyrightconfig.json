@@ -1,5 +1,5 @@
 {
-  "$schema": "https://github.com/microsoft/pyright/blob/main/packages/vscode-pyright/schemas/pyrightconfig.schema.json",
+  "$schema": "https://raw.githubusercontent.com/microsoft/pyright/refs/heads/main/packages/vscode-pyright/schemas/pyrightconfig.schema.json",
 
   "include": ["src", "tests"],
   "exclude": ["build", "dist", ".nox", ".venv", "docs/_build", "**/__pycache__"],
@@ -15,23 +15,25 @@
   "reportUnusedVariable": "warning",
   "reportPossiblyUnboundVariable": "warning",
 
-  "settings": {
-    "python.pythonPath": "/Users/egg/micromamba/envs/uqbar/bin/python"
-  },
+  // "settings": {
+  //   "python.pythonPath": "/Users/egg/micromamba/envs/uqbar/bin/python"
+  // },
 
-  "env": ["uqbar"],
-  "venv": ["uqbar/bin/python"],
-  "micromamba": ["/Users/egg/micromamba/envs/"],
+  // "env": "uqbar",
+  // "venv": "uqbar/bin/python",
+  // "micromamba": "/Users/egg/micromamba/envs/",
+
+  "venvPath": "/Users/egg/micromamba/envs",
+  "venv": "uqbar",
 
   "executionEnvironments": [
     {
-      "root": "/Users/egg/Projects/",
-      "extraPaths": [
-        "BioBook", "Bloom", "GusmaoLab", "LumenNet", "Magnetohydrodynamics", 
-        "Mikrokosmos", "Nightingale", "Phenoteka", "Syzygy", "Uqbar", "Wildlife"
-      ],
-      "venvPath": "/Users/egg/micromamba/envs/",
-      "venv": "uqbar"
+      "root": "/Users/egg/Projects/Uqbar/",
+      "extraPaths": ["src/"]
+      //"root": "/Users/egg/Projects/",
+      //"extraPaths": ["/Users/egg/micromamba/envs/uqbar/lib/python3.12/site-packages/"],
+      //"venvPath": "/Users/egg/micromamba/envs/",
+      //"venv": "uqbar"
     }
   ]
 }

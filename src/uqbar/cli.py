@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import re
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -68,6 +69,8 @@ FALSE_VALUE_SET: set[str] = {"false", "f", "no", "n", "0", "off"}
 MISSING_VALUE_SET: set[str] = {"none", "null", "nul", "nan", "na", "n/a", "void"}
 
 
+SPLIT_PATTERN = r"[ ,;|\t\n]+"
+
 # -------------------------------------------------------------------------------------
 # Helpers
 # -------------------------------------------------------------------------------------
@@ -101,6 +104,17 @@ def _as_path(value: str) -> Path:
     Use Path.exists()/is_file()/is_dir() downstream if you want strict validation.
     """
     return Path(value).expanduser()
+
+
+def _as_path_list(value: str) -> list[Path]:
+    """
+    Convert a CLI string to a list of Path (no existence check).
+    Use Path.exists()/is_file()/is_dir() downstream if you want strict validation.
+    """
+
+    # Use re.split() to perform the split
+    value_list = re.split(SPLIT_PATTERN, value)
+    return [Path(e).expanduser() for e in value_list]
 
 
 def _as_datetime(value: str) -> str | None:
@@ -507,9 +521,9 @@ def tieta_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
         ),
         epilog=(
             f"Examples:\n"
-            f"  $ {UQBAR} {TIETA} 3 0.25 true 'hello' ./data\n"
-            f"  $ {UQBAR} {TIETA} 3 0.25 false 'hello' ./data --the-int 7 --the-path ~/Downloads\n"
-            f"  $ {UQBAR} {TIETA} 3 0.25 yes 'hello' ./data -e --the-boolean off\n"
+            f"  $ {UQBAR} {TIETA} claude -i input.pdf -o output.txt -s 10 -f 20\n"
+            f"  $ {UQBAR} {TIETA} gpt -i ./loc1/file.txt -o ./out-loc/output.txt\n"
+            f"  $ {UQBAR} {TIETA} gpt -l ./loc1/,./loc2/ -o ./out-loc/output.txt\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -524,19 +538,40 @@ def tieta_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
 
     # Positional arguments
     parser.add_argument(
-        "input_path",
-        type=_as_path,
-        metavar="PATH",
-        help="Required input pdf path.",
-    )
-    parser.add_argument(
-        "output_path",
-        type=_as_path,
-        metavar="PATH",
-        help="Required output text path.",
+        "command_subtipe",
+        type=str,
+        metavar="SUBCOMMAND",
+        help="Requested prompt type. Currently in ['claude', 'gpt']",
     )
 
     # Optional arguments
+    parser.add_argument(
+        "-i"
+        "--input-path",
+        dest="input_path",
+        type=_as_path,
+        default=None,
+        metavar="PATH",
+        help="Optional input as a path to a pdf file.",
+    )
+    parser.add_argument(
+        "-l"
+        "--input-path-list",
+        dest="input_path_list",
+        type=_as_path_list,
+        default=None,
+        metavar="PATH[,PATH,...]",
+        help="Optional input as a list of paths containing files.",
+    )
+    parser.add_argument(
+        "-o"
+        "--output-path",
+        dest="output_path",
+        type=_as_path,
+        default=None,
+        metavar="PATH",
+        help="Optional name of text output file path.",
+    )
     parser.add_argument(
         "-s",
         "--start-page",

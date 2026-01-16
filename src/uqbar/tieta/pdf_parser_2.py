@@ -1,13 +1,35 @@
+# SPDX-License-Identifier: MIT
+# uqbar/tieta/pdf_parser.py
+"""
+Tieta | PDF Parser
+==================
+
+Overview
+--------
+Placeholder.
+
+Metadata
+--------
+- Project: Tieta
+- License: MIT
+"""
+
+# -------------------------------------------------------------------------------------
+# Imports
+# -------------------------------------------------------------------------------------
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
-import re
-from typing import Any, Iterable
+from typing import Any
 
 from pypdf import PdfReader, PdfWriter
 
 
+# -------------------------------------------------------------------------------------
+# Constants
+# -------------------------------------------------------------------------------------
 @dataclass(frozen=True)
 class ChapterSlice:
     """Page range to extract (0-indexed, inclusive start, exclusive end)."""
@@ -64,8 +86,8 @@ def extract_first_chapter_pdf(
     if pdf_path.suffix.lower() != ".pdf":
         raise ValueError(f"Expected a .pdf file, got: {pdf_path.name}")
 
-    reader = PdfReader(str(pdf_path))
-    n_pages = len(reader.pages)
+    reader: PdfReader = PdfReader(str(pdf_path))
+    n_pages: int = len(reader.pages)
     print(n_pages)
     if n_pages == 0:
         raise ValueError("PDF has 0 pages.")

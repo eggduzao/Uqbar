@@ -21,13 +21,14 @@ from __future__ import annotations
 
 import functools
 import warnings
+from collections.abc import Callable
 from datetime import datetime
 
 
 # --------------------------------------------------------------------------------------
 # Early utilities
 # --------------------------------------------------------------------------------------
-def deprecated(reason: str):
+def deprecated(reason: str) -> Callable:
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):

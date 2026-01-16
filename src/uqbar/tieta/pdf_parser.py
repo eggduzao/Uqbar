@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 # uqbar/tieta/pdf_parser.py
 """
-Tieta | Utils
-=============
+Tieta | PDF Parser
+==================
 
 Overview
 --------
@@ -157,33 +157,46 @@ def _extract_pdf_text_to_file(
     return warnings
 
 
-# --- Example usage ---
-if __name__ == "__main__":
-    pdf_in = Path("/Users/egg/Desktop/inclusive_instructional_design_for_neurodiverse_learners.pdf")
-    txt_out = Path("output.txt")
+# # --- Example usage ---
+# if __name__ == "__main__":
+#     pdf_in = Path("/Users/egg/Desktop/inclusive_instructional_design_for_neurodiverse_learners.pdf")
+#     txt_out = Path("output.txt")
 
-    warns = extract_pdf_text_to_file(
-        pdf_in,
-        txt_out,
-        initial_page = 2,
-        final_page = 5,
-    )
+#     warns = extract_pdf_text_to_file(
+#         pdf_in,
+#         txt_out,
+#         initial_page = 2,
+#         final_page = 5,
+#     )
 
-    if warns:
-        print("\nWarnings:")
-        for w in warns:
-            where = f"page {w.page}" if w.page is not None else "document"
-            print(f"- [{w.kind}] ({where}) {w.detail}")
-    else:
-        print("No obvious red flags detected.")
+#     if warns:
+#         print("\nWarnings:")
+#         for w in warns:
+#             where = f"page {w.page}" if w.page is not None else "document"
+#             print(f"- [{w.kind}] ({where}) {w.detail}")
+#     else:
+#         print("No obvious red flags detected.")
 
 
 # --------------------------------------------------------------------------------------
 # Functions
 # --------------------------------------------------------------------------------------
 
+def clean_chunk_string(
+    raw_string_list: list[str],
+) -> list[list[str]]:
+    out: list[list[str]] = []
+    return out
 
-
+def read_input_pdf(
+        input_path: Path,
+        start_page: int,
+        final_page: int | None,
+        redflags: bool,
+        redflags_path: Path,
+) -> list[str]:
+    out: list[str] = []
+    return out
 
 # --------------------------------------------------------------------------------------
 # Exports

@@ -23,8 +23,6 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-from uqbar.acta.utils import GO_EMOTIONS_LABELS, TrendList
-
 # -------------------------------------------------------------------------------------
 # Constants
 # -------------------------------------------------------------------------------------
@@ -221,39 +219,40 @@ def _flush_prompt(
 # Functions
 # --------------------------------------------------------------------------------------
 def create_prompts(
-    trend_list: TrendList,
+    clean_chunked_string: list[list[str]],
     *,
     prompt_file_path: Path = DEFAULT_PROMPT_IMG_MOOD_PATH,
     overwrite_file: bool = False,
     write_file: bool = False,
-) -> Path | None:
+) -> list[list[str]]:
     """
     Create Trends Prompt for Chat GPT or OpenRouter models.
     """
 
+    out: list[list[str]] = []
+
     # Check file
     prompt_file_path.parent.mkdir(parents=True, exist_ok=True)
     if prompt_file_path.exists() and not overwrite_file:
-        return prompt_file_path
+        return out
 
     # Check length of multi-prompt
     len(trend_list)
 
     # Iterate through trends
     for _counter, trend in enumerate(trend_list, start=1):
-
         pass
 
     # Check whether to write in a file
     if not write_file:
-        return prompt_file_path
+        return out
 
     # Write Output to file and return Path
     with open(prompt_file_path, "w") as file:
         for trend in trend_list:
             file.write(trend.image_mood_file_prompt_query)
 
-    return prompt_file_path
+    return out
 
 
 # --------------------------------------------------------------------------------------
