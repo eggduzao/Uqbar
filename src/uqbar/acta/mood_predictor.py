@@ -21,11 +21,15 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import asdict
+from enum import Enum
 from math import floor
 from typing import Any
 
 import numpy as np
 from transformers import pipeline
+from transformers.utils import logging as hf_logging
+
+from uqbar.acta.trends import GO_EMOTIONS_LABELS, MoodItem, Trend, TrendList
 
 warnings.filterwarnings("ignore")
 
@@ -81,38 +85,6 @@ _NEG: set[str] = {
     "disappointment",
     "nervousness",
 }
-
-
-GO_EMOTIONS_LABELS: list[str] = [
-    "admiration",
-    "amusement",
-    "anger",
-    "annoyance",
-    "approval",
-    "caring",
-    "confusion",
-    "curiosity",
-    "desire",
-    "disappointment",
-    "disapproval",
-    "disgust",
-    "embarrassment",
-    "excitement",
-    "fear",
-    "gratitude",
-    "grief",
-    "joy",
-    "love",
-    "nervousness",
-    "optimism",
-    "pride",
-    "realization",
-    "relief",
-    "remorse",
-    "sadness",
-    "surprise",
-    "neutral",
-]
 
 
 NEWS_CATEGORIES: dict[int, tuple[str, str]] = {
@@ -210,62 +182,11 @@ NEWS_CATEGORIES: dict[int, tuple[str, str]] = {
 class MoodLevel(Enum):
     """Placeholder"""
 
-    VERY_HIGH: int = 5
-    HIGH: int = 4
-    AVERAGE: int = 3
-    LOW: int = 2
-    VERY_LOW: int = 1
-
-@dataclass()
-class MoodItem:
-    admiration: float | None = None
-    amusement: float | None = None
-    anger: float | None = None
-    annoyance: float | None = None
-    approval: float | None = None
-    caring: float | None = None
-    confusion: float | None = None
-    curiosity: float | None = None
-    desire: float | None = None
-    disappointment: float | None = None
-    disapproval: float | None = None
-    disgust: float | None = None
-    embarrassment: float | None = None
-    excitement: float | None = None
-    fear: float | None = None
-    gratitude: float | None = None
-    grief: float | None = None
-    joy: float | None = None
-    love: float | None = None
-    nervousness: float | None = None
-    optimism: float | None = None
-    pride: float | None = None
-    realization: float | None = None
-    relief: float | None = None
-    remorse: float | None = None
-    sadness: float | None = None
-    surprise: float | None = None
-    neutral: float | None = None
-
-    # ---------- BIG GETTER ----------
-    def as_list(self) -> list[float | None]:
-        """
-        Return the mood values as a list ordered by GO_EMOTIONS_LABELS.
-        """
-        return [getattr(self, name) for name in GO_EMOTIONS_LABELS]
-
-    # ---------- BIG SETTER ----------
-    def from_list(self, values: Iterable[float | None]) -> None:
-        """
-        Populate mood values from a list ordered by GO_EMOTIONS_LABELS.
-        """
-        values = list(values)
-        if len(values) != len(GO_EMOTIONS_LABELS):
-            raise ValueError(
-                f"Expected {len(GO_EMOTIONS_LABELS)} values, got {len(values)}."
-            )
-        for name, value in zip(GO_EMOTIONS_LABELS, values, strict=False):
-            setattr(self, name, value)
+    VERY_HIGH = 5
+    HIGH = 4
+    AVERAGE = 3
+    LOW = 2
+    VERY_LOW = 1
 
 
 # -------------------------------------------------------------------------------------
@@ -360,8 +281,6 @@ def _predict_mood(
     if suppress_transformers_logging:
         # Quiet HF/transformers logging without touching your global logging config too much.
         try:
-            from transformers.utils import logging as hf_logging
-
             hf_logging.set_verbosity_error()
         except Exception:
             pass
@@ -639,6 +558,8 @@ def _score_heuristics(
         scores[2] += _S010
         scores[22] += _S020
 
+    return scores
+
 
 def _softmax(list_of_items: list[float]) -> list[float]:
     arr = np.array(list_of_items, dtype=float)
@@ -671,23 +592,25 @@ def predict_mood(trend_list: TrendList) -> None:
 
     for trend in trend_list:
 
+        if not isinstance(trend, Trend):
+            raise ValueError("Not a trend.")
+
         # Get mood keywords
-        mood_keywords: list[str] = trend.mood_prompt_response
+        mood_keywords: list[str] = trend.mood_presult_keyword
         input_text = " ".join(mood_keywords)
 
         # Predict mood
         mood_scores: MoodItem = _predict_mood(input_text)
-        list_of_scores: list[float] = mood_scores.as_list()
+        list_of_scores: list[float | None] = mood_scores.as_list()
 
         # Create softmax mood_scores
-        softmax_scores: list[float] = _softmax(list_of_scores)
+        clean_list_of_scores: list[float] = [e for e in list_of_scores if e]
+        softmax_scores: list[float] = _softmax(clean_list_of_scores)
         mood_scores.from_list(softmax_scores)
 
         # TODO: choose_news_music_style implementation
         # choose_news_music_style(mood_scores)
-        trend.mood_scores = mood_scores
-
-    return
+        # trend.mood_scores = mood_scores
 
 
 def choose_news_music_style(

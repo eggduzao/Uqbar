@@ -169,7 +169,7 @@ def _flush_prompt(
 # --------------------------------------------------------------------------------------
 # Functions
 # --------------------------------------------------------------------------------------
-def create_trend_tts_prompt(
+def create_trend_prompt(
     trend_list: TrendList,
     *,
     prompt_file_path: Path = DEFAULT_PROMPT_TTS_PATH,
@@ -349,7 +349,7 @@ def read_trend_prompt(
 # Exports
 # --------------------------------------------------------------------------------------
 __all__: list[str] = [
-    "create_trend_tts_prompt",
+    "create_trend_prompt",
     "read_trend_prompt",
 ]
 

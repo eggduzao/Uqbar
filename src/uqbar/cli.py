@@ -183,7 +183,6 @@ def acta_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
     dict[str, Any]
         A dict with parsed values. Keys match the argument `dest` names.
     """
-
     if not argv:
         argv = sys.argv[1:]
 
@@ -212,10 +211,32 @@ def acta_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
     )
 
     # Positional arguments
-    ###
+    parser.add_argument(
+        "root_path",
+        type=_as_path,
+        metavar="PATH",
+        help="Main path to store all data.",
+    )
 
     # Optional arguments
-    ###
+    parser.add_argument(
+        "-d",
+        "--date",
+        dest="this_date",
+        type=_as_datetime,
+        default=None,
+        metavar="DATE",
+        help="Date in which to fetch trends. Keep empty for latest trends.",
+    )
+    parser.add_argument(
+        "-s",
+        "--semaphore",
+        dest="semaphore",
+        type=str,
+        default=None,
+        metavar="INPUT_STR",
+        help="Which steps of the pipeline to run as a comma-separated list of int",
+    )
 
     ns = parser.parse_args(argv)
     return vars(ns)

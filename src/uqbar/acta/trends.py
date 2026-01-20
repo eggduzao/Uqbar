@@ -57,6 +57,90 @@ _MONTHS_DICT: dict[str, str] = {
 }
 
 
+GO_EMOTIONS_LABELS: list[str] = [
+    "admiration",
+    "amusement",
+    "anger",
+    "annoyance",
+    "approval",
+    "caring",
+    "confusion",
+    "curiosity",
+    "desire",
+    "disappointment",
+    "disapproval",
+    "disgust",
+    "embarrassment",
+    "excitement",
+    "fear",
+    "gratitude",
+    "grief",
+    "joy",
+    "love",
+    "nervousness",
+    "optimism",
+    "pride",
+    "realization",
+    "relief",
+    "remorse",
+    "sadness",
+    "surprise",
+    "neutral",
+]
+
+
+@dataclass()
+class MoodItem:
+    admiration: float | None = None
+    amusement: float | None = None
+    anger: float | None = None
+    annoyance: float | None = None
+    approval: float | None = None
+    caring: float | None = None
+    confusion: float | None = None
+    curiosity: float | None = None
+    desire: float | None = None
+    disappointment: float | None = None
+    disapproval: float | None = None
+    disgust: float | None = None
+    embarrassment: float | None = None
+    excitement: float | None = None
+    fear: float | None = None
+    gratitude: float | None = None
+    grief: float | None = None
+    joy: float | None = None
+    love: float | None = None
+    nervousness: float | None = None
+    optimism: float | None = None
+    pride: float | None = None
+    realization: float | None = None
+    relief: float | None = None
+    remorse: float | None = None
+    sadness: float | None = None
+    surprise: float | None = None
+    neutral: float | None = None
+
+    # ---------- BIG GETTER ----------
+    def as_list(self) -> list[float | None]:
+        """
+        Return the mood values as a list ordered by GO_EMOTIONS_LABELS.
+        """
+        return [getattr(self, name) for name in GO_EMOTIONS_LABELS]
+
+    # ---------- BIG SETTER ----------
+    def from_list(self, values: Iterable[float | None]) -> None:
+        """
+        Populate mood values from a list ordered by GO_EMOTIONS_LABELS.
+        """
+        values = list(values)
+        if len(values) != len(GO_EMOTIONS_LABELS):
+            raise ValueError(
+                f"Expected {len(GO_EMOTIONS_LABELS)} values, got {len(values)}."
+            )
+        for name, value in zip(GO_EMOTIONS_LABELS, values, strict=False):
+            setattr(self, name, value)
+
+
 # --------------------------------------------------------------------------------------
 # Helpers
 # --------------------------------------------------------------------------------------
@@ -339,7 +423,7 @@ class Trend:
     mood_presult_keyword: list[str] = field(default_factory=list)
 
     # News mood fields
-    mood_scores: dict[str, Any] = field(default_factory=dict)
+    # mood_scores: MoodItem = field(default_factory=MoodItem)
 
     # ----- Methods -----
     def update_paywall(self) -> None:
@@ -501,4 +585,9 @@ __all__: list[str] = [
     "DateTimeUTC",
     "Trend",
     "TrendList",
+    "MoodItem",
+    "GO_EMOTIONS_LABELS",
 ]
+
+
+

@@ -643,8 +643,9 @@ def _perform_query_trend(
         payload.update(extra_body)
 
     # --- Call ---
+    response: ChatCompletion | None
     try:
-        response: ChatCompletion = client.chat.completions.create(**payload)
+        response = client.chat.completions.create(**payload)
     except Exception:
         print(f"Could not execute model: {model} with api-key = {apkey[-6:]}")
         print(f"Query = {query}")
@@ -831,23 +832,23 @@ def query_models(
                 if not isinstance(results_raw, list) or not results_raw:
                     raise ValueError("cleaned output is not a non-empty list")
 
-                results_str: list[str] = [x for x in results_raw if isinstance(x, str) and x]
+                results_str: list[str | None] = [x for x in results_raw if isinstance(x, str) and x]
                 if not results_str:
                     raise ValueError("cleaned output contains no strings")
 
-                main_raw: str = results_str[0]
-                summary_raw: str = results_str[1]
-                keywords_raw: str = results_str[2]
-                mood_word: str = results_str[3]
+                main_raw: str | None = results_str[0]
+                summary_raw: str | None = results_str[1]
+                keywords_raw: str | None = results_str[2]
+                mood_word: str | None = results_str[3]
 
-                main_chunked: list[list[str]] | None = _chunk_prompt_result(main_raw)
+                main_chunked: list[list[str]] | None = _chunk_prompt_result(main_raw) if main_raw else None
                 if not isinstance(main_chunked, list) or not _has_only_str_and_at_least_one(main_chunked, str):
                     raise ValueError("chunked main text invalid (expected list[list[str]] with >=1 str)")
 
                 if not isinstance(summary_raw, str):
                     raise ValueError("summary is not a string")
 
-                keywords_list: list[str] = keywords_raw.split(";")
+                keywords_list: list[str] | None = keywords_raw.split(";") if isinstance(keywords_raw, str) else None
                 if not isinstance(keywords_list, list) or not _has_only_str_and_at_least_one(keywords_list, str):
                     raise ValueError("keywords_list is invalid")
 
