@@ -1,4 +1,4 @@
-# Phenoteka — developer Makefile
+# uqbar — developer Makefile
 # ==============================
 # Public targets:
 #   make test   -> uninstall + editable install + run ONE chosen pytest command
@@ -11,7 +11,7 @@
 # ---- knobs ---------------------------------------------------------------
 SHELL  := /bin/bash
 PYTHON ?= python3
-PKG    ?= phenoteka
+PKG    ?= uqbar
 PIP    ?= $(PYTHON) -m pip
 CONSTR ?= -c constraints.txt
  
@@ -30,7 +30,7 @@ CONSTR ?= -c constraints.txt
 # Show live logs for a specific module - '-s' prints "print()"s
 PYTEST_CMD := pytest -q tests/test_io/test_yaml_io.py -o log_cli=true -o log_cli_level=INFO -s
 # Coverage with missing lines shown
-#PYTEST_CMD := pytest -q tests/test_tables -s --cov=phenoteka.tables --cov-report=term-missing
+#PYTEST_CMD := pytest -q tests/test_tables -s --cov=uqbar.tables --cov-report=term-missing
 # Run tests excluding @pytest.mark.slow
 #PYTEST_CMD := pytest -m "not slow"
 # Stop on first failure (fail fast)

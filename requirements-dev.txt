@@ -1,5 +1,5 @@
 #####################################################################################
-# Package — requirements-dev.txt
+# Uqbar — requirements-dev.txt
 # Purpose:
 #   Superset of requirements.txt, adding all tooling for development,
 #   testing, continuous integration, linting, and documentation building.

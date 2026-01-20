@@ -24,7 +24,7 @@ import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from uqbar.acta.utils import Trend, TrendList, deprecated
+from uqbar.acta.trends import Trend, TrendList
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -41,22 +41,6 @@ RSS_DOWNLOAD_PATH: Path = Path("/Users/egg/Desktop/web.html")
 _AMP_SANITIZE_RE = re.compile(r"&(?!(amp|lt|gt|quot|apos|#\d+|#x[0-9A-Fa-f]+);)")
 
 _TRAFFIC_RE = re.compile(r"^\s*([0-9]*\.?[0-9]+)\s*([KMB]?)\+?\s*$", re.IGNORECASE)
-
-
-# ------------------------------------ DEPRECATED -------------------------------------
-@deprecated("Version 0.1.0 - Manual Download")
-def constants_legacy() -> None:
-    """
-    Legacy Constants
-    """
-    # Mock URL
-    Path("/Users/egg/Desktop/web.html")
-
-    # Precompiled patterns
-    re.compile(r"Trend breakdown")
-    re.compile(r'data-term="([^"]+)"')
-    re.compile(r"In the news")
-    re.compile(r"https://[^\s\"'>]+")
 
 
 # -------------------------------------------------------------------------------------
@@ -180,54 +164,13 @@ def _delete_trends_local_url(rss_download_path: Path) -> tuple[str, str]:
     return result.stdout, result.stderr
 
 
-# ------------------------------------ DEPRECATED -------------------------------------
-@deprecated("Version 0.1.0 - Manual Download")
-def _get_trends_from_local_url_legacy(url_path: Path) -> list[str]:
-
-    parsed_file = []
-
-    with open(url_path) as file:
-        for line in file:
-            ll = line.strip()
-            l = len(ll)
-            if l <= 1000:
-                parsed_file.append(ll)
-                continue
-            curr_line = []
-            for c in ll:
-                if c != ">":
-                    curr_line.append(c)
-                    continue
-                curr_line.append(c)
-                parsed_file.append("".join(curr_line))
-                curr_line = []
-
-        return parsed_file
-
-
-@deprecated("Version 0.1.0 - Manual Download")
-def _delete_trends_local_url_legacy(url_path: Path) -> tuple[str, str]:
-
-    file_path = str(url_path)
-    folder_path = str(url_path.parent / url_path.stem) + "_files/"
-
-    result = subprocess.run(
-        ["rm", "-rf", file_path, folder_path],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-
-    return result.stdout, result.stderr
-
-
 # -------------------------------------------------------------------------------------
 # Functions
 # -------------------------------------------------------------------------------------
 def parse_trend_rss_feed(
     rss_feed_path: Path,
     working_path: Path,
-) -> TrendList:
+) -> TrendList | None:
     """
     Parse a Google Trends RSS feed file as saved from a browser.
 
@@ -241,7 +184,7 @@ def parse_trend_rss_feed(
     root = ET.fromstring(xml_text)
     channel = root.find("channel")
     if channel is None:
-        return []
+        return None
 
     all_items = channel.findall("item")
     trend_list: TrendList = TrendList()
@@ -285,10 +228,10 @@ def parse_trend_rss_feed(
         trend_list.append(trend)
 
         # Initialization - Path
-        trend.content_path: Path = working_path / f"trend_{counter:02d}"
-        trend.image_path: Path = trend.content_path / "pics"
-        trend.video_path: Path = trend.content_path / "vids"
-        trend.audio_path: Path = trend.content_path / "audi"
+        trend.content_path = working_path / f"trend_{counter:02d}"
+        trend.image_path = trend.content_path / "pics"
+        trend.video_path = trend.content_path / "vids"
+        trend.audio_path = trend.content_path / "audi"
         path_list = [trend.image_path, trend.video_path, trend.audio_path]
         for path_name in path_list:
             try:
@@ -301,7 +244,7 @@ def parse_trend_rss_feed(
 
 def get_trends(
     *,
-    rss_download_path: str = RSS_DOWNLOAD_PATH,
+    rss_download_path: Path = RSS_DOWNLOAD_PATH,
     working_path: Path,
     delete_rss_xml_path: bool = False,
 ) -> TrendList | None:
@@ -326,10 +269,13 @@ def get_trends(
             return None
 
     # Create Trends and TrendList
-    trend_list: TrendList = parse_trend_rss_feed(
-        rss_feed_path=rss_download_path,
-        working_path=working_path,
-    )
+    if not isinstance(trend_list := parse_trend_rss_feed(
+            rss_feed_path=rss_download_path,
+            working_path=working_path,
+            ),
+        TrendList,
+    ):
+        return None
 
     if not trend_list:
         print("[ERROR] Trend List is Empty!")
@@ -350,116 +296,11 @@ def get_trends(
     return trend_list
 
 
-# ------------------------------------ DEPRECATED -------------------------------------
-@deprecated("Version 0.1.0 - Manual Download")
-def get_trend_tags_legacy(
-    trend_list: list[str],
-    *,
-    max_num: int | None = None,
-) -> list[str]:
-    """
-    Extract trend tags from newline-forced HTML chunks.
-
-    The function:
-    - waits for the third occurrence of the literal text "Trend breakdown"
-    - then collects values from attributes of the form data-term="<TREND>"
-    - stops when another full set of three "Trend breakdown" occurrences is found
-    - removes duplicates while preserving insertion order
-    """
-    collecting = False
-    breakdown_count = 0
-    collected: list[str] = []
-    seen: set[str] = set()
-
-    for line in trend_list:
-        # Count "Trend breakdown"
-        if "TREND_BREAKDOWN_RE".search(line):
-            breakdown_count += 1
-
-            if breakdown_count == 3:
-                collecting = True
-                continue
-
-            if collecting and breakdown_count == 6:
-                break
-
-        if not collecting:
-            continue
-
-        # Extract data-term values
-        for match in "DATA_TERM_RE".findall(line):
-            if match not in seen:
-                seen.add(match)
-                collected.append(match)
-
-                if max_num is not None and len(collected) >= max_num:
-                    return collected
-
-    return collected
-
-
-@deprecated("Version 0.1.0 - Manual Download")
-def get_trend_news_urls_legacy(
-    trend_list: list[str],
-) -> list[str]:
-    """
-    Extract up to three news article URLs from newline-forced HTML chunks.
-
-    The function:
-    - finds the unique occurrence of the literal text "In the news"
-    - then extracts the first three URLs starting with "https://"
-    - stops immediately after collecting three URLs
-    """
-    collecting = False
-    urls: list[str] = []
-
-    for line in trend_list:
-        if not collecting:
-            if "NEWS_HEADER_RE".search(line):
-                collecting = True
-            continue
-
-        # Once collecting, extract URLs
-        for match in "URL_RE".findall(line):
-            urls.append(match)
-            if len(urls) == 3:
-                return urls
-
-    return urls
-
-
-@deprecated("Version 0.1.0 - Manual Download")
-def get_trends_legacy(
-    *,
-    url_path: str = "MOCK_URL",
-    delete_url: bool = False,
-) -> tuple[list[str], list[str]] | None:
-    """
-    Returns trending tags and the 3 articles of news articles related to the trend.
-    """
-    trend_list = _get_trends_from_local_url_legacy(url_path)
-
-    if not trend_list:
-        print("Trend List is Empty!")
-        return None, None
-
-    tags = get_trend_tags_legacy(trend_list)
-    news = get_trend_news_urls_legacy(trend_list)
-
-    if not news:
-        print("News URL List is Empty!")
-        return None, None
-
-    if delete_url:
-        _delete_trends_local_url_legacy(url_path)
-
-    return tags, news
-
-
 # --------------------------------------------------------------------------------------
 # Exports
 # --------------------------------------------------------------------------------------
 __all__: list[str] = [
+    "parse_trend_rss_feed",
     "get_trends",
 ]
 

@@ -10,30 +10,18 @@
   "pythonPlatform": "Darwin",
 
   "reportMissingImports": "error",
-  "reportMissingTypeStubs": "none",
+  "reportMissingTypeStubs": "warning",
   "reportUnusedImport": "warning",
   "reportUnusedVariable": "warning",
   "reportPossiblyUnboundVariable": "warning",
-
-  // "settings": {
-  //   "python.pythonPath": "/Users/egg/micromamba/envs/uqbar/bin/python"
-  // },
-
-  // "env": "uqbar",
-  // "venv": "uqbar/bin/python",
-  // "micromamba": "/Users/egg/micromamba/envs/",
 
   "venvPath": "/Users/egg/micromamba/envs",
   "venv": "uqbar",
 
   "executionEnvironments": [
     {
-      "root": "/Users/egg/Projects/Uqbar/",
-      "extraPaths": ["src/"]
-      //"root": "/Users/egg/Projects/",
-      //"extraPaths": ["/Users/egg/micromamba/envs/uqbar/lib/python3.12/site-packages/"],
-      //"venvPath": "/Users/egg/micromamba/envs/",
-      //"venv": "uqbar"
+      "root": ".",
+      "extraPaths": ["src"]
     }
   ]
 }

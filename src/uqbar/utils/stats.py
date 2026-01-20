@@ -59,7 +59,7 @@ def get_random(
     """
     Placeholder
     """
-    value = NORMAL_GENERATOR.normal(loc = mean, scale = std, size = size)
+    value: list[float] = NORMAL_GENERATOR.normal(loc = mean, scale = std, size = size)
     return max(float(value[0]), 0.0011)
 
 
@@ -68,7 +68,7 @@ def hyper_random(
     interval: list[Any] | None = None,
     number: int = 1,
     mode: str = "without"
-) -> Any:
+) -> int | float | list[int | float]:
     """
     Generate hyper-random values that never repeat with any seed,
     using high-entropy system randomness.
@@ -97,7 +97,7 @@ def hyper_random(
     -------
     Any
         - A single object or list of objects depending on `number`.
-        - If interval=None: returns int or List[int].
+        - If interval=None: returns int or list[int].
         - If interval=[a,b] w/ ints: integer(s) in [a, b].
         - If interval is a list of objects: random selections from that list.
 

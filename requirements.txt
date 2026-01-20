@@ -1,5 +1,5 @@
 #####################################################################################
-# Package — requirements.txt
+# Uqbar — requirements.txt
 # Purpose:
 #   Define **minimal** runtime dependencies for Package, i.e., the packages
 #   strictly required for core functionality in production environments.

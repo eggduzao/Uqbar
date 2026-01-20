@@ -24,13 +24,11 @@ from dataclasses import asdict
 from math import floor
 from typing import Any
 
-warnings.filterwarnings("ignore")
-
-
 import numpy as np
 from transformers import pipeline
 
-from uqbar.acta.utils import GO_EMOTIONS_LABELS, NEWS_CATEGORIES, MoodItem, MoodLevel
+warnings.filterwarnings("ignore")
+
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -83,6 +81,191 @@ _NEG: set[str] = {
     "disappointment",
     "nervousness",
 }
+
+
+GO_EMOTIONS_LABELS: list[str] = [
+    "admiration",
+    "amusement",
+    "anger",
+    "annoyance",
+    "approval",
+    "caring",
+    "confusion",
+    "curiosity",
+    "desire",
+    "disappointment",
+    "disapproval",
+    "disgust",
+    "embarrassment",
+    "excitement",
+    "fear",
+    "gratitude",
+    "grief",
+    "joy",
+    "love",
+    "nervousness",
+    "optimism",
+    "pride",
+    "realization",
+    "relief",
+    "remorse",
+    "sadness",
+    "surprise",
+    "neutral",
+]
+
+
+NEWS_CATEGORIES: dict[int, tuple[str, str]] = {
+    1: (
+        "Breaking News (High Alert/Surprise)",
+        "Rapid, muted piano octaves with a soft, organic heartbeat pulse. Urgent but not alarming.",
+    ),
+    2: (
+        "Investigative Report (Deep Focus/Intrigue)",
+        "A rhythmic, low-register cello ostinato with light metallic ticking. Studious and persistent.",
+    ),
+    3: (
+        "Political Reform (Diplomacy/Optimism)",
+        "Mid-tempo acoustic guitar and light orchestral swells. Warm, professional, forward-looking.",
+    ),
+    4: (
+        "Conflict & Crisis (Solemnity/Grief)",
+        "Sustained, high-register strings with a deep, slow bass note. Mournful but dignifying.",
+    ),
+    5: (
+        "Economic Trends (Stability/Analytical)",
+        'Clean, "plucky" electric guitar with plenty of air. Crisp, modern, emotionally neutral.',
+    ),
+    6: (
+        "Environmental Crisis (Concern/Melancholy)",
+        "Ethereal woodwinds over low, resonant synth pads. Vast, reflective, slightly lonely.",
+    ),
+    7: (
+        "Scientific Breakthrough (Wonder/Curiosity)",
+        'Shimmering "glassy" mallet percussion (marimba-like). Bright, precise, intellectually exciting.',
+    ),
+    8: (
+        "Humanitarian Profile (Empathy/Resilience)",
+        "Solo acoustic piano melody with slight reverb. Vulnerable, intimate, inspiring.",
+    ),
+    9: (
+        "Social Justice & Rights (Tension/Conviction)",
+        "Distant cinematic drums with a steady, rising violin line. Serious, purposeful.",
+    ),
+    10: (
+        "Technology & Future (Innovation/Pace)",
+        "Minimalist glitch beats with warm Rhodes piano. Tech-focused but friendly.",
+    ),
+    11: (
+        "Health & Wellness (Reassurance/Care)",
+        "Gentle, flowing piano arpeggios. Safe, clean, comforting.",
+    ),
+    12: (
+        "Local Community (Neighborly/Familiar)",
+        "Light, folky instrumentation with brushes on drums. Grounded and everyday.",
+    ),
+    13: (
+        "Sports Commentary (Energy/Achievement)",
+        "Driving rhythmic percussion without epic brass. Energetic and athletic.",
+    ),
+    14: (
+        "Global Summits (Formal/Procedural)",
+        "Stately, rhythmic orchestral patterns. Polished prestige, not aggressive.",
+    ),
+    15: (
+        "Arts & Culture (Sophistication/Whimsy)",
+        "Pizzicato strings and light woodwinds. Playful, intellectual, rhythmic.",
+    ),
+    16: (
+        "Crime & Justice (Judgment/Caution)",
+        "Low, distorted piano hits with slow electronic sub-bass. Dark, sober, heavy-footed.",
+    ),
+    17: (
+        "Education & Youth (Potential/Development)",
+        "Bright toy-like percussion (glockenspiel) with steady bass. Youthful but structured.",
+    ),
+    18: (
+        "Obituary or Tribute (Memory/Honor)",
+        "A singular, repeating cello note with a soft choral pad. Gracious, quiet, final.",
+    ),
+    19: (
+        "Weather & Nature (Movement/Awe)",
+        "Rapid, cascading piano notes like rain. Fluid, natural, dynamic.",
+    ),
+    20: (
+        "Opinion & Editorial (Dialogue/Persuasion)",
+        "Walking bassline with jazz-adjacent drums. Conversational, thoughtful.",
+    ),
+    21: (
+        "Fallback 1 (Valence (+/-) Generalization)",
+        "Professional ambiguity with restrained timpani fourths/fifths and steady piano eighths.",
+    ),
+    22: (
+        "Fallback 2 (Absolute Neutrality)",
+        "Mid-register strings with slow bass and clean electronic pointers.",
+    ),
+}
+
+
+class MoodLevel(Enum):
+    """Placeholder"""
+
+    VERY_HIGH: int = 5
+    HIGH: int = 4
+    AVERAGE: int = 3
+    LOW: int = 2
+    VERY_LOW: int = 1
+
+@dataclass()
+class MoodItem:
+    admiration: float | None = None
+    amusement: float | None = None
+    anger: float | None = None
+    annoyance: float | None = None
+    approval: float | None = None
+    caring: float | None = None
+    confusion: float | None = None
+    curiosity: float | None = None
+    desire: float | None = None
+    disappointment: float | None = None
+    disapproval: float | None = None
+    disgust: float | None = None
+    embarrassment: float | None = None
+    excitement: float | None = None
+    fear: float | None = None
+    gratitude: float | None = None
+    grief: float | None = None
+    joy: float | None = None
+    love: float | None = None
+    nervousness: float | None = None
+    optimism: float | None = None
+    pride: float | None = None
+    realization: float | None = None
+    relief: float | None = None
+    remorse: float | None = None
+    sadness: float | None = None
+    surprise: float | None = None
+    neutral: float | None = None
+
+    # ---------- BIG GETTER ----------
+    def as_list(self) -> list[float | None]:
+        """
+        Return the mood values as a list ordered by GO_EMOTIONS_LABELS.
+        """
+        return [getattr(self, name) for name in GO_EMOTIONS_LABELS]
+
+    # ---------- BIG SETTER ----------
+    def from_list(self, values: Iterable[float | None]) -> None:
+        """
+        Populate mood values from a list ordered by GO_EMOTIONS_LABELS.
+        """
+        values = list(values)
+        if len(values) != len(GO_EMOTIONS_LABELS):
+            raise ValueError(
+                f"Expected {len(GO_EMOTIONS_LABELS)} values, got {len(values)}."
+            )
+        for name, value in zip(GO_EMOTIONS_LABELS, values, strict=False):
+            setattr(self, name, value)
 
 
 # -------------------------------------------------------------------------------------

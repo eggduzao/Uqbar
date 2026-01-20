@@ -36,7 +36,7 @@ name = "package"
 version = "0.1.0"
 
 # One‑line summary for package indexes and installers
-description = "A modular, research-grade platform for phenotypic data ETL, quality metrics, semantic harmonization, and intelligent imputation."
+description = "A modular, research-grade platform for general developer daily toolkits."
 
 # Long form lives in README.md and is shown on package indexes
 readme = "README.md"
@@ -49,10 +49,8 @@ license = { text = "AGPL-3.0-or-later" }
 
 # Authors and maintainers
 authors = [
-  { name = "Eduardo Gusmao", email = "eduardo.gusmao@gusmaolab.org" },
-  { name = "Halisson Cardoso", email = "halissonalberdan@gmail.com" },
-  { name = "Natale Cavacana", email = "natale@gmail.com" },
-  { name = "Dilza Campos", email = "dilza@biof.ufrj.br" },
+  { name = "Eduardo Gusmao", email = "eduardo@gusmaolab.org" },
+  { name = "Dimitri Frischmann", email = "dimitri.frischmann@tum-sls.de" },
 ]
 maintainers = [
   { name = "Package Team", email = "contact@gusmaolab.org" },
@@ -60,22 +58,22 @@ maintainers = [
 
 # Keywords improve searchability on PyPI
 keywords = [
-  "phenotype", "cohort", "EHR", "ETL", "quality-metrics",
-  "harmonization", "OMOP", "HPO", "LOINC", "SNOMED",
-  "bioinformatics", "population-genomics", "Dash",
+  "cli", "tools", "python", "toolkit", "prompt",
+  "machine learning", "bioinformatics", "search",
+  "schedule", "web scraping", "youtube",
 ]
 
 # Classifiers describe maturity, license, and audience in standardized ways
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
-  "Intended Audience :: Healthcare Industry",
+  "Intended Audience :: Technology Industry",
   "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering",
-  "Topic :: Scientific/Engineering :: Bio-Informatics",
+  "Topic :: Scientific/Engineering :: Machine learning",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
@@ -172,7 +170,7 @@ api = [
 # [project.scripts]
 # package = "package.cli.main:main"
 [project.scripts]
-magnetohydrodynamics = "magnetohydrodynamics.__main__:main"
+uqbar = "uqbar.__main__:main"
 
 # ---------------------------
 # Project URLs (PyPI side panel)

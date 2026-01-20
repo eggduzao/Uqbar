@@ -1,4 +1,4 @@
-name: magnetohydrodynamics
+name: uqbar
 channels:
   - conda-forge
 
@@ -18,7 +18,7 @@ dependencies:
   # For dev & formatting
   - pip
   - pip:
-      - magnetohydrodynamics  # editable install if developing the package
+      # - uqbar  # editable install if developing the package
       - black
       - ruff
       - mypy

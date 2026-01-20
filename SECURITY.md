@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-Only the latest released version of Phenoteka will receive security updates.
+Only the latest released version of Uqbar will receive security updates.
 
 ## Reporting a Vulnerability
 
@@ -16,4 +16,4 @@ We will:
 - Provide a timeline for resolution.
 - Keep you informed throughout the process.
 
-Your cooperation helps us keep Phenoteka safe for everyone.
+Your cooperation helps us keep Uqbar safe for everyone.

@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir .
 EXPOSE 8000
 
 # Default command (CLI help); override in docker-compose or run args
-CMD ["phenoteka", "--help"]
+CMD ["uqbar", "--help"]
 
 ####################################################################
 

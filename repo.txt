@@ -1,14 +1,14 @@
 # Repository Information
-name: Magnetohydrodynamics
-package: magnetohydrodynamics
-description: Core library implementing algorithms, utilities, and experiments associated with the Magnetohydrodynamics Python package.
+name: Uqbar
+package: uqbar
+description: Core library implementing algorithms, utilities, and experiments associated with the Uqbar Python package.
 
 # Maintainers
 primary_maintainer: Eduardo G. Gusmao
 contact_email: contact@gusmaolab.org
 
 # Repository Structure Notes
-src_dir: src/magnetohydrodynamics/
+src_dir: src/uqbar/
 tests_dir: tests/
 docs_dir: docs/
 examples_dir: examples/

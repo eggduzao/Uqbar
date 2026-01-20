@@ -1,7 +1,7 @@
-# **Magnetohydrodynamics - Style Guide**
+# **Uqbar - Style Guide**
 
 This document defines the coding and contribution style for the
-**Magnetohydrodynamics** project. The goal is to keep the codebase
+**Uqbar** project. The goal is to keep the codebase
 consistent, readable, and easy to review.
 
 ---
@@ -78,14 +78,14 @@ Key conventions:
 
 ## **4. Project Layout**
 
-- Library code: `src/magnetohydrodynamics/`
+- Library code: `src/uqbar/`
 - Tests: `tests/`
 - Docs: `docs/`
 - Examples: `examples/`
 - Notebooks (exploratory only): `notebooks/`
 
 #### Tests should mirror the package structure:
-- `src/magnetohydrodynamics/core.py` -> `tests/test_core.py`
+- `src/uqbar/core.py` -> `tests/test_core.py`
 
 ---
 
@@ -108,8 +108,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from magnetohydrodynamics.io import load_snapshot
-from magnetohydrodynamics.solver import advance
+from uqbar.io import load_snapshot
+from uqbar.solver import advance
 ```
 
 ---
@@ -144,7 +144,7 @@ Internal/private helpers (`_helper`) may have shorter docstrings, but
 should still explain **purpose** and **arguments**.
 
 Module-docstrings are **highly encouraged**, follow the examples seen in
-`src/magnetohydrodynamics/`.
+`src/uqbar/`.
 
 ---
 
@@ -217,7 +217,7 @@ Improves stability at high Alfvén speeds and prepares for AMR support.
 ## **11. Public API**
 
 - All exported symbols **should be listed in `__all__`** where appropriate.
-- The public API should be **re-exported** from `magnetohydrodynamics/__init__.py`.
+- The public API should be **re-exported** from `uqbar/__init__.py`.
 - Avoid breaking changes to the public API without bumping the MAJOR
 version and documenting in `CHANGELOG.md`.
 
@@ -296,5 +296,5 @@ Example:
 
 ---
 
-By contributing to **Magnetohydrodynamics**, you agree to follow this
+By contributing to **Uqbar**, you agree to follow this
 style guide so the project remains pleasant to work on for **everyone**.

@@ -101,18 +101,9 @@ from uqbar.acta.trend_prompt_parser import (
     create_trend_image_mood_prompt,
     create_trend_tts_prompt,
 )
-from uqbar.acta.utils import (
-    TrendList,
-    dtnow,
-    load_trendlist,
-    save_trendlist,
-)
-
-
-def hyper_random(values: list[int]) -> int:
-    """Select random value from list."""
-    import random
-    return random.choice(values)
+from uqbar.acta.trends import TrendList, load_trendlist, save_trendlist
+from uqbar.utils.stats import hyper_random
+from uqbar.utils.utils import dtnow
 
 # from uqbar.acta.image_scraper import
 # from uqbar.acta.image_downloader import
@@ -187,13 +178,29 @@ def acta_core(
 
     # Options
     image_mood_input_by_ai: bool = False
-    hyper_random_for_openroute_user_tts: int = hyper_random([0, 47])
-    hyper_random_for_openroute_model_tts: int = hyper_random([0, 487])
-    hyper_random_for_openroute_user_imgmood: int = hyper_random([0, 47])
-    hyper_random_for_openroute_model_imgmood: int = hyper_random([0, 487])
+    if not isinstance(
+        hyper_random_for_openroute_user_tts := hyper_random(interval=[0, 47]),
+        int
+    ):
+        raise ValueError("hyper_random function did not return an integer")
+    if not isinstance(
+        hyper_random_for_openroute_model_tts := hyper_random(interval=[0, 487]),
+        int
+    ):
+        raise ValueError("hyper_random function did not return an integer")
+    if not isinstance(
+        hyper_random_for_openroute_user_imgmood := hyper_random(interval=[0, 47]),
+        int
+    ):
+        raise ValueError("hyper_random function did not return an integer")
+    if not isinstance(
+        hyper_random_for_openroute_model_imgmood := hyper_random(interval=[0, 487]),
+        int
+    ):
+        raise ValueError("hyper_random function did not return an integer")
 
     # Initialization - Date string
-    datetime_utc = dtnow(fmt=False).split(" ")[0]
+    datetime_utc: str = str(dtnow(fmt=False)).split(" ")[0]
     if TESTING:
         datetime_utc = "2025-12-27"
     working_path: Path = ROOT_PATH / datetime_utc
@@ -206,13 +213,14 @@ def acta_core(
     output_log_path = working_path / "trends_1.json"
     if Semaphore.ONE:
         rss_download_path: Path = working_path / "rss_trend.html"
-        trend_list: TrendList = get_trends(
-            rss_download_path=rss_download_path,
-            working_path=working_path,
-            delete_rss_xml_path=True,
-        )
-        if trend_list is None:
-            print("[Error] Trend list is None.")
+        if not isinstance(
+            trend_list := get_trends(
+                rss_download_path=rss_download_path,
+                working_path=working_path,
+                delete_rss_xml_path=True,
+            ),
+            TrendList
+        ):
             return 1
         save_trendlist(trend_list, output_log_path)
     else:

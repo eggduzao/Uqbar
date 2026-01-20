@@ -27,20 +27,16 @@ from __future__ import annotations
 
 import re
 from collections import deque
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from time import sleep
 from typing import Any, Literal
 
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
 
-from uqbar.acta.utils import (
-    PassError,
-    Trend,
-    deprecated,
-    dtnow,
-    get_random,
-)
+from uqbar.acta.trends import Trend, TrendList
+from uqbar.utils.stats import get_random
+from uqbar.utils.utils import PassError, dtnow
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -51,18 +47,18 @@ DEFAULT_OPENROUTER_API_KEY: str = (
 
 DEFAULT_MODEL_ID: str = "allenai/olmo-3.1-32b-think:free"
 
-DEFAULT_ROLE: str = "user"
+DEFAULT_ROLE: ROLEType = "user"
 
 DEFAULT_BASE_URL:str = "https://openrouter.ai/api/v1"
 
 DEFAULT_API_KEY_LOC:str = "env"
 
 DEFAULT_HEADERS: dict[str, str] = {
-    "HTTP-Referer": "http://localhost:3000",
+    "HTTP-Referer": "https://www.gusmaolab.org",
     "X-Title": "Acta Diurna",
 }
 
-DEFAULT_EXTRA_BODY: dict[str, str] = {"user": "eduardo-local-test"}
+DEFAULT_EXTRA_BODY: dict[str, str] = {"user": "acta-local-test"}
 
 DEFAULT_MAX_RETRIES_MODEL: int = 3
 
@@ -437,8 +433,6 @@ MODEL_KEY_DICT: dict[str, list[str]] = {
 }
 
 
-TEXTType = str
-
 ROLEType = Literal["system", "user", "assistant", "developer"]
 
 
@@ -558,7 +552,7 @@ def _perform_query_trend(
 
     # Request shaping
     stop: str | Sequence[str] | None = None,
-    response_format: TEXTType | None = None,
+    response_format: dict[str, Any] | None = None,
     logit_bias: dict[str, int] | None = None,
 
     # Reliability / hygiene
@@ -567,7 +561,7 @@ def _perform_query_trend(
 
     # Advanced: pass richer messages if you ever need it
     system_prompt: str | None = None,
-) -> ChatCompletion:
+) -> ChatCompletion | None:
     """
     Perform a single chat completion request and return the raw ChatCompletion.
 
@@ -654,7 +648,7 @@ def _perform_query_trend(
     except Exception:
         print(f"Could not execute model: {model} with api-key = {apkey[-6:]}")
         print(f"Query = {query}")
-        print(f"Will try a new model.{"-"*50}\n")
+        print(f"Will try a new model.{'-'*50}\n")
         return None
     return response
 
@@ -689,357 +683,204 @@ def _clean_output(
     return chunks
 
 
-# ------------------------------------ DEPRECATED -------------------------------------
-@deprecated("Version 0.1.0 - Manual Download")
-def _perform_query_trend_legacy(
-    query: str,
-    model: str,
-    role: str,
-    base_url: str,
-    apkey: str,
-    default_headers: dict[str, str],
-    extra_body: dict[str, str],
-) -> ChatCompletion:
-    """
-    Returns a ChatCompletion object from a query.
-
-    The structure of a ChatCompletion is:
-    ```json
-    }
-        response = {
-        "id": "...",
-        "model": "...",
-        "choices": [
-            {
-                "index": 0,
-                "message": {
-                    "role": "assistant",
-                    "content": "Here is the generated text..."
-                },
-                "finish_reason": "stop"
-            }
-            # potentially more choices here
-        ],
-        "usage": {
-            "prompt_tokens": ...,
-            "completion_tokens": ...
-        }
-    }
-    ```
-    """
-    # Client automatically uses the OPENROUTER_API_KEY environment variable
-    client = OpenAI(
-        base_url=base_url,
-        api_key=apkey,
-        default_headers=default_headers, # Required by OpenRouter for logging
-    )
-
-    message_list = [
-        {
-            "role": role,
-            "content": query,
-        }
-    ]
-
-    response = client.chat.completions.create(
-        model=model,
-        messages=message_list,
-    )
-
-    return response
-
-
-@deprecated("Version 0.1.0 - Manual Download")
-def _clean_output_legacy(
-    prompt_result: str,
-    split_words: bool = False,
-) -> list[str] | str:
-
-    # 1. Find opening triple backtick
-    start = prompt_result.find("```")
-    if start == -1:
-        return None
-
-    # Consume opening ``` and optional language label (up to first newline)
-    start_line_end = prompt_result.find("\n", start)
-    if start_line_end == -1:
-        return None
-
-    # 2. Find closing triple backtick
-    end = prompt_result.find("```", start_line_end + 1)
-    if end == -1:
-        return None
-
-    # Extract the content inside the backticks
-    prompt_str = prompt_result[start_line_end + 1 : end]
-
-    # Split words or return entire chunk
-    if split_words:
-        return prompt_str.strip().split(" ")
-    return prompt_str
+def _has_only_str_and_at_least_one(lst: Any, fmt: type) -> bool:
+    seen = False
+    stop = False
+    while not stop:
+        if isinstance(lst, Iterable):
+            for item in lst:
+                _has_only_str_and_at_least_one(item, fmt)
+        elif isinstance(lst, fmt):
+            stop = True
+            seen = True
+        else:
+            return seen
+    return seen
 
 
 # --------------------------------------------------------------------------------------
 # Functions
 # --------------------------------------------------------------------------------------
 def query_models(
-    trend_list: list[str],
+    trend_list: TrendList,
     user_counter: int,
     model_counter: int,
     *,
     model_name_list: list[str] = MODEL_NAME_LIST,
     model_key_dict: dict[str, list[str]] = MODEL_KEY_DICT,
-    role: str = DEFAULT_ROLE,
+    role: ROLEType = DEFAULT_ROLE,
     base_url: str = DEFAULT_BASE_URL,
-    key_dict: dict[str, list[str]] = MODEL_KEY_DICT,
     default_headers: dict[str, str] = DEFAULT_HEADERS,
     default_extra_body: dict[str, str] = DEFAULT_EXTRA_BODY,
     sleep_min_base: float = SLEEP_MIN_BASE,
     max_retries: int = DEFAULT_MAX_RETRIES_MODEL,
 ) -> None:
+    """
+    Query models for each Trend in `trend_list`, retrying failures up to `max_retries`
+    per trend, with sleeps between attempts. Never raises (best-effort logging).
+    """
 
     # Initialize trend trend_stack
-    trend_stack: deque[Trend] = deque([t for t in trend_list])
+    trend_stack: deque[Trend] = deque(trend_list)
+
+    # Per-trend retry counters
+    retries_left: dict[int, int] = {id(t): max_retries for t in trend_stack}
 
     # Create result list
     counter = -1
-    retry_count = 0
+
+    # Main Trend while loop
     while trend_stack:
 
-        # Initialize trend
+        # Initialize trend loop
         counter += 1
-        retry_count += 1
         trend = trend_stack.pop()
 
-        # Get model
+        # ---------------------------
+        # Validate input
+        # ---------------------------
+        query = trend.tts_prompt_query
+        if not isinstance(query, str) or not query.strip():
+            print(f"{dtnow()} ERROR: trend.tts_prompt_query is not a non-empty string")
+            sleep(get_random() + sleep_min_base)
+            continue
+
+        # ---------------------------
+        # Pick model and key
+        # ---------------------------
         api_model_id, api_key_id = _get_model_name_and_key(
-            user_counter+counter,
-            model_counter+counter,
+            user_counter + counter,
+            model_counter + counter,
             model_name_list,
             model_key_dict,
         )
 
+        # ---------------------------
         # Check API key
+        # ---------------------------
         if not api_key_id:
             print(f"{dtnow()} ERROR:")
             print(
                 f"{dtnow()} You need to give an OpenRouter Key. Check"
                 f" https://openrouter.ai/docs/guides/overview/auth/oauth"
             )
-            return
+            continue
 
+        # ---------------------------
         # Check model
+        # ---------------------------
         if not api_model_id:
             print(f"{dtnow()} ERROR:")
             print(f"{dtnow()} Model ID invalid. Try: 'allenai_31'")
-            return
+            continue
 
-        query: str = trend.tts_prompt_query
-
-        response: ChatCompletion = _perform_query_trend(
-            query=query,
-            model=api_model_id,
-            role=role,
-            base_url=base_url,
-            apkey=api_key_id,
-            default_headers=default_headers,
-            extra_body=default_extra_body,
-            app_url="HTTP-Referer",
-            app_title="X-Title",
-            response_format={"type":"json_object"},
-        )
-
-        # Check reponse and response.choices
-        if not response or not response.choices:
-            if retry_count < max_retries:
-                trend_stack.append(trend)
-            else:
-                retry_count = 0
+        # -------------------------------
+        # Call provider (may return None)
+        # -------------------------------
+        if not isinstance(
+            response := _perform_query_trend(
+                query=query,
+                model=api_model_id,
+                role=role,
+                base_url=base_url,
+                apkey=api_key_id,
+                extra_body=default_extra_body,
+                app_url=default_headers.get("HTTP-Referer", None),
+                app_title=default_headers.get("X-Title", None),
+            ),
+            ChatCompletion,
+        ):
+            print(f"{dtnow()} ERROR:")
+            print(f"{dtnow()} Prompt could not be formed correctly")
             sleep(get_random() + sleep_min_base)
             continue
 
-        # Create stack with response.choices
-        from collections import deque as stack
-        response_choices_stack = stack(response.choices)
-
-        # Output structures
-        trend.tts_presult_full_text: list[list[list[str]]] = []
-        trend.tts_presult_summary_text: list[str] = []
-
-        # Loop management structures
-        idx = -1
-        success_choice: dict[int: list[bool]] = dict()
-        while response_choices_stack:
-
-            idx += 1
-
-            resp = response_choices_stack.pop()
-            if not resp:
-                print(f"..{dtnow()} ERROR:")
-                print(f"..No response_choices_stack[{idx}] was found.")
-                if retry_count < max_retries:
-                    success_choice[idx].append(False)
-                    print("..Continuing loop with signal to requeue.")
-                else:
-                    success_choice[idx].append(True)
-                    print("..Continuing loop without signal to requeue.")
-                continue
-
-            # Populating success_choice dictionary
-            success_test = success_choice.get(idx)
-            if not isinstance(success_test, list):
-                success_choice[idx]: list[bool] = []
-
-            # Check if content exists
-            if not resp.message.content:
-                print(f"..{dtnow()} ERROR:")
-                print(f"..No response_choices_stack[{idx}].message.content was found.")
-                if retry_count < max_retries:
-                    success_choice[idx].append(False)
-                    print("..Continuing loop with signal to requeue.")
-                else:
-                    success_choice[idx].append(True)
-                    print("..Continuing loop without signal to requeue.")
-                continue
-
-            results: list[str] = _clean_output(
-                prompt_result=resp.message.content,
-                split_words=False,
-            )
-
-            if not results:
-                print(f"..{dtnow()} ERROR:")
-                print(f"..Could not clean response_choices_stack[{idx}].message.content.")
-                if retry_count < max_retries:
-                    success_choice[idx].append(False)
-                    print("..Continuing loop with signal to requeue.")
-                else:
-                    success_choice[idx].append(True)
-                    print("..Continuing loop without signal to requeue.")
-                continue
+        # If call failed or returned an unusable response, requeue if possible.
+        if not response or not getattr(response, "choices", None):
+            left = retries_left.get(id(trend), 0) - 1
+            retries_left[id(trend)] = left
+            if left > 0:
+                trend_stack.appendleft(trend)  # retry later (round-robin-ish)
             else:
-                success_choice[idx].append(True)
+                print(f"{dtnow()} ERROR: exhausted retries for trend={trend.title!r}")
+            sleep(get_random() + sleep_min_base)
+            continue
 
+        # ---------------------------
+        # Initialize output structures
+        # ---------------------------
+        trend.tts_presult_full_text = []
+        trend.tts_presult_summary_text = []
+        trend.image_presult_keywords = []
+        trend.mood_presult_keyword = []
+
+
+        # Track whether at least one choice succeeded for this trend
+        any_success = False
+
+        # ---------------------------
+        # Process choices (avoid tortuous stacks / idx dict-of-lists)
+        # ---------------------------
+        for idx, choice in enumerate(response.choices):
             try:
-                max_idx: int = max(enumerate(results), key=lambda x: len(x[1]))[0]
-                min_idx: int = min(enumerate(results), key=lambda x: len(x[1]))[0]
+                content: str | None = choice.message.content if choice and choice.message else None
+                if not isinstance(content, str) or not content.strip():
+                    raise ValueError("missing message.content")
 
-                main_text_chunked: list[list[str]] = _chunk_prompt_result(results[max_idx])
-                trend.tts_presult_full_text.append(main_text_chunked)
-                trend.tts_presult_summary_text.append(results[min_idx])
+                results_raw = _clean_output(prompt_result=content, split_words=False)
+                if not isinstance(results_raw, list) or not results_raw:
+                    raise ValueError("cleaned output is not a non-empty list")
+
+                results_str: list[str] = [x for x in results_raw if isinstance(x, str) and x]
+                if not results_str:
+                    raise ValueError("cleaned output contains no strings")
+
+                main_raw: str = results_str[0]
+                summary_raw: str = results_str[1]
+                keywords_raw: str = results_str[2]
+                mood_word: str = results_str[3]
+
+                main_chunked: list[list[str]] | None = _chunk_prompt_result(main_raw)
+                if not isinstance(main_chunked, list) or not _has_only_str_and_at_least_one(main_chunked, str):
+                    raise ValueError("chunked main text invalid (expected list[list[str]] with >=1 str)")
+
+                if not isinstance(summary_raw, str):
+                    raise ValueError("summary is not a string")
+
+                keywords_list: list[str] = keywords_raw.split(";")
+                if not isinstance(keywords_list, list) or not _has_only_str_and_at_least_one(keywords_list, str):
+                    raise ValueError("keywords_list is invalid")
+
+                if not isinstance(mood_word, str):
+                    raise ValueError("summary is not a string")
+
+                trend.tts_presult_full_text.append(main_chunked)
+                trend.tts_presult_summary_text.append(summary_raw)
+                trend.image_presult_keywords.append(keywords_list)
+                trend.mood_presult_keyword.append(mood_word)
+                any_success = True
+
             except Exception as e:
-                print(f"..{dtnow()} ERROR:")
-                print(e)
-                if retry_count < max_retries:
-                    success_choice[idx].append(False)
-                    print("..Continuing loop with signal to requeue.")
-                else:
-                    success_choice[idx].append(True)
-                    print("..Continuing loop without signal to requeue.")
+                # Never break; log and keep going to other choices
+                print(f"..{dtnow()} ERROR: failed processing choice[{idx}] for trend={trend.title!r}")
+                print(f"..{type(e).__name__}: {e}")
                 continue
 
-        sleep(get_random() + sleep_min_base)
-
-        if not sum([x for _, x in success_choice.items()]):
-            retry_count += 1
-            continue
-
-        retry_count = 0
-
-    return None
-
-
-def query_image_and_mood(
-    trend_list: list[str],
-    user_counter: int,
-    model_counter: int,
-    *,
-    model_name_list: list[str] = MODEL_NAME_LIST,
-    model_key_dict: dict[str, list[str]] = MODEL_KEY_DICT,
-    role: str = DEFAULT_ROLE,
-    base_url: str = DEFAULT_BASE_URL,
-    key_dict: str = MODEL_KEY_DICT,
-    default_headers: dict[str, str] = DEFAULT_HEADERS,
-    default_extra_body: dict[str, str] = DEFAULT_EXTRA_BODY,
-    sleep_min_base: float = SLEEP_MIN_BASE,
-    max_retries: int = DEFAULT_MAX_RETRIES_MODEL,
-) -> None:
-
-    # Initialize trend stack
-    stack: deque[Trend] = deque(trend_list)
-
-    # Create result list
-    counter = -1
-    retry_count = 0
-    while stack:
-
-        # Initialize trend
-        counter += 1
-        retry_count += 1
-        trend = stack.pop()
-
-        # Get model
-        api_model_id, api_key_id = _get_model_name_and_key(
-            user_counter+counter,
-            model_counter+counter,
-            model_name_list,
-            model_key_dict,
-        )
-
-        # Check API key
-        if not api_key_id:
-            print(f"{dtnow()} ERROR:")
-            print(
-                f"{dtnow()} You need to give an OpenRouter Key. Check"
-                f" https://openrouter.ai/docs/guides/overview/auth/oauth"
-            )
-            return
-
-        # Check model
-        if not api_model_id:
-            print(f"{dtnow()} ERROR:")
-            print(f"{dtnow()} Model ID invalid. Try: 'allenai_31'")
-            return
-
-        # Image and Mood query
-        mood_prompt_query: str = trend.image_mood_prompt_query
-
-        response: ChatCompletion = _perform_query_trend(
-            query=mood_prompt_query,
-            model=api_model_id,
-            role=role,
-            base_url=base_url,
-            apkey=api_key_id,
-            default_headers=default_headers,
-            extra_body=default_extra_body,
-            app_url="HTTP-Referer",
-            app_title="X-Title",
-            response_format={"type":"json_object"},
-        )
-
-        if not response:
-            if retry_count < max_retries:
-                stack.append(trend)
+        # ---------------------------
+        # Decide whether to retry this trend
+        # ---------------------------
+        if not any_success:
+            left = retries_left.get(id(trend), 0) - 1
+            retries_left[id(trend)] = left
+            if left > 0:
+                trend_stack.appendleft(trend)
+                print(f"{dtnow()} WARN: no valid choices; requeued trend={trend.title!r} (retries_left={left})")
             else:
-                retry_count = 0
-            sleep(get_random() + sleep_min_base)
-            continue
+                print(f"{dtnow()} ERROR: no valid choices; exhausted retries for trend={trend.title!r}")
 
-        retry_count = 0
-
-        trend.image_mood_presult_keywords: list[list[str]] = []
-        trend.mood_mood_presult_words: list[str] = []
-        for idx in range(0, len(response.choices)):
-
-            results: list[str] = _clean_output(
-                prompt_result=response.choices[idx].message.content,
-                split_words=False,
-            )
-
-            image_list: list[str] = results[0].strip().split(" ")
-            trend.image_mood_presult_keywords.append(image_list)
-            mood_name: str = results[1].strip()
-            trend.mood_mood_presult_words.append(mood_name)
+        else:
+            # Reset retries on success (optional but typically desired)
+            retries_left[id(trend)] = max_retries
 
         sleep(get_random() + sleep_min_base)
 
@@ -1051,7 +892,6 @@ def query_image_and_mood(
 # --------------------------------------------------------------------------------------
 __all__: list[str] = [
     "query_models",
-    "query_image_and_mood",
 ]
 
 

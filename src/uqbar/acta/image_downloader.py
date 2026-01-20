@@ -54,7 +54,7 @@ from uqbar.acta.image_processor import (
     image_dedup,
 )
 from uqbar.acta.image_scaper import get_image_links
-from uqbar.acta.utils import QueryConfig, TrendList
+from uqbar.acta.utils import TrendList
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -113,6 +113,21 @@ DEFAULT_STOPWORDS_FALLBACK: set[str] = {
     "our",
     "your",
 }
+
+
+@dataclass(frozen=True)
+class QueryConfig:
+    """
+    Query Configuration Dataclass
+    """
+
+    max_phrases: int = 3  # quoted phrases for precision query
+    max_keywords: int = 10  # unquoted tokens for both queries
+    min_token_len: int = 2
+    phrase_ngram_range: tuple[int, int] = (2, 3)
+    phrase_min_score: float = 0.05  # TF-IDF threshold (tune for short titles)
+    keep_unicode_letters: bool = True  # keep accented letters
+    ascii_only: bool = False  # if True, strip accents entirely
 
 
 # --------------------------------------------------------------------------------------
