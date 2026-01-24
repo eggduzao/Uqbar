@@ -91,7 +91,7 @@ from __future__ import annotations
 
 import re
 import sys
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from enum import Enum, IntEnum
 from pathlib import Path
@@ -185,21 +185,100 @@ class Semaphore:
 # Helpers
 # --------------------------------------------------------------------------------------
 def _resolve_semaphore(raw_string: str | None) -> Semaphore:
-    """ Resolves Semaphores"""
+    """
+    Resolve a semaphore selection string into a Semaphore instance.
 
-    # Create Semaphore
-    semaphore: Semaphore = Semaphore()
+    Semantics
+    ---------
+    - If `raw_string` is None or empty/whitespace: enable all steps.
+    - Otherwise, parse integers from the string and enable only those steps.
 
-    # Update Semaphore
-    if raw_string is None:
+    Accepted input examples
+    -----------------------
+    "1,2,3"
+    "1 2 3"
+    "1; 2; 3"
+    "1, 2;3  4"
+    "7-8,11-13"   # ranges supported
+
+    Notes
+    -----
+    - Never raises; invalid tokens are ignored with a warning.
+    """
+    semaphore = Semaphore()
+
+    if raw_string is None or not raw_string.strip():
         semaphore.set_all(True)
+        return semaphore
+
+    s = raw_string.strip()
+
+    # Split on common separators: commas, semicolons, and any whitespace.
+    tokens = [t for t in re.split(r"[,\s;]+", s) if t]
+    ints: list[int] = []
+
+    for tok in tokens:
+        # Support simple ranges like "7-8" or "11-13"
+        if "-" in tok:
+            a_str, b_str = (p.strip() for p in tok.split("-", 1))
+            if a_str.isdigit() and b_str.isdigit():
+                a, b = int(a_str), int(b_str)
+                lo, hi = (a, b) if a <= b else (b, a)
+                ints.extend(range(lo, hi + 1))
+            else:
+                print(f"Invalid range token ignored: {tok!r}")
+            continue
+
+        if tok.isdigit():
+            ints.append(int(tok))
+        else:
+            print(f"Invalid token ignored: {tok!r}")
+
+    # Enable parsed steps
+    if ints:
+        semaphore.update_many(ints, True)
     else:
-        SPLIT_RE = r" ,;"
-        str_list: list[str] = re.split(raw_string, SPLIT_RE)
-        int_list: list[int] = [int(e) for e in str_list if int(e)]
-        semaphore.update_many(int_list, True)
+        print("No valid step indices found; enabling all steps.")
+        semaphore.set_all(True)
 
     return semaphore
+
+
+def _run_or_load(
+    *,
+    key: SemaphoreKey,
+    finalphore: Semaphore,
+    working_path: Path,
+    filename: str,
+    state: TrendList,
+    run: Callable[[TrendList], TrendList],
+) -> TrendList | None:
+    """
+    If `key` is enabled, run `run(state)` and save checkpoint (if state is TrendList).
+    Otherwise, load checkpoint and return it.
+
+    This is intentionally low-ceremony for "personal pipeline" code.
+    """
+    checkpoint_path: Path = working_path / filename
+
+    if finalphore.get(key):
+        new_state = run(state)
+        if isinstance(new_state, TrendList):
+            save_trendlist(new_state, checkpoint_path)
+        return new_state
+
+    elif not checkpoint_path.exists():
+        print(f"File {checkpoint_path} does not exist.")
+        sys.exit(0)
+
+    elif not isinstance(
+        loaded := load_trendlist(checkpoint_path),
+        TrendList,
+    ):
+        print(f"Invalid checkpoint: {checkpoint_path}")
+        sys.exit(1)
+        return loaded
+
 
 # --------------------------------------------------------------------------------------
 # Functions
@@ -281,75 +360,136 @@ def acta_core(
         raise ValueError("hyper_random function did not return an integer")
 
     # Declarations
-    working_path: Path
-    output_log_path: Path
-    update_required: bool
+    working_path: Path | None = None
+    rss_download_path: Path | None = None
 
-    trend_list: TrendList
+    trend_list: TrendList | None = None
 
     # 0. Setup | Initialization
     if finalphore.get(SemaphoreKey.ZERO):
-        working_path: Path = root_path / datetime_utc
+        working_path = root_path / datetime_utc
         try:
             working_path.mkdir(parents=True, exist_ok=True)
         except Exception as e:
             print(f"An error occurred during path creation: {e}")
-        update_required = False
-        output_log_path = working_path / "trends_1.json"
-        rss_download_path: Path = working_path / "rss_trend.html"
+        rss_download_path = working_path / "rss_trend.html"
 
-    # 1. [MAIN PATH] Get trend xml file
-    if finalphore.get(SemaphoreKey.ONE):
-        if not isinstance(
-            trend_list := get_trends(
-                rss_download_path=rss_download_path,
-                working_path=working_path,
-                delete_rss_xml_path=False,
-            ),
-            TrendList
-        ):
-            return 1
-        save_trendlist(trend_list, output_log_path)
-        update_required = False
-    else:
-        if output_log_path.exists() and update_required:
-            trend_list = load_trendlist(output_log_path)
-        else:
-            print(f"File {output_log_path} does not exist.")
-            sys.exit(0)
+    if not working_path or not isinstance(working_path, Path):
+        return 1
 
-    # 2. [MAIN PATH - AI PROMPT TEXT CREATION] Create TTS prompt input
-    output_log_path = working_path / "trends_2.json"
-    if finalphore.get(SemaphoreKey.TWO):
-        create_trend_prompt(
-            trend_list=trend_list,
-            overwrite_file=False,
-            write_file=False,
-        )
-        save_trendlist(trend_list, output_log_path)
-        update_required = False
-    else:
-        if output_log_path.exists():
-            trend_list = load_trendlist(output_log_path)
-        else:
-            print(f"File {output_log_path} does not exist.")
-            sys.exit(0)
+    # 1) Get trends
+    trend_list = _run_or_load(
+        key=SemaphoreKey.ONE,
+        finalphore=finalphore,
+        working_path=working_path,
+        filename="trends_1.json",
+        state=trend_list if trend_list else TrendList(),
+        run=lambda _prev: get_trends(
+            rss_download_path=rss_download_path,
+            working_path=working_path,
+            delete_rss_xml_path=False,
+        ),
+    )
+    if not isinstance(trend_list, TrendList):
+        return 1
 
-    # 3. [MAIN PATH - AI PROMPT EXECUTION] Query TTS prompt to obtain its result
-    output_log_path = working_path / "trends_3.json"
-    if finalphore.get(SemaphoreKey.THREE):
-        query_models(
-            trend_list=trend_list,
-            user_counter=hyper_random_for_openroute_user_tts,
-            model_counter=hyper_random_for_openroute_model_tts,
-        )
-        save_trendlist(trend_list, output_log_path)
-    else:
-        if output_log_path.exists():
-            trend_list = load_trendlist(output_log_path)
-        else:
-            print(f"File {output_log_path} does not exist.")
-            sys.exit(0)
+    # 2) Create prompts (in-place mutation; return state)
+    trend_list = _run_or_load(
+        key=SemaphoreKey.TWO,
+        finalphore=finalphore,
+        working_path=working_path,
+        filename="trends_2.json",
+        state=trend_list,
+        run=lambda prev: (
+            create_trend_prompt(
+                trend_list=prev,
+                overwrite_file=False,
+                write_file=False,
+            )
+            or prev
+        ),
+    )
+    if not isinstance(trend_list, TrendList):
+        return 1
+
+    # 3) Query models (in-place mutation; return state)
+    trend_list = _run_or_load(
+        key=SemaphoreKey.THREE,
+        finalphore=finalphore,
+        working_path=working_path,
+        filename="trends_3.json",
+        state=trend_list,
+        run=lambda prev: (
+            query_models(
+                trend_list=prev,
+                user_counter=hyper_random_for_openroute_user_tts,
+                model_counter=hyper_random_for_openroute_model_tts,
+            )
+            or prev
+        ),
+    )
+    if not isinstance(trend_list, TrendList):
+        return 1
+
+    # # 1. [MAIN PATH] Get trend xml file
+    # if working_path and working_path.exists():
+    #     output_log_path = working_path / "trends_1.json"
+    # if finalphore.get(SemaphoreKey.ONE):
+    #     if not isinstance(
+    #         trend_list := get_trends(
+    #             rss_download_path=rss_download_path,
+    #             working_path=working_path,
+    #             delete_rss_xml_path=False,
+    #         ),
+    #         TrendList
+    #     ):
+    #         return 1
+    #     if output_log_path and output_log_path.exists():
+    #         save_trendlist(trend_list, output_log_path)
+    #     if not is_loaded:
+    #         is_loaded = True
+    # else:
+    #     if output_log_path and output_log_path.exists():
+    #         trend_list = load_trendlist(output_log_path)
+    #     else:
+    #         print(f"File {output_log_path} does not exist.")
+    #         sys.exit(0)
+
+    # # 2. [MAIN PATH - AI PROMPT TEXT CREATION] Create TTS prompt input
+    # if working_path and working_path.exists():
+    #     output_log_path = working_path / "trends_2.json"
+    # if finalphore.get(SemaphoreKey.TWO):
+    #     create_trend_prompt(
+    #         trend_list=trend_list,
+    #         overwrite_file=False,
+    #         write_file=False,
+    #     )
+    #     if output_log_path and output_log_path.exists():
+    #         save_trendlist(trend_list, output_log_path)
+    # else:
+    #     if output_log_path and output_log_path.exists():
+    #         trend_list = load_trendlist(output_log_path)
+    #     else:
+    #         print(f"File {output_log_path} does not exist.")
+    #         sys.exit(0)
+
+    # # 3. [MAIN PATH - AI PROMPT EXECUTION] Query TTS prompt to obtain its result
+    # if working_path and working_path.exists():
+    #     output_log_path = working_path / "trends_3.json"
+    # if finalphore.get(SemaphoreKey.THREE):
+    #     query_models(
+    #         trend_list=trend_list,
+    #         user_counter=hyper_random_for_openroute_user_tts,
+    #         model_counter=hyper_random_for_openroute_model_tts,
+    #     )
+    #     if output_log_path and output_log_path.exists():
+    #         save_trendlist(trend_list, output_log_path)
+    # else:
+    #     if output_log_path and output_log_path.exists():
+    #         trend_list = load_trendlist(output_log_path)
+    #     else:
+    #         print(f"File {output_log_path} does not exist.")
+    #         sys.exit(0)
 
     # # 4/5. [BRANCH A - AI SOLUTION]
     # if image_mood_input_by_ai:
@@ -508,7 +648,7 @@ def acta_core(
     #         print(f"File {output_log_path} does not exist.")
     #         sys.exit(0)
 
-    # return 0
+    return 0
 
 
 # --------------------------------------------------------------------------------------
@@ -519,7 +659,10 @@ __all__: list[str] = [
 ]
 
 # -------------------------------------------------------------------------------------
-# Test | python -m uqbar acta /Users/egg/acta/content/ -d '2026-01-20' -s 1 > out.txt 2>&1
+# Test
+# python -m uqbar acta /Users/egg/acta/content/ -d '2026-01-21' -s 0,1 > out.txt 2>&1
+# python -m uqbar acta /Users/egg/acta/content/ -d '2026-01-21' -s 0,2 > out.txt 2>&1
+# python -m uqbar acta /Users/egg/acta/content/ -d '2026-01-21' -s 0,3 > out.txt 2>&1
 # -------------------------------------------------------------------------------------
 # if __name__ == "__main__":
 #     ...

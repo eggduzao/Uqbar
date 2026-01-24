@@ -715,7 +715,7 @@ def query_models(
     default_extra_body: dict[str, str] = DEFAULT_EXTRA_BODY,
     sleep_min_base: float = SLEEP_MIN_BASE,
     max_retries: int = DEFAULT_MAX_RETRIES_MODEL,
-) -> None:
+) -> TrendList:
     """
     Query models for each Trend in `trend_list`, retrying failures up to `max_retries`
     per trend, with sleeps between attempts. Never raises (best-effort logging).
@@ -885,7 +885,7 @@ def query_models(
 
         sleep(get_random() + sleep_min_base)
 
-    return None
+    return trend_list
 
 
 # --------------------------------------------------------------------------------------

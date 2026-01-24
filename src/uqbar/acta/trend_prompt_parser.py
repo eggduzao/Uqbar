@@ -51,7 +51,7 @@ TOTAL_WORD_COUNT: int = 1_200
 
 SUMMARY_WORD_COUNT: int = 100
 
-TOTAL_WORD_IMAGE_COUNT: int = 10
+TOTAL_WORD_IMAGE_COUNT: int = 5
 
 
 # Regular expressions
@@ -87,41 +87,45 @@ def _get_prompt_string(
         last_ruler: str = ""
 
     regular_prompt: str = (
-        f"1. Goal: Write a Continuous Prose as a Professional Calm News-Media Narrator,\n"
-        f"targeting a General Audience; synthesizing these three news sources, which report\n"
-        f"the same facts with minor framing differences:\n"
+        f"1. Goal: Write a Continuous Prose as a Professional Calm News-Media "
+        f"Narrator, targeting a General Audience; synthesizing these three news "
+        f"sources, which report the same facts with minor framing differences:\n"
         f"    1.1. {news_url_list[0]}\n"
         f"    1.2. {news_url_list[1]}\n"
         f"    1.3. {news_url_list[2]}\n"
         f"\n"
         f"2. Length of text: ~{total_word_count:,} words (±20%).\n"
         f"\n"
-        f"3. Style: Predominantly in a news-style impersonal voice, hook the reader with\n"
-        f"mystery in the first 2–3 sentences. Develop the news arc while maintaining mystery.\n"
-        f"Release the mystery once the reader’s full attention is secured. Fill the remainder\n"
-        f"of the report with background and established facts.\n"
+        f"3. Style:\n"
+        f"    3.1. Predominantly in a news-style impersonal voice.\n"
+        f"    3.2. Hook the reader with mystery in the first 2–3 sentences.\n"
+        f"    3.3. Develop the news arc while maintaining mystery.\n"
+        f"    3.4. Release the mystery once the reader’s full attention is secured.\n"
+        f"    3.5. Fill the remainder of the report with background and established "
+        f"facts.\n"
         f"\n"
-        f"4. Optimize the textual flow for neural TTS. Minor trimming after generation is\n"
-        f"acceptable. Keep sentences short to medium in length.\n"
+        f"4. Optimize the textual flow for neural TTS. Minor trimming after "
+        f"generation is acceptable. Keep sentences short to medium in length.\n"
         f"\n"
         f"5. Constraints:\n"
-        f"    5.1. Create mystery and tension. Atmospheric or metaphorical language is allowed,\n"
-        f"         but do not introduce false factual claims.\n"
-        f"    5.2. Adopt a news-anchor storytelling tone. Avoid excessive LinkedIn-style\n"
-        f"         seriousness or job-market structure.\n"
+        f"    5.1. Create mystery and tension. Atmospheric or metaphorical "
+        f"language is allowed, but do not introduce false factual claims.\n"
+        f"    5.2. Adopt a news-anchor storytelling tone. Avoid excessive "
+        f"LinkedIn-style seriousness or job-market structure.\n"
         f"    5.3. Avoid hyphens and other TTS-unfriendly characters.\n"
         f"\n"
         f"6. Please return each in a separate triple-backtick codebox:\n"
         f"    6.1. The full text.\n"
-        f"    6.2. A ~{SUMMARY_WORD_COUNT}-words (±20%) summary of the full text in another\n"
-        f"         triple-backtick code block.\n"
-        f"    6.3. A semicolon-separated list of the TOP ~{total_word_image_count} most \n"
-        f"         representative keywords (±5 words), optimised for a google-like search.\n"
-        f"    6.4. A single word, most representative of the mood that an average person \n"
-        f"         would feel when seeing such news story.\n"
+        f"    6.2. A ~{summary_word_count}-words (±20%) summary of the full text "
+        f"in another triple-backtick code block.\n"
+        f"    6.3. A semicolon-separated list of the TOP ~{total_word_image_count} "
+        f"most representative keywords (±20%), **optimised for a google-like "
+        f"search**.\n"
+        f"    6.4. A single word, most representative of the **mood that an average "
+        f"person would feel when seeing such news story**.\n"
         f"\n"
-        f"7. Do return only the four triple-backtick codeboxes above, stacked on after  \n"
-        f"the other; and NOTHING more other than their content.\n"
+        f"7. Do **return only the four triple-backtick codeboxes mentioned above**, "
+        f"stacked and in order. Do **NOT** return anything else.\n"
     )
 
     special_prompt: str = (
@@ -175,15 +179,20 @@ def create_trend_prompt(
     prompt_file_path: Path = DEFAULT_PROMPT_TTS_PATH,
     overwrite_file: bool = False,
     write_file: bool = False,
-) -> Path | None:
+) -> TrendList:
     """
     Create Trends Prompt for Chat GPT or OpenRouter models.
     """
 
+    print("Entered create_trend_prompt")
+
     # Check file
     prompt_file_path.parent.mkdir(parents=True, exist_ok=True)
     if prompt_file_path.exists() and not overwrite_file:
-        return prompt_file_path
+        print("prompt_file_path does not exist.")
+        return trend_list
+
+    print(f"prompt_file_path = {prompt_file_path}")
 
     # Check length of multi-prompt
     total_size: int = len(trend_list)
@@ -212,7 +221,7 @@ def create_trend_prompt(
 
     # Check whether to write in a file
     if not write_file:
-        return prompt_file_path
+        return trend_list
 
     # Write Output to file and return Path
     with open(prompt_file_path, "w") as file:
@@ -220,7 +229,7 @@ def create_trend_prompt(
             if isinstance(trend, Trend) and isinstance(trend.tts_file_prompt_query, str):
                 file.write(trend.tts_file_prompt_query)
 
-    return prompt_file_path
+    return trend_list
 
 
 def read_trend_prompt(

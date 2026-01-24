@@ -35,8 +35,6 @@ CHROME_COMMAND: str = "/Applications/Google Chrome.app/Contents/MacOS/Google Chr
 
 RSS_URL: str = "https://trends.google.com/trending/rss?geo=US"
 
-RSS_DOWNLOAD_PATH: Path = Path("/Users/egg/Desktop/web.html")
-
 
 _AMP_SANITIZE_RE = re.compile(r"&(?!(amp|lt|gt|quot|apos|#\d+|#x[0-9A-Fa-f]+);)")
 
@@ -47,10 +45,10 @@ _TRAFFIC_RE = re.compile(r"^\s*([0-9]*\.?[0-9]+)\s*([KMB]?)\+?\s*$", re.IGNORECA
 # Helpers
 # -------------------------------------------------------------------------------------
 def _download_rss_feed(
+    rss_download_path: Path,
     *,
     chrome_command: str = CHROME_COMMAND,
     rss_url: str = RSS_URL,
-    rss_download_path: Path = RSS_DOWNLOAD_PATH,
 ) -> tuple[str, str]:
     """
     Fetch the rendered DOM of `rss_url` using headless Chrome and save it to disk.
@@ -170,7 +168,7 @@ def _delete_trends_local_url(rss_download_path: Path) -> tuple[str, str]:
 def parse_trend_rss_feed(
     rss_feed_path: Path,
     working_path: Path,
-) -> TrendList | None:
+) -> TrendList:
     """
     Parse a Google Trends RSS feed file as saved from a browser.
 
@@ -178,13 +176,14 @@ def parse_trend_rss_feed(
     - strips any non-XML preamble before <rss>
     - sanitizes bare '&' characters to '&amp;'
     """
+
     raw_text = rss_feed_path.read_text(encoding="utf-8", errors="replace")
     xml_text = _extract_rss_xml_text(raw_text)
 
     root = ET.fromstring(xml_text)
     channel = root.find("channel")
     if channel is None:
-        return None
+        return TrendList()
 
     all_items = channel.findall("item")
     trend_list: TrendList = TrendList()
@@ -198,14 +197,10 @@ def parse_trend_rss_feed(
         trend.volume = _parse_approx_traffic(approx)
 
         pub = _child_text_by_localname(item, "pubDate")
-        # print(f"pub = {pub} | type(pub) = {type(pub)}")
-        # sys.exit(0)
 
         if counter == 1:
             if not trend_list.datetime_utc:
                 trend_list.datetime_utc = pub
-            # print(f"trend_list.datetime_utc = {trend_list.datetime_utc} | type(trend_list.datetime_utc) = {type(trend_list.datetime_utc)}")
-            # sys.exit(0)
             trend_list.update_datetime()
 
         trend.picture_source = _child_text_by_localname(item, "picture_source")
@@ -243,14 +238,19 @@ def parse_trend_rss_feed(
 
 
 def get_trends(
+    rss_download_path: Path | None,
+    working_path: Path | None,
     *,
-    rss_download_path: Path = RSS_DOWNLOAD_PATH,
-    working_path: Path,
     delete_rss_xml_path: bool = False,
-) -> TrendList | None:
+) -> TrendList:
     """
     Returns trending tags and the 3 articles of news articles related to the trend.
     """
+    if not working_path or not working_path.exists():
+        raise ValueError("working_path does not exist.")
+
+    if rss_download_path is None:
+        raise ValueError("rss_download_path is None")
 
     # If file does not exist, try to download
     if not rss_download_path.exists():
@@ -266,7 +266,7 @@ def get_trends(
         # Still does not exist, halt
         if not rss_download_path.exists():
             print("[ERROR] Trend xml file does not exist!")
-            return None
+            return TrendList()
 
     # Create Trends and TrendList
     if not isinstance(trend_list := parse_trend_rss_feed(
@@ -275,11 +275,12 @@ def get_trends(
             ),
         TrendList,
     ):
-        return None
+        print("[ERROR] Could not parse RSS feed.")
+        return TrendList()
 
     if not trend_list:
         print("[ERROR] Trend List is Empty!")
-        return None
+        return TrendList()
 
     if delete_rss_xml_path and rss_download_path.exists():
 
@@ -291,7 +292,7 @@ def get_trends(
             return trend_list
 
         print("[ERROR] Trend xml file count not be deleted.")
-        return None
+        return TrendList()
 
     return trend_list
 
