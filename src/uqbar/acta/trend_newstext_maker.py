@@ -222,7 +222,7 @@ MODEL_NAME_LIST: list[str] = [
 MODEL_KEY_DICT: dict[str, list[str]] = {
     "allenai_31": [
         "allenai/olmo-3.1-32b-think:free",
-        "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",
+        "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",
         "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",
         "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",
     ], # TOP 1
@@ -444,6 +444,8 @@ def _get_model_name_and_key(
     model_counter: int,
     model_name_list: list[str],
     model_key_dict: dict[str, list[str]],
+    *,
+    single_key: bool = True
 ) -> tuple[str, str]:
     """
     Returns the model and key IDs based on the calculation of the current counters
@@ -454,6 +456,9 @@ def _get_model_name_and_key(
     api_model_id, api_key_id : tuple[str, str]
         A tuple containing the model and key IDs
     """
+    if single_key: # HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+        "allenai_31"
+
     api_model_id, api_key_id = DEFAULT_MODEL_ID, DEFAULT_OPENROUTER_API_KEY
 
     try:
@@ -576,7 +581,7 @@ def _perform_query_trend(
     Notes:
       - `default_headers` is merged with optional attribution headers.
       - Retries are handled by the OpenAI Python SDK where supported; keep max_retries modest.
-      - This function does *not* attempt to circumvent policies or limits; it’s built for
+      - This function does *not* attempt to circumvent policies or limits; it's built for
         good client behavior (reasonable retries, timeouts, attribution).
     """
     if not isinstance(query, str) or not query.strip():
@@ -647,9 +652,9 @@ def _perform_query_trend(
     try:
         response = client.chat.completions.create(**payload)
     except Exception:
-        print(f"Could not execute model: {model} with api-key = {apkey[-6:]}")
-        print(f"Query = {query}")
-        print(f"Will try a new model.{'-'*50}\n")
+        print(f"{dtnow()} Could not execute model: {model} with api-key = {apkey[-6:]}")
+        print(f"{dtnow()} Query = {query}")
+        print(f"{dtnow()} Will try a new model.{'-'*50}\n")
         return None
     return response
 

@@ -170,6 +170,23 @@ class Semaphore:
         for k in keys:
             self.set(k, value)
 
+    def there_is_higher(self, key: SemaphoreKey | int) -> bool:
+        """
+        Return True if any semaphore key with value >= `key` is True.
+
+        Parameters
+        ----------
+        key : SemaphoreKey | int
+            Starting key (inclusive).
+
+        Returns
+        -------
+        bool
+            True if any flag at or above `key` is enabled, else False.
+        """
+        start = self._normalize(key).value
+        return any(self._values[SemaphoreKey(i)] for i in range(start, len(SemaphoreKey)))
+
     # --- Internal ---
     @staticmethod
     def _normalize(key: SemaphoreKey | int) -> SemaphoreKey:
@@ -268,8 +285,9 @@ def _run_or_load(
         return new_state
 
     elif not checkpoint_path.exists():
-        print(f"File {checkpoint_path} does not exist.")
-        sys.exit(0)
+        if finalphore.there_is_higher(key):
+            print(f"File {checkpoint_path} does not exist.")
+        return state
 
     elif not isinstance(
         loaded := load_trendlist(checkpoint_path),
@@ -277,7 +295,8 @@ def _run_or_load(
     ):
         print(f"Invalid checkpoint: {checkpoint_path}")
         sys.exit(1)
-        return loaded
+
+    return loaded
 
 
 # --------------------------------------------------------------------------------------
@@ -336,8 +355,12 @@ def acta_core(
     else:
         finalphore: Semaphore = _resolve_semaphore(semaphore)
 
+    print("\n")
+    print(f"root_path = {root_path}")
+    print(f"this_date = {this_date}")
+    print(f"semaphore = {semaphore}")
+
     # Options
-    image_mood_input_by_ai: bool = False
     if not isinstance(
         hyper_random_for_openroute_user_tts := hyper_random(interval=[0, 47]),
         int
@@ -345,16 +368,6 @@ def acta_core(
         raise ValueError("hyper_random function did not return an integer")
     if not isinstance(
         hyper_random_for_openroute_model_tts := hyper_random(interval=[0, 487]),
-        int
-    ):
-        raise ValueError("hyper_random function did not return an integer")
-    if not isinstance(
-        hyper_random_for_openroute_user_imgmood := hyper_random(interval=[0, 47]),
-        int
-    ):
-        raise ValueError("hyper_random function did not return an integer")
-    if not isinstance(
-        hyper_random_for_openroute_model_imgmood := hyper_random(interval=[0, 487]),
         int
     ):
         raise ValueError("hyper_random function did not return an integer")
@@ -376,6 +389,11 @@ def acta_core(
 
     if not working_path or not isinstance(working_path, Path):
         return 1
+
+    print("\n")
+    print(f"working_path = {working_path}")
+    print(f"rss_download_path = {working_path}")
+    print(f"trend_list = {working_path}")
 
     # 1) Get trends
     trend_list = _run_or_load(

@@ -184,15 +184,11 @@ def create_trend_prompt(
     Create Trends Prompt for Chat GPT or OpenRouter models.
     """
 
-    print("Entered create_trend_prompt")
-
     # Check file
     prompt_file_path.parent.mkdir(parents=True, exist_ok=True)
     if prompt_file_path.exists() and not overwrite_file:
         print("prompt_file_path does not exist.")
         return trend_list
-
-    print(f"prompt_file_path = {prompt_file_path}")
 
     # Check length of multi-prompt
     total_size: int = len(trend_list)
@@ -226,7 +222,7 @@ def create_trend_prompt(
     # Write Output to file and return Path
     with open(prompt_file_path, "w") as file:
         for trend in trend_list:
-            if isinstance(trend, Trend) and isinstance(trend.tts_file_prompt_query, str):
+            if trend and isinstance(trend.tts_file_prompt_query, str):
                 file.write(trend.tts_file_prompt_query)
 
     return trend_list
@@ -317,7 +313,7 @@ def read_trend_prompt(
                 curr_id: int = prompt_number
 
                 cond_id: bool = False
-                if prev_id is not None:
+                if prev_id:
                     cond_id: bool = curr_id != prev_id
 
                 if cond_id:
