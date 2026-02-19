@@ -38,7 +38,17 @@ OUT: Path = Path("/Users/egg/Desktop")
 
 DEFAULT_PROMPT_TTS_PATH: Path = OUT / "tts.txt"
 
-DEFAULT_PROMPT_IMG_MOOD_PATH: Path = OUT / "img_mood.txt"
+DEFAULT_PROMPT_IMAGE_KEYWORD_PATH: Path = OUT / "image_keyword.txt"
+
+DEFAULT_PROMPT_IMAGE_SCALE_PATH: Path = OUT / "image_scale.txt"
+
+DEFAULT_PROMPT_MOOD_PATH: Path = OUT / "mood.txt"
+
+DEFAULT_PROMPT_THUMB_IMAGE_PATH: Path = OUT / "thumb_image.txt"
+
+DEFAULT_PROMPT_THUMB_BACK_PATH: Path = OUT / "thumb_background.txt"
+
+DEFAULT_PROMPT_THUMB_SCALE_PATH: Path = OUT / "thumb_scale.txt"
 
 
 # Rulers
@@ -47,11 +57,11 @@ BIG_RULER_LEN: int = 170
 SMALL_RULER_LEN: int = 25
 
 # Word Count
-TOTAL_WORD_COUNT: int = 1_200
+TOTAL_WORD_COUNT: int = 1_000
 
 SUMMARY_WORD_COUNT: int = 100
 
-TOTAL_WORD_IMAGE_COUNT: int = 5
+TOTAL_IMAGE_KEYWORD_COUNT: int = 5
 
 
 # Regular expressions
@@ -67,7 +77,84 @@ PROMPT_HEADER_RE = re.compile(
 # --------------------------------------------------------------------------------------
 # Helpers
 # --------------------------------------------------------------------------------------
-def _get_prompt_string(
+# def _get_prompt_string(
+#     is_last: bool,
+#     news_url_list: list[str],
+#     current_count: int,
+#     total_count: int,
+#     *,
+#     total_word_count: int = TOTAL_WORD_COUNT,
+#     summary_word_count: int = SUMMARY_WORD_COUNT,
+#     total_word_image_count: int = TOTAL_WORD_IMAGE_COUNT,
+#     small_ruler_len: int = SMALL_RULER_LEN,
+#     big_ruler_len: int = BIG_RULER_LEN,
+# ) -> tuple[str, str]:
+
+#     first_ruler: str = f"{'-'*big_ruler_len}\n\n"
+#     last_ruler: str = "\n"
+#     if is_last:
+#         first_ruler: str = f"{'-'*big_ruler_len}\n\n"
+#         last_ruler: str = ""
+
+#     regular_prompt: str = (
+#         f"1. Goal: Write a Continuous Prose as a Professional Calm News-Media "
+#         f"Narrator, targeting a General Audience; synthesizing these three news "
+#         f"sources, which report the same facts with minor framing differences:\n"
+#         f"    1.1. {news_url_list[0]}\n"
+#         f"    1.2. {news_url_list[1]}\n"
+#         f"    1.3. {news_url_list[2]}\n"
+#         f"\n"
+#         f"2. Length of text: ~{total_word_count:,} words (±20%).\n"
+#         f"\n"
+#         f"3. Style:\n"
+#         f"    3.1. Predominantly in a news-style impersonal voice.\n"
+#         f"    3.2. Hook the reader with mystery in the first 2–3 sentences.\n"
+#         f"    3.3. Develop the news arc while maintaining mystery.\n"
+#         f"    3.4. Release the mystery once the reader’s full attention is secured.\n"
+#         f"    3.5. Fill the remainder of the report with background and established "
+#         f"facts.\n"
+#         f"\n"
+#         f"4. Optimize the textual flow for neural TTS. Minor trimming after "
+#         f"generation is acceptable. Keep sentences short to medium in length.\n"
+#         f"\n"
+#         f"5. Constraints:\n"
+#         f"    5.1. Create mystery and tension. Atmospheric or metaphorical "
+#         f"language is allowed, but do not introduce false factual claims.\n"
+#         f"    5.2. Adopt a news-anchor storytelling tone. Avoid excessive "
+#         f"LinkedIn-style seriousness or job-market structure.\n"
+#         f"    5.3. Avoid hyphens and other TTS-unfriendly characters.\n"
+#         f"\n"
+#         f"6. Please return each in a separate triple-backtick codebox:\n"
+#         f"    6.1. The full text.\n"
+#         f"    6.2. A ~{summary_word_count}-words (±20%) summary of the full text "
+#         f"in another triple-backtick code block.\n"
+#         f"    6.3. A semicolon-separated list of the TOP ~{total_word_image_count} "
+#         f"most representative keywords (±20%), **optimised for a google-like "
+#         f"search**.\n"
+#         f"    6.4. A single word, most representative of the **mood that an average "
+#         f"person would feel when seeing such news story**.\n"
+#         f"\n"
+#         f"7. Do **return only the four triple-backtick codeboxes mentioned above**, "
+#         f"stacked and in order. Do **NOT** return anything else.\n"
+#     )
+
+#     special_prompt: str = (
+#         f"{first_ruler}"
+#         f"> TREND PROMPTS [{current_count:02d} of {total_count:02d}]\n"
+#         f"\n"
+#         f"Honeybun,\n"
+#         f"\n"
+#         f"{regular_prompt}\n"
+#         f"\n"
+#         f"{'-'*small_ruler_len}\n"
+#         f"\n"
+#         f"XXXXX\n"
+#         f"{last_ruler}"
+#     )
+
+#     return regular_prompt, special_prompt
+
+def _get_tts_prompt_string(
     is_last: bool,
     news_url_list: list[str],
     current_count: int,
@@ -143,6 +230,47 @@ def _get_prompt_string(
     )
 
     return regular_prompt, special_prompt
+
+
+def _get_mood_prompt_string(
+    is_last: bool,
+    news_url_list: list[str],
+    current_count: int,
+    total_count: int,
+    *,
+    total_word_count: int = TOTAL_WORD_COUNT,
+    summary_word_count: int = SUMMARY_WORD_COUNT,
+    total_word_image_count: int = TOTAL_WORD_IMAGE_COUNT,
+    small_ruler_len: int = SMALL_RULER_LEN,
+    big_ruler_len: int = BIG_RULER_LEN,
+) -> tuple[str, str]:
+
+    first_ruler: str = f"{'-'*big_ruler_len}\n\n"
+    last_ruler: str = "\n"
+    if is_last:
+        first_ruler: str = f"{'-'*big_ruler_len}\n\n"
+        last_ruler: str = ""
+
+    regular_prompt: str = (
+
+    )
+
+    special_prompt: str = (
+        f"{first_ruler}"
+        f"> TREND PROMPTS [{current_count:02d} of {total_count:02d}]\n"
+        f"\n"
+        f"Honeybun,\n"
+        f"\n"
+        f"{regular_prompt}\n"
+        f"\n"
+        f"{'-'*small_ruler_len}\n"
+        f"\n"
+        f"XXXXX\n"
+        f"{last_ruler}"
+    )
+
+    return regular_prompt, special_prompt
+
 
 
 def _flush_prompt(

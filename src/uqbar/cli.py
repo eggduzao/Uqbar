@@ -195,9 +195,9 @@ def acta_parser(argv: Sequence[str] | None = None) -> dict[str, Any]:
         ),
         epilog=(
             f"Examples:\n"
-            f"  $ {UQBAR} {ACTA} 3 0.25 true 'hello' ./data\n"
-            f"  $ {UQBAR} {ACTA} 3 0.25 false 'hello' ./data --the-int 7 --the-path ~/Downloads\n"
-            f"  $ {UQBAR} {ACTA} 3 0.25 yes 'hello' ./data -e --the-boolean off\n"
+            f"  $ {UQBAR} {ACTA} --help\n"
+            f"  $ {UQBAR} {ACTA} ./root/\n"
+            f"  $ {UQBAR} {ACTA} ./root/ -d 2026-07-31 --s '1,2,5,6,7,8,9'\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

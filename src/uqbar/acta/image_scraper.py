@@ -45,7 +45,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
-from uqbar.acta.utils import get_random
+from uqbar.utils import hyper_random
 
 # -------------------------------------------------------------------------------------
 # Constants
@@ -192,11 +192,12 @@ def _click_location_button(
             )
             break
 
-        sleep(sleep_min_base + get_random())
+        sleep(sleep_min_base + hyper_random([SLEEP_MIN_BASE, SLEEP_MIN_BASE+SLEEP_MAX_BASE]))
     return
 
 
 def _select_location_dropdown(
+    driver: webdriver,
     sleep_min_base: float,
     sleep_max_base: float,
     *,
@@ -208,17 +209,21 @@ def _select_location_dropdown(
 
     # Change locale to US (English)
     if target_text_list is None:
-        target_text_list = ["US (English)", "US", "USA", "Estados Unidos (inglês)", "Estados Unidos", "United States (english)", "United States"]
-    _click_on_xpath('//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[1]/div/div[1]')
-    sleep(sleep_min_base + get_random())
-    _click_on_xpath('//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[1]/div/div[2]/div[2]/div[63]/div/div/div/span[2]')
-    sleep(sleep_max_base + get_random())
+        target_text_list = [
+            "US (English)", "US", "USA", "Estados Unidos (inglês)",
+            "Estados Unidos", "United States (english)", "United States"
+        ]
+
+    _click_on_xpath(driver, '//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[1]/div/div[1]')
+    sleep(sleep_min_base + hyper_random([0, SLEEP_MAX_BASE]))
+    _click_on_xpath(driver, '//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[1]/div/div[2]/div[2]/div[63]/div/div/div/span[2]')
+    sleep(sleep_max_base + hyper_random([0, SLEEP_MAX_BASE]))
 
     # Changing Image Sizes to Large
-    _click_on_xpath('//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[5]/div/div[1]')
-    sleep(sleep_min_base + get_random())
-    _click_on_xpath('//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[5]/div/div[2]/div/div[4]/div')
-    sleep(sleep_max_base + get_random())
+    _click_on_xpath(driver, '//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[5]/div/div[1]')
+    sleep(sleep_min_base + hyper_random([0, SLEEP_MAX_BASE])
+    _click_on_xpath(driver, '//*[@id="react-layout"]/div/div[2]/div/nav/div/ul/li[5]/div/div[2]/div/div[4]/div')
+    sleep(sleep_max_base + hyper_random([0, SLEEP_MAX_BASE])
 
     return
 

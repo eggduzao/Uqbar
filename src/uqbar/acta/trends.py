@@ -231,9 +231,9 @@ def save_trendlist(trend_list: TrendList, path: Path) -> None:
 
 
 def load_trendlist(path: Path) -> TrendList:
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
 
-    tl_meta = payload.get("trendlist", {}) if isinstance(payload, dict) else {}
+    tl_meta: dict[str, Any] = payload.get("trendlist", {})
     tl = TrendList(
         datetime_utc=tl_meta.get("datetime_utc"),
         datetime_br=tl_meta.get("datetime_br"),
@@ -248,9 +248,7 @@ def load_trendlist(path: Path) -> TrendList:
     if isinstance(tl_meta.get("datetime_us_parts"), dict):
         tl.datetime_us_parts = tl_meta["datetime_us_parts"]
 
-    items = payload.get("items", [])
-    if not isinstance(items, list):
-        raise TypeError(f"Invalid snapshot: 'items' must be a list, got {type(items)!r}.")
+    items: list[str] = payload.get("items", [])
 
     for item in items:
         if not isinstance(item, dict):
@@ -417,10 +415,10 @@ class Trend:
     image_mood_file_prompt_query: str | None = None
 
     # Prompt Response Fields
-    tts_presult_full_text: list[list[list[str]]] = field(default_factory=list)
-    tts_presult_summary_text: list[str] = field(default_factory=list)
-    image_presult_keywords: list[list[str]] = field(default_factory=list)
-    mood_presult_keyword: list[str] = field(default_factory=list)
+    tts_presult_full_text: list[list[list[str]]] = field(default_factory=lambda: [])
+    tts_presult_summary_text: list[str] = field(default_factory=lambda: [])
+    image_presult_keywords: list[list[str]] = field(default_factory=lambda: [])
+    mood_presult_keyword: list[str] = field(default_factory=lambda: [])
 
     # News mood fields
     # mood_scores: MoodItem = field(default_factory=MoodItem)
@@ -464,6 +462,10 @@ class TrendList(MutableSequence[Trend]):
     datetime_br_parts: dict[str, str | None]
     datetime_us_parts: dict[str, str | None]
 
+    # Field dedicated to errors
+    stdout_message: str | None = None
+    stderr_message: str | None = None
+
     # Creating required list
     _items: list[Trend]
 
@@ -473,6 +475,8 @@ class TrendList(MutableSequence[Trend]):
         datetime_utc: str | None = None,
         datetime_br: str | None = None,
         datetime_us: str | None = None,
+        stdout_message: str | None = None,
+        stderr_message: str | None = None,
     ) -> None:
         self.datetime_utc = datetime_utc
         self.datetime_br = datetime_br
@@ -481,6 +485,9 @@ class TrendList(MutableSequence[Trend]):
         self.datetime_utc_parts = _empty_parts()
         self.datetime_br_parts = _empty_parts()
         self.datetime_us_parts = _empty_parts()
+
+        self.stdout_message = stdout_message
+        self.stderr_message = stderr_message
 
         self._items = []
 
@@ -519,37 +526,27 @@ class TrendList(MutableSequence[Trend]):
         """
         if isinstance(index, slice):
             # Guard: str/bytes are iterables but semantically wrong here.
-            if isinstance(value, (str, bytes)):
-                raise TypeError("Slice assignment requires an iterable of Trend, not str/bytes.")
+            if isinstance(value, Iterable):
 
-            # Normalize to list to support repeated validation and list slice assignment.
-            try:
-                items = list(value)  # type: ignore[arg-type]
-            except TypeError as e:
-                raise TypeError("Slice assignment requires an iterable of Trend.") from e
+                # Normalize to list to support repeated validation and list slice assignment.
+                try:
+                    items: list[Trend] = list(value)
+                except TypeError as e:
+                    raise TypeError("Slice assignment requires an iterable of Trend.") from e
 
-            # Validate element types with a helpful error.
-            for x in items:
-                if not isinstance(x, Trend):
-                    raise TypeError(
-                        "Slice assignment requires Trend items; "
-                        f"got {type(x)!r} for element {x!r}."
-                    )
-
-            self._items[index] = items
-            return
-
-        # int index assignment
-        if not isinstance(value, Trend):
-            raise TypeError(f"Expected Trend, got {type(value)!r}.")
-        self._items[index] = value
+                # Validate element types with a helpful error.
+                for x in items:
+                    self._items[index] = items
+                return
+        elif isinstance(value, Trend):
+            self._items[index] = value
 
     def __delitem__(self, index: int | slice) -> None:
         del self._items[index]
 
     def insert(self, index: int, value: Trend) -> None:
-        if not isinstance(value, Trend):
-            raise TypeError(f"Expected Trend, got {type(value)!r}.")
+        # if not isinstance(value, Trend):
+        #     raise TypeError(f"Expected Trend, got {type(value)!r}.")
         self._items.insert(index, value)
 
 
@@ -588,6 +585,3 @@ __all__: list[str] = [
     "MoodItem",
     "GO_EMOTIONS_LABELS",
 ]
-
-
-

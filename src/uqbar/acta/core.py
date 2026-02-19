@@ -90,7 +90,6 @@ Metadata
 from __future__ import annotations
 
 import re
-import sys
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from enum import Enum, IntEnum
@@ -195,70 +194,65 @@ class Semaphore:
         try:
             return SemaphoreKey(key)
         except ValueError as e:
-            raise KeyError(f"Invalid semaphore key: {key!r}") from e
+            raise KeyError(f"{dtnow} Invalid semaphore key: {key!r}") from e
 
 
 # --------------------------------------------------------------------------------------
 # Helpers
 # --------------------------------------------------------------------------------------
 def _resolve_semaphore(raw_string: str | None) -> Semaphore:
-    """
-    Resolve a semaphore selection string into a Semaphore instance.
+    """ Resolves Semaphores"""
 
-    Semantics
-    ---------
-    - If `raw_string` is None or empty/whitespace: enable all steps.
-    - Otherwise, parse integers from the string and enable only those steps.
+    # Create Semaphore
+    semaphore: Semaphore = Semaphore()
 
-    Accepted input examples
-    -----------------------
-    "1,2,3"
-    "1 2 3"
-    "1; 2; 3"
-    "1, 2;3  4"
-    "7-8,11-13"   # ranges supported
-
-    Notes
-    -----
-    - Never raises; invalid tokens are ignored with a warning.
-    """
-    semaphore = Semaphore()
-
-    if raw_string is None or not raw_string.strip():
+    # Update Semaphore
+    if raw_string is None:
         semaphore.set_all(True)
-        return semaphore
-
-    s = raw_string.strip()
-
-    # Split on common separators: commas, semicolons, and any whitespace.
-    tokens = [t for t in re.split(r"[,\s;]+", s) if t]
-    ints: list[int] = []
-
-    for tok in tokens:
-        # Support simple ranges like "7-8" or "11-13"
-        if "-" in tok:
-            a_str, b_str = (p.strip() for p in tok.split("-", 1))
-            if a_str.isdigit() and b_str.isdigit():
-                a, b = int(a_str), int(b_str)
-                lo, hi = (a, b) if a <= b else (b, a)
-                ints.extend(range(lo, hi + 1))
-            else:
-                print(f"Invalid range token ignored: {tok!r}")
-            continue
-
-        if tok.isdigit():
-            ints.append(int(tok))
-        else:
-            print(f"Invalid token ignored: {tok!r}")
-
-    # Enable parsed steps
-    if ints:
-        semaphore.update_many(ints, True)
     else:
-        print("No valid step indices found; enabling all steps.")
-        semaphore.set_all(True)
+        SPLIT_RE = r" ,;"
+        str_list: list[str] = re.split(raw_string, SPLIT_RE)
+        int_list: list[int] = [int(e) for e in str_list if int(e)]
+        semaphore.update_many(int_list, True)
 
     return semaphore
+
+
+def _prev_checkpoint_path(
+    *,
+    key: SemaphoreKey,
+    working_path: Path,
+    filename: str,
+    first_key: SemaphoreKey,
+) -> Path | None:
+    """
+    Find the nearest existing checkpoint strictly before `key`.
+
+    Assumes checkpoint filenames are of the form 'trends_<N>.json' (as in your example),
+    where N matches SemaphoreKey numeric values.
+
+    Parameters
+    ----------
+    key
+        Current step.
+    working_path
+        Folder where checkpoints live.
+    filename
+        Current step filename (unused for discovery other than assuming the same scheme).
+    first_key
+        Numerical first step.
+
+    Returns
+    -------
+    Path | None
+        Path to the nearest previous checkpoint, or None if none exist.
+    """
+    # Use the convention you already showed: trends_<i>.json
+    for i in range(key.value - 1, first_key.value - 1, -1):
+        candidate = working_path / f"trends_{i}.json"
+        if candidate.exists():
+            return candidate
+    return None
 
 
 def _run_or_load(
@@ -271,32 +265,79 @@ def _run_or_load(
     run: Callable[[TrendList], TrendList],
 ) -> TrendList | None:
     """
-    If `key` is enabled, run `run(state)` and save checkpoint (if state is TrendList).
-    Otherwise, load checkpoint and return it.
+    Gap-aware checkpoint runner/loader controlled by `finalphore`.
 
-    This is intentionally low-ceremony for "personal pipeline" code.
+    Behavior
+    --------
+    - If `finalphore.get(key)` is False:
+        - If checkpoint exists: load and return it.
+        - Else: return `state` unchanged.
+    - If `finalphore.get(key)` is True:
+        - If `key` is the numerical first step: run with `state`, save, return.
+        - Else: find nearest earlier checkpoint in decreasing order; load it; run; save; return.
+          If none exist: raise FileNotFoundError.
+        - If `run()` does not return a TrendList: return None (caller can treat as failure).
+
+    Parameters
+    ----------
+    key
+        Current step key.
+    finalphore
+        Semaphore controlling which steps run.
+    working_path
+        Folder where checkpoints live.
+    filename
+        Checkpoint filename for this step (e.g. "trends_1.json").
+    state
+        In-memory TrendList used when passing through or when running the first step.
+    run
+        Step function taking a TrendList and returning a TrendList.
+
+    Returns
+    -------
+    TrendList | None
+        The loaded or newly computed TrendList, or None if `run()` failed.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the step is enabled but no earlier checkpoint exists and `key` is not the first step.
     """
-    checkpoint_path: Path = working_path / filename
+    checkpoint_path = working_path / filename
 
-    if finalphore.get(key):
-        new_state = run(state)
-        if isinstance(new_state, TrendList):
-            save_trendlist(new_state, checkpoint_path)
-        return new_state
-
-    elif not checkpoint_path.exists():
-        if finalphore.there_is_higher(key):
-            print(f"File {checkpoint_path} does not exist.")
+    # If this step is disabled: load if possible, otherwise pass-through.
+    if not finalphore.get(key):
+        if checkpoint_path.exists():
+            return load_trendlist(checkpoint_path)
         return state
 
-    elif not isinstance(
-        loaded := load_trendlist(checkpoint_path),
-        TrendList,
-    ):
-        print(f"Invalid checkpoint: {checkpoint_path}")
-        sys.exit(1)
+    # Enabled step: determine the numerical first step (lowest enum value).
+    first_key = min(SemaphoreKey, key=lambda k: k.value)
 
-    return loaded
+    # First step: no previous TrendList required.
+    if key == first_key:
+        new_state = run(state)
+        save_trendlist(new_state, checkpoint_path)
+        return new_state
+
+    # Non-first step: must backfill from nearest earlier checkpoint.
+    prev_path = _prev_checkpoint_path(
+        key=key,
+        working_path=working_path,
+        filename=filename,
+        first_key=first_key,
+    )
+    if prev_path is None:
+        raise FileNotFoundError(
+            f"{dtnow} Cannot run step {key.name} (value={key.value}): "
+            f"no earlier checkpoint found under {working_path}. "
+            f"Expected one of trends_{key.value-1}.json .. trends_{first_key.value}.json."
+        )
+
+    prev_state = load_trendlist(prev_path)
+    new_state = run(prev_state)
+    save_trendlist(new_state, checkpoint_path)
+    return new_state
 
 
 # --------------------------------------------------------------------------------------
@@ -378,7 +419,7 @@ def acta_core(
 
     trend_list: TrendList | None = None
 
-    # 0. Setup | Initialization
+    # Step 0: CLI handles + Semaphore logic + any preprocessing [OK]
     if finalphore.get(SemaphoreKey.ZERO):
         working_path = root_path / datetime_utc
         try:
@@ -387,15 +428,10 @@ def acta_core(
             print(f"An error occurred during path creation: {e}")
         rss_download_path = working_path / "rss_trend.html"
 
-    if not working_path or not isinstance(working_path, Path):
+    if not working_path:
         return 1
 
-    print("\n")
-    print(f"working_path = {working_path}")
-    print(f"rss_download_path = {working_path}")
-    print(f"trend_list = {working_path}")
-
-    # 1) Get trends
+    # Step 1: Google Trends API - Fetching Trends [OK]
     trend_list = _run_or_load(
         key=SemaphoreKey.ONE,
         finalphore=finalphore,
@@ -411,7 +447,8 @@ def acta_core(
     if not isinstance(trend_list, TrendList):
         return 1
 
-    # 2) Create prompts (in-place mutation; return state)
+    # Step 2: Create prompt strings: TTS-friendly News Text, News Mood, Image
+    # Query Keywords and Thumb prompt-ask [--]
     trend_list = _run_or_load(
         key=SemaphoreKey.TWO,
         finalphore=finalphore,
@@ -430,7 +467,8 @@ def acta_core(
     if not isinstance(trend_list, TrendList):
         return 1
 
-    # 3) Query models (in-place mutation; return state)
+    # Step 3.1: Use ``DeepSeek-R1-Distill-Qwen-32B-4bit`` to get News Texts
+    # (based on prompt from 2) [ ]
     trend_list = _run_or_load(
         key=SemaphoreKey.THREE,
         finalphore=finalphore,
@@ -449,222 +487,32 @@ def acta_core(
     if not isinstance(trend_list, TrendList):
         return 1
 
-    # # 1. [MAIN PATH] Get trend xml file
-    # if working_path and working_path.exists():
-    #     output_log_path = working_path / "trends_1.json"
-    # if finalphore.get(SemaphoreKey.ONE):
-    #     if not isinstance(
-    #         trend_list := get_trends(
-    #             rss_download_path=rss_download_path,
-    #             working_path=working_path,
-    #             delete_rss_xml_path=False,
-    #         ),
-    #         TrendList
-    #     ):
-    #         return 1
-    #     if output_log_path and output_log_path.exists():
-    #         save_trendlist(trend_list, output_log_path)
-    #     if not is_loaded:
-    #         is_loaded = True
-    # else:
-    #     if output_log_path and output_log_path.exists():
-    #         trend_list = load_trendlist(output_log_path)
-    #     else:
-    #         print(f"File {output_log_path} does not exist.")
-    #         sys.exit(0)
+    # Step 3.2: Use ``SamLowe/roberta-base-go_emotions`` to get News Texts
+    # Emotions (based on prompt from 2) [ ]
 
-    # # 2. [MAIN PATH - AI PROMPT TEXT CREATION] Create TTS prompt input
-    # if working_path and working_path.exists():
-    #     output_log_path = working_path / "trends_2.json"
-    # if finalphore.get(SemaphoreKey.TWO):
-    #     create_trend_prompt(
-    #         trend_list=trend_list,
-    #         overwrite_file=False,
-    #         write_file=False,
-    #     )
-    #     if output_log_path and output_log_path.exists():
-    #         save_trendlist(trend_list, output_log_path)
-    # else:
-    #     if output_log_path and output_log_path.exists():
-    #         trend_list = load_trendlist(output_log_path)
-    #     else:
-    #         print(f"File {output_log_path} does not exist.")
-    #         sys.exit(0)
+    # Step 3.3: Use ``sentence-transformers/all-MiniLM-L6-v2`` with ``KeyBERT``
+    # to get Image Query String (based on prompt from 2) [ ]
 
-    # # 3. [MAIN PATH - AI PROMPT EXECUTION] Query TTS prompt to obtain its result
-    # if working_path and working_path.exists():
-    #     output_log_path = working_path / "trends_3.json"
-    # if finalphore.get(SemaphoreKey.THREE):
-    #     query_models(
-    #         trend_list=trend_list,
-    #         user_counter=hyper_random_for_openroute_user_tts,
-    #         model_counter=hyper_random_for_openroute_model_tts,
-    #     )
-    #     if output_log_path and output_log_path.exists():
-    #         save_trendlist(trend_list, output_log_path)
-    # else:
-    #     if output_log_path and output_log_path.exists():
-    #         trend_list = load_trendlist(output_log_path)
-    #     else:
-    #         print(f"File {output_log_path} does not exist.")
-    #         sys.exit(0)
+    # Step 3.4: Use ``DeepSeek-R1-Distill-Qwen-32B-4bit`` to generate a thumbnail
+    # query prompt text [ ]
 
-    # # 4/5. [BRANCH A - AI SOLUTION]
-    # if image_mood_input_by_ai:
+    # Step 4: Fetch images using ``requests`` + ``Selenium`` and Image Query String
+    # (from 3.3) [ ]
 
-    #     # 4.A [BRANCH A - AI PROMPT TEXT CREATION] Create Image/Mood prompt input
-    #     output_log_path = working_path / "trends_4A.json"
-    #     if Semaphore.FOUR_A:
-    #         save_trendlist(trend_list, output_log_path)
-    #     else:
-    #         if output_log_path.exists():
-    #             trend_list = load_trendlist(output_log_path)
-    #         else:
-    #             print(f"File {output_log_path} does not exist.")
-    #             sys.exit(0)
+    # Step 5: Create TTS audio using ``piper``, ``wave``, ``soundfile``, ``pydub``,
+    # ``ffmpeg`` and News Texts (from 3.1) [ ]
 
-    #     # 5.A [BRANCH A - AI PROMPT EXECUTION] Query Image/Mood prompt to obtain its result
-    #     output_log_path = working_path / "trends_5A.json"
-    #     if Semaphore.FIVE_A:
-    #         save_trendlist(trend_list, output_log_path)
-    #     else:
-    #         if output_log_path.exists():
-    #             trend_list = load_trendlist(output_log_path)
-    #         else:
-    #             print(f"File {output_log_path} does not exist.")
-    #             sys.exit(0)
+    # Step 6: Select background music mapping music library to News Text Emotion
+    # (from 3.2) [ ]
 
+    # Step 7: Assign sound effects with ``BBC Sound Effects Archive`` coordinated with
+    # the TTS Audio from 5 using `piper`, `wave`, `soundfile`, `pydub`, `ffmpeg` [ ]
 
-    # # 4/5. [BRANCH B - HEURISTICS SOLUTION]
-    # else:
+    # Step 8: Create thumbnail 'main' with `segmind/SSD-1B` based on 3.4, put background
+    # with `Pillow` and upscale with `stabilityai/stable-diffusion-x4-upscaler` [ ]
 
-    #     # 4.B [BRANCH B - HEURISTICS IMAGE KEYWORD CREATION] Create Image query keywords based on data
-    #     output_log_path = working_path / "trends_4B.json"
-    #     if Semaphore.FOUR_B:
-    #         save_trendlist(trend_list, output_log_path)
-    #     else:
-    #         if output_log_path.exists():
-    #             trend_list = load_trendlist(output_log_path)
-    #         else:
-    #             print(f"File {output_log_path} does not exist.")
-    #             sys.exit(0)
-
-
-    #     # 5.B.I [BRANCH B - HEURISTICS MOOD QUERY CREATION] Create mood query based on heuristics
-    #     output_log_path = working_path / "trends_5Bi.json"
-    #     if Semaphore.FIVE_BI:
-    #         save_trendlist(trend_list, output_log_path)
-    #     else:
-    #         if output_log_path.exists():
-    #             trend_list = load_trendlist(output_log_path)
-    #         else:
-    #             print(f"File {output_log_path} does not exist.")
-    #             sys.exit(0)
-
-
-    #     # 5.B.II [BRANCH B - HEURISTICS MOOD PREDICTION] Predict mood query based on heuristics
-    #     output_log_path = working_path / "trends_5Bii.json"
-    #     if Semaphore.FIVE_BII:
-    #         predict_mood(trend_list=trend_list)
-    #         save_trendlist(trend_list, output_log_path)
-    #     else:
-    #         if output_log_path.exists():
-    #             trend_list = load_trendlist(output_log_path)
-    #         else:
-    #             print(f"File {output_log_path} does not exist.")
-    #             sys.exit(0)
-
-    # # 6. [MAIN PATH - XXXXXXX] Search for images
-    # output_log_path = working_path / "trends_6.json"
-    # if Semaphore.SIX:
-    #     save_trendlist(trend_list, output_log_path)
-    # else:
-    #     if output_log_path.exists():
-    #         trend_list = load_trendlist(output_log_path)
-    #     else:
-    #         print(f"File {output_log_path} does not exist.")
-    #         sys.exit(0)
-
-    # # 7. [MAIN PATH - XXXXXXX] Download images
-    # output_log_path = working_path / "trends_7.json"
-    # if Semaphore.SEVEN:
-    #     # download_images(trend_list)  # TODO: implement
-    #     save_trendlist(trend_list, output_log_path)
-    # else:
-    #     if output_log_path.exists():
-    #         trend_list = load_trendlist(output_log_path)
-    #     else:
-    #         print(f"File {output_log_path} does not exist.")
-    #         sys.exit(0)
-
-    # # 8. [MAIN PATH - XXXXXXX] Parse images:
-    # #    - Standardize file extensions resolving compression
-    # #    - Remove duplicates by name and by AI
-    # #    - Standardize numeric ordered name
-    # output_log_path = working_path / "trends_8.json"
-    # if Semaphore.EIGHT:
-    #     save_trendlist(trend_list, output_log_path)
-    # else:
-    #     if output_log_path.exists():
-    #         trend_list = load_trendlist(output_log_path)
-    #     else:
-    #         print(f"File {output_log_path} does not exist.")
-    #         sys.exit(0)
-
-    # # 9. [MAIN PATH - XXXXXXX] Create audio tts from query model's responses
-    # output_log_path = working_path / "trends_9.json"
-    # if Semaphore.NINE:
-    #     save_trendlist(trend_list, output_log_path)
-    # else:
-    #     if output_log_path.exists():
-    #         trend_list = load_trendlist(output_log_path)
-    #     else:
-    #         print(f"File {output_log_path} does not exist.")
-    #         sys.exit(0)
-
-    # # 10. [MAIN PATH - XXXXXXX] Generate background music based on mood and audio's length
-    # output_log_path = working_path / "trends_10.json"
-    # if Semaphore.TEN:
-    #     save_trendlist(trend_list, output_log_path)
-    # else:
-    #     if output_log_path.exists():
-    #         trend_list = load_trendlist(output_log_path)
-    #     else:
-    #         print(f"File {output_log_path} does not exist.")
-    #         sys.exit(0)
-
-    # # 11. [MAIN PATH - XXXXXXX] Create thumbnails, ribbons and metadata
-    # output_log_path = working_path / "trends_11.json"
-    # if Semaphore.ELEVEN:
-    #     save_trendlist(trend_list, output_log_path)
-    # else:
-    #     if output_log_path.exists():
-    #         trend_list = load_trendlist(output_log_path)
-    #     else:
-    #         print(f"File {output_log_path} does not exist.")
-    #         sys.exit(0)
-
-    # # 12. [MAIN PATH - XXXXXXX] Create video from: tts audio, images downloaded, background music
-    # output_log_path = working_path / "trends_12.json"
-    # if Semaphore.TWELVE:
-    #     save_trendlist(trend_list, output_log_path)
-    # else:
-    #     if output_log_path.exists():
-    #         trend_list = load_trendlist(output_log_path)
-    #     else:
-    #         print(f"File {output_log_path} does not exist.")
-    #         sys.exit(0)
-
-    # # 13. [MAIN PATH - XXXXXXX] Upload video to youtube with correct thumbs and metadata
-    # output_log_path = working_path / "trends_13.json"
-    # if Semaphore.THIRTEEN:
-    #     save_trendlist(trend_list, output_log_path)
-    # else:
-    #     if output_log_path.exists():
-    #         trend_list = load_trendlist(output_log_path)
-    #     else:
-    #         print(f"File {output_log_path} does not exist.")
-    #         sys.exit(0)
+    # Step 9: Orchestrate ``TTS + SFX + Background Audio`` with Carousel Image with Ken
+    # Burns effect (and maybe others) using ``ffmpeg`` and ``moviepy`` [ ]
 
     return 0
 

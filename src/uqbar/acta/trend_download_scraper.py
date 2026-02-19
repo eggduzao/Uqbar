@@ -71,9 +71,11 @@ def _download_rss_feed(
     ]
 
     result = subprocess.run(command, capture_output=True, text=True, check=True)
+    stdout_message: str = result.stdout
+    stderr_message: str = result.stderr
 
     rss_download_path.write_text(result.stdout, encoding="utf-8")
-    return result.stdout, result.stderr
+    return stdout_message, stderr_message
 
 
 def _extract_rss_xml_text(raw_text: str) -> str:
@@ -159,7 +161,10 @@ def _delete_trends_local_url(rss_download_path: Path) -> tuple[str, str]:
         check=True,
     )
 
-    return result.stdout, result.stderr
+    stdout: str = result.stdout
+    stderr: str = result.stderr
+
+    return stdout, stderr
 
 
 # -------------------------------------------------------------------------------------
@@ -255,12 +260,17 @@ def get_trends(
     # If file does not exist, try to download
     if not rss_download_path.exists():
 
+        download_out = download_err = None
+
         # Download rss feed to download path
         try:
             download_out, download_err = _download_rss_feed(
                 rss_download_path=rss_download_path,
             )
         except Exception as e:
+            trend_list = TrendList()
+            trend_list.stdout_message = download_out
+            trend_list.stderr_message = download_err
             raise e
 
         # Still does not exist, halt
@@ -269,14 +279,10 @@ def get_trends(
             return TrendList()
 
     # Create Trends and TrendList
-    if not isinstance(trend_list := parse_trend_rss_feed(
+    trend_list = parse_trend_rss_feed(
             rss_feed_path=rss_download_path,
             working_path=working_path,
-            ),
-        TrendList,
-    ):
-        print("[ERROR] Could not parse RSS feed.")
-        return TrendList()
+    )
 
     if not trend_list:
         print("[ERROR] Trend List is Empty!")
@@ -284,8 +290,12 @@ def get_trends(
 
     if delete_rss_xml_path and rss_download_path.exists():
 
+        delete_out = delete_err = None
+
         print("Deleting trend xml file...")
         delete_out, delete_err = _delete_trends_local_url(rss_download_path)
+        trend_list.stdout_message = delete_out
+        trend_list.stderr_message = delete_err
 
         if not rss_download_path.exists():
             print("Trend xml file deleted successfully!")
